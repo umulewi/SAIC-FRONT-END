@@ -1,0 +1,127 @@
+.saic-sidebar {
+  position: fixed;
+  top: 60px;
+  left: 0;
+  bottom: 0;
+  width: 240px;
+  background: #0d2240;
+  display: flex;
+  flex-direction: column;
+  transition: width 0.25s ease;
+  z-index: 90;
+  overflow: hidden;
+}
+
+.saic-sidebar.collapsed {
+  width: 60px;
+}
+
+.sidebar-inner {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0.75rem 0;
+  scrollbar-width: thin;
+  scrollbar-color: #2a3f60 transparent;
+}
+
+.sidebar-inner::-webkit-scrollbar { width: 4px; }
+.sidebar-inner::-webkit-scrollbar-track { background: transparent; }
+.sidebar-inner::-webkit-scrollbar-thumb { background: #2a3f60; border-radius: 4px; }
+
+.sidebar-group {
+  margin-bottom: 0.25rem;
+}
+
+.group-label {
+  display: block;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #64829e;
+  padding: 0.7rem 1rem 0.3rem;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.group-divider {
+  height: 1px;
+  background: #1e3a5a;
+  margin: 0.4rem 0.5rem;
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.55rem 1rem;
+  color: #a0b4cc;
+  text-decoration: none;
+  font-size: 0.82rem;
+  font-weight: 500;
+  border-radius: 0;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+  overflow: hidden;
+  position: relative;
+  margin: 0.05rem 0.5rem;
+  border-radius: 6px;
+}
+
+.sidebar-item:hover {
+  background: rgba(255,255,255,0.06);
+  color: #ffffff;
+}
+
+.sidebar-item.active {
+  background: linear-gradient(90deg, #1a5c38, #2d8653);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.item-icon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  width: 20px;
+}
+
+.item-label {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.item-chevron {
+  margin-left: auto;
+  opacity: 0.6;
+}
+
+.sidebar-footer {
+  padding: 0.75rem 1rem;
+  border-top: 1px solid #1e3a5a;
+}
+
+.sidebar-brand {
+  font-size: 0.65rem;
+  color: #4a6580;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.saic-sidebar.collapsed .sidebar-item {
+  padding: 0.55rem;
+  margin: 0.05rem 0.35rem;
+  justify-content: center;
+}
+
+.saic-sidebar.collapsed .item-label,
+.saic-sidebar.collapsed .item-chevron {
+  display: none;
+}
+
+.saic-sidebar.collapsed .item-icon {
+  width: auto;
+}

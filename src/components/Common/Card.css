@@ -1,0 +1,57 @@
+.saic-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+  border: 1px solid #e8edf3;
+}
+
+.card-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1a2b4b;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #f0f4f8;
+}
+
+.stat-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+  border: 1px solid #e8edf3;
+}
+
+.stat-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stat-green .stat-icon { background: #f0faf4; color: #2d8653; }
+.stat-blue .stat-icon  { background: #eff6ff; color: #2563eb; }
+.stat-amber .stat-icon { background: #fffbeb; color: #d97706; }
+.stat-red .stat-icon   { background: #fff5f5; color: #c53030; }
+
+.stat-value {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #1a2b4b;
+  margin: 0 0 0.1rem;
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: #718096;
+  margin: 0;
+  font-weight: 500;
+}

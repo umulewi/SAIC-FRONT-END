@@ -1,0 +1,22 @@
+.dashboard-root {
+  min-height: 100vh;
+  background: #f0f4f8;
+}
+
+.dashboard-body {
+  margin-left: 240px;
+  padding-top: 60px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  transition: margin-left 0.25s ease;
+}
+
+.dashboard-body.sidebar-collapsed {
+  margin-left: 60px;
+}
+
+.dashboard-main {
+  flex: 1;
+  padding: 1.5rem;
+}

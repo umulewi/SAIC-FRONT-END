@@ -1,0 +1,20 @@
+.saic-footer {
+  background: #0d2240;
+  color: #64829e;
+  font-size: 0.72rem;
+  padding: 0.65rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-shrink: 0;
+}
+
+.footer-tagline {
+  color: #4a6580;
+  font-style: italic;
+}
+
+@media (max-width: 640px) {
+  .footer-tagline { display: none; }
+}
