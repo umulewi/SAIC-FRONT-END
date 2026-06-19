@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react';
 import {
   ClipboardList, ClipboardCheck, Users, CalendarDays,
   BarChart3, TrendingUp, CheckCircle, XCircle, Clock,
-  AlertTriangle, FileSpreadsheet, RefreshCw, Download,
+  AlertTriangle, RefreshCw, Download,
 } from 'lucide-react';
 import { adminGetTasks, adminGetAssignedTasks, adminGetStaff, adminGetLeaveRequests } from '../../api/role';
-import { getAnalytics, downloadExport } from '../../api/tasks';
+import { getAnalytics } from '../../api/tasks';
 import type { AnalyticsData } from '../../types';
 import { StatCard } from '../../components/Common/Card';
 import PageHeader from '../../components/Common/PageHeader';
@@ -38,8 +38,6 @@ export default function AdminOverviewPage() {
   const [analytics,    setAnalytics]    = useState<AnalyticsData | null>(null);
   const [anLoading,    setAnLoading]    = useState(true);
   const [anError,      setAnError]      = useState('');
-  const [exporting,    setExporting]    = useState(false);
-
   const loadAnalytics = async () => {
     setAnLoading(true); setAnError('');
     try   { setAnalytics(await getAnalytics()); }
@@ -64,13 +62,6 @@ export default function AdminOverviewPage() {
     });
     loadAnalytics();
   }, []);
-
-  const handleExport = async () => {
-    setExporting(true);
-    try   { await downloadExport(); }
-    catch { alert('Export failed. Please try again.'); }
-    finally { setExporting(false); }
-  };
 
   if (statsLoading) return <LoadingSpinner message="Loading admin dashboard…" />;
 

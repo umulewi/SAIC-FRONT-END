@@ -1,5 +1,9 @@
 import { useEffect, useState } from 'react';
 import {
+  getCellsBySector, getDistrictsByProvince, getProvinces,
+  getSectorsByDistrict, getVillagesByCell,
+} from 'rwanda-geo-structure';
+import {
   Pencil, Trash2, CheckCircle, X, User, Mail,
   Phone, MapPin, Loader2, AlertCircle, UserPlus,
   ChevronLeft, ChevronRight,
@@ -22,12 +26,17 @@ type StaffFormData = {
   last_name: string;
   telephone: string;
   gender: string;
-  address: string;
+  province: string;
+  district: string;
+  sector: string;
+  cell: string;
+  village: string;
 };
 
 const EMPTY_FORM: StaffFormData = {
   email: '', first_name: '', last_name: '',
-  telephone: '', gender: '', address: '',
+  telephone: '', gender: '',
+  province: '', district: '', sector: '', cell: '', village: '',
 };
 
 function initials(first: string, last: string) {
@@ -47,6 +56,46 @@ export default function StaffManagementPage({ roleId, label }: StaffManagementPa
   const [error,      setError]      = useState('');
   const [deleteTarget, setDeleteTarget] = useState<StaffMember | null>(null);
   const [deleting,     setDeleting]    = useState(false);
+
+  // Geo-structure cascading options
+  const [provinces,  setProvinces_]  = useState<string[]>([]);
+  const [districts,  setDistricts]   = useState<string[]>([]);
+  const [sectors,    setSectors]     = useState<string[]>([]);
+  const [cells,      setCells]       = useState<string[]>([]);
+  const [villages,   setVillages]    = useState<string[]>([]);
+
+  useEffect(() => { setProvinces_(getProvinces()); }, []);
+
+  const handleProvinceChange = (val: string) => {
+    setForm(p => ({ ...p, province: val, district: '', sector: '', cell: '', village: '' }));
+    setDistricts(val ? getDistrictsByProvince(val) : []);
+    setSectors([]); setCells([]); setVillages([]);
+  };
+  const handleDistrictChange = (val: string) => {
+    setForm(p => ({ ...p, district: val, sector: '', cell: '', village: '' }));
+    setSectors(val ? getSectorsByDistrict(form.province, val) : []);
+    setCells([]); setVillages([]);
+  };
+  const handleSectorChange = (val: string) => {
+    setForm(p => ({ ...p, sector: val, cell: '', village: '' }));
+    setCells(val ? getCellsBySector(form.province, form.district, val) : []);
+    setVillages([]);
+  };
+  const handleCellChange = (val: string) => {
+    setForm(p => ({ ...p, cell: val, village: '' }));
+    setVillages(val ? getVillagesByCell(form.province, form.district, form.sector, val) : []);
+  };
+
+  const hydrateGeo = (m: StaffMember) => {
+    const prov = m.province ?? '';
+    const dist = m.district ?? '';
+    const sect = m.sector ?? '';
+    const cel  = m.cell ?? '';
+    setDistricts(prov ? getDistrictsByProvince(prov) : []);
+    setSectors(prov && dist ? getSectorsByDistrict(prov, dist) : []);
+    setCells(prov && dist && sect ? getCellsBySector(prov, dist, sect) : []);
+    setVillages(prov && dist && sect && cel ? getVillagesByCell(prov, dist, sect, cel) : []);
+  };
 
   const load = () =>
     adminGetStaff(roleId)
@@ -72,8 +121,13 @@ export default function StaffManagementPage({ roleId, label }: StaffManagementPa
       last_name:  m.last_name,
       telephone:  m.telephone ?? '',
       gender:     m.gender ?? '',
-      address:    m.address ?? '',
+      province:   m.province ?? '',
+      district:   m.district ?? '',
+      sector:     m.sector ?? '',
+      cell:       m.cell ?? '',
+      village:    m.village ?? '',
     });
+    hydrateGeo(m);
     setError(''); setSuccess(''); setShowForm(true);
   };
 
@@ -93,7 +147,11 @@ export default function StaffManagementPage({ roleId, label }: StaffManagementPa
       last_name:  form.last_name.trim(),
       telephone:  form.telephone.trim() || undefined,
       gender:     form.gender || undefined,
-      address:    form.address.trim() || undefined,
+      province:   form.province || undefined,
+      district:   form.district || undefined,
+      sector:     form.sector || undefined,
+      cell:       form.cell || undefined,
+      village:    form.village || undefined,
     };
 
     setSubmitting(true); setError(''); setSuccess('');
@@ -199,10 +257,45 @@ export default function StaffManagementPage({ roleId, label }: StaffManagementPa
                     <option value="other">Other</option>
                   </select>
                 </div>
-                <div className="sm-field sm-field-full">
-                  <label className="sm-label"><MapPin size={12} /> Address</label>
-                  <input className="sm-input" value={form.address} onChange={handleChange('address')}
-                    placeholder="Street, City, Country" disabled={submitting} />
+                <div className="sm-field">
+                  <label className="sm-label"><MapPin size={12} /> Province</label>
+                  <select className="sm-input sm-select" value={form.province}
+                    onChange={e => handleProvinceChange(e.target.value)} disabled={submitting}>
+                    <option value="">— Select Province —</option>
+                    {provinces.map(p => <option key={p} value={p}>{p}</option>)}
+                  </select>
+                </div>
+                <div className="sm-field">
+                  <label className="sm-label"><MapPin size={12} /> District</label>
+                  <select className="sm-input sm-select" value={form.district}
+                    onChange={e => handleDistrictChange(e.target.value)} disabled={submitting || !form.province}>
+                    <option value="">— Select District —</option>
+                    {districts.map(d => <option key={d} value={d}>{d}</option>)}
+                  </select>
+                </div>
+                <div className="sm-field">
+                  <label className="sm-label"><MapPin size={12} /> Sector</label>
+                  <select className="sm-input sm-select" value={form.sector}
+                    onChange={e => handleSectorChange(e.target.value)} disabled={submitting || !form.district}>
+                    <option value="">— Select Sector —</option>
+                    {sectors.map(s => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                </div>
+                <div className="sm-field">
+                  <label className="sm-label"><MapPin size={12} /> Cell</label>
+                  <select className="sm-input sm-select" value={form.cell}
+                    onChange={e => handleCellChange(e.target.value)} disabled={submitting || !form.sector}>
+                    <option value="">— Select Cell —</option>
+                    {cells.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+                <div className="sm-field">
+                  <label className="sm-label"><MapPin size={12} /> Village</label>
+                  <select className="sm-input sm-select" value={form.village}
+                    onChange={e => setForm(p => ({ ...p, village: e.target.value }))} disabled={submitting || !form.cell}>
+                    <option value="">— Select Village —</option>
+                    {villages.map(v => <option key={v} value={v}>{v}</option>)}
+                  </select>
                 </div>
               </div>
 

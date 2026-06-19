@@ -1,7 +1,7 @@
 import { LogOut, ChevronDown, PanelLeftClose, PanelLeftOpen, KeyRound, Eye, EyeOff, X, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import NotificationsPanel from '../Common/NotificationsPanel';
 import client from '../../api/client';
 import './Header.css';
@@ -14,7 +14,7 @@ interface HeaderProps {
 export default function Header({ onToggleSidebar, sidebarCollapsed }: HeaderProps) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
+
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   // Change password modal state
@@ -60,8 +60,6 @@ export default function Header({ onToggleSidebar, sidebarCollapsed }: HeaderProp
 
   const initials = user?.email ? user.email.substring(0, 2).toUpperCase() : 'US';
 
-  const segment = location.pathname.split('/').filter(Boolean).pop() ?? '';
-  const pageTitle = segment.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 
   return (
     <>

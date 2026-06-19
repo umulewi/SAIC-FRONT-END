@@ -261,7 +261,11 @@ export interface StaffMember {
   last_name: string;
   telephone?: string;
   gender?: string;
-  address?: string;
+  province?: string;
+  district?: string;
+  sector?: string;
+  cell?: string;
+  village?: string;
   manager_id?: number | null;
 }
 
