@@ -1,0 +1,64 @@
+/* ══════════════════════════════════════════════
+   SAIC MIS — Employee Task Detail Page
+══════════════════════════════════════════════ */
+
+.tdp-root { display: flex; flex-direction: column; gap: 1.25rem; }
+
+.tdp-header-card {
+  background: #fff; border: 1px solid #e4ede4; border-radius: 16px;
+  padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem;
+}
+.tdp-header-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 1rem; flex-wrap: wrap;
+}
+.tdp-title {
+  font-size: 1.3rem; font-weight: 800; color: #1e3a1e;
+  letter-spacing: -0.02em; margin: 0;
+}
+.tdp-badges { display: flex; gap: 0.4rem; flex-wrap: wrap; flex-shrink: 0; }
+.tdp-actions { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+
+.tdp-feedback-banner {
+  display: flex; align-items: flex-start; gap: 0.6rem;
+  background: #fce4ec; border: 1px solid #f5c6c6; border-radius: 10px;
+  padding: 0.75rem 1rem; font-size: 0.85rem; color: #c62828; line-height: 1.5;
+}
+.tdp-approved-banner {
+  display: flex; align-items: center; gap: 0.5rem;
+  background: #e8f5e9; border: 1px solid #a5d6a7; border-radius: 10px;
+  padding: 0.65rem 1rem; font-size: 0.85rem; color: #2e7d32;
+}
+.tdp-success-banner {
+  display: flex; align-items: center; gap: 0.5rem;
+  background: #e8f5e9; border: 1px solid #a5d6a7; border-radius: 10px;
+  padding: 0.65rem 1rem; font-size: 0.85rem; color: #2e7d32;
+}
+
+/* Submit button */
+.btn-submit {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  background: #1565c0; color: #fff; border: none; border-radius: 9px;
+  padding: 0.55rem 1.1rem; font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; font-family: inherit; transition: background 0.15s;
+}
+.btn-submit:hover:not(:disabled) { background: #0d47a1; }
+.btn-submit:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.btn-ok { background: #2D5016 !important; }
+
+/* Submit form card */
+.tdp-submit-card {
+  background: #f4faf4; border: 2px solid #a5d6a7; border-radius: 14px;
+  padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 0.9rem;
+}
+.tdp-submit-title {
+  display: flex; align-items: center; gap: 0.45rem;
+  font-size: 1rem; font-weight: 700; color: #1e3a1e; margin: 0;
+}
+
+/* Layout */
+.tdp-layout { display: grid; grid-template-columns: 1fr 280px; gap: 1.25rem; align-items: start; }
+@media (max-width: 860px) { .tdp-layout { grid-template-columns: 1fr; } }
+.tdp-main { display: flex; flex-direction: column; gap: 1.25rem; }
+.tdp-sidebar { display: flex; flex-direction: column; gap: 1.25rem; }

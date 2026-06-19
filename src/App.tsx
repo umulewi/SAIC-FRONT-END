@@ -5,11 +5,12 @@ import ProtectedRoute from './routes/ProtectedRoute';
 import RoleRoute from './routes/RoleRoute';
 
 import Login from './pages/Login/Login';
+import ResetPasswordPage from './pages/Login/ResetPasswordPage';
 
 // Shared pages
 import ProfilePage from './pages/shared/ProfilePage';
 import MyTasksPage from './pages/shared/MyTasksPage';
-import SubmitTaskPage from './pages/shared/SubmitTaskPage';
+import TaskDetailPage from './pages/shared/TaskDetailPage';
 import LeaveRequestPage from './pages/shared/LeaveRequestPage';
 import LeaveStatusPage from './pages/shared/LeaveStatusPage';
 import RoleOverviewPage from './pages/shared/RoleOverviewPage';
@@ -17,9 +18,13 @@ import RoleOverviewPage from './pages/shared/RoleOverviewPage';
 // Admin pages
 import AdminOverviewPage from './pages/admin/AdminOverviewPage';
 import AdminTasksPage from './pages/admin/AdminTasksPage';
-import AdminAssignedTasksPage from './pages/admin/AdminAssignedTasksPage';
+import AdminTaskDetailPage from './pages/admin/AdminTaskDetailPage';
 import AdminLeaveManagementPage from './pages/admin/AdminLeaveManagementPage';
+import AdminPettyCashPage from './pages/admin/AdminPettyCashPage';
 import StaffManagementPage from './pages/admin/StaffManagementPage';
+
+// Role-specific pages
+import AccountantPettyCashPage from './pages/accountant/AccountantPettyCashPage';
 
 // Non-admin roles: slug → { roleLabel, apiBase }
 const NON_ADMIN_ROLES: { slug: string; roleLabel: string; apiBase: string }[] = [
@@ -54,6 +59,7 @@ function AppRoutes() {
     <Routes>
       <Route path="/" element={<RootRedirect />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
 
       <Route element={<ProtectedRoute />}>
         {/* Admin routes */}
@@ -64,8 +70,9 @@ function AppRoutes() {
           <Route index element={<Navigate to="overview" replace />} />
           <Route path="overview"          element={<AdminOverviewPage />} />
           <Route path="tasks"             element={<AdminTasksPage />} />
-          <Route path="assigned-tasks"    element={<AdminAssignedTasksPage />} />
+          <Route path="tasks/:id"         element={<AdminTaskDetailPage />} />
           <Route path="leave-management"  element={<AdminLeaveManagementPage />} />
+          <Route path="petty-cash"        element={<AdminPettyCashPage />} />
 
           {/* Staff management — keyed by role ID, matching sidebar paths */}
           {Object.entries(ADMIN_STAFF_ROLES).map(([roleId, label]) => (
@@ -88,9 +95,12 @@ function AppRoutes() {
             <Route path="overview"      element={<RoleOverviewPage apiBase={apiBase} roleName={roleLabel} />} />
             <Route path="profile"       element={<ProfilePage apiBase={apiBase} />} />
             <Route path="tasks"         element={<MyTasksPage apiBase={apiBase} />} />
-            <Route path="submit-task"   element={<SubmitTaskPage apiBase={apiBase} />} />
+            <Route path="tasks/:id"     element={<TaskDetailPage apiBase={apiBase} />} />
             <Route path="leave-request" element={<LeaveRequestPage apiBase={apiBase} />} />
             <Route path="leave-status"  element={<LeaveStatusPage apiBase={apiBase} />} />
+            {slug === 'accountant' && (
+              <Route path="petty-cash" element={<AccountantPettyCashPage apiBase={apiBase} />} />
+            )}
           </Route>
         ))}
       </Route>

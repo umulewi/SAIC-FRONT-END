@@ -3,7 +3,6 @@ import type { RoleConfig } from '../types';
 const commonMenuItems = [
   { id: 'profile',       label: 'My Profile',    icon: 'User',          path: 'profile' },
   { id: 'tasks',         label: 'My Tasks',       icon: 'ClipboardList', path: 'tasks' },
-  { id: 'submit-task',   label: 'Submit Task',    icon: 'Send',          path: 'submit-task' },
   { id: 'leave-request', label: 'Request Leave',  icon: 'CalendarOff',   path: 'leave-request' },
   { id: 'leave-status',  label: 'Leave Status',   icon: 'CalendarCheck', path: 'leave-status' },
 ];
@@ -16,8 +15,8 @@ export const ROLE_CONFIG: Record<string, RoleConfig> = {
     menuItems: [
       { id: 'overview',          label: 'Overview',             icon: 'LayoutDashboard', path: 'overview' },
       { id: 'tasks',             label: 'Tasks',                icon: 'ClipboardList',   path: 'tasks' },
-      { id: 'assigned-tasks',    label: 'Assigned Tasks',       icon: 'ClipboardCheck',  path: 'assigned-tasks' },
       { id: 'leave-management',  label: 'Leave Management',     icon: 'CalendarDays',    path: 'leave-management' },
+      { id: 'petty-cash',        label: 'Petty Cash',           icon: 'DollarSign',      path: 'petty-cash' },
       // Staff management — paths use role IDs to match new unified staff endpoint
       { id: 'admin-manager',     label: 'Admin Managers',       icon: 'UserCog',         path: 'staff/6' },
       { id: 'it-officer',        label: 'IT Officers',          icon: 'Monitor',         path: 'staff/7' },
@@ -95,7 +94,11 @@ export const ROLE_CONFIG: Record<string, RoleConfig> = {
     apiBase: '/accountant',
     dashboardPath: '/dashboard/accountant',
     canManageStaff: false,
-    menuItems: [{ id: 'overview', label: 'Overview', icon: 'LayoutDashboard', path: 'overview' }, ...commonMenuItems],
+    menuItems: [
+      { id: 'overview',    label: 'Overview',    icon: 'LayoutDashboard', path: 'overview' },
+      { id: 'petty-cash',  label: 'Petty Cash',  icon: 'DollarSign',      path: 'petty-cash' },
+      ...commonMenuItems,
+    ],
   },
 
   'Training Department Manager': {

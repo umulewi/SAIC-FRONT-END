@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ClipboardList, CalendarCheck, Send, User } from 'lucide-react';
-import { getAssignedTasks, getLeaveStatus, getProfile } from '../../api/role';
+import { getAssignedTasks, getLeaveStatus, getProfile, getSubmissionCount } from '../../api/role';
 import { StatCard } from '../../components/Common/Card';
 import PageHeader from '../../components/Common/PageHeader';
 import LoadingSpinner from '../../components/Common/LoadingSpinner';
@@ -12,23 +12,26 @@ interface RoleOverviewPageProps {
 }
 
 export default function RoleOverviewPage({ apiBase, roleName }: RoleOverviewPageProps) {
-  const [taskCount, setTaskCount] = useState(0);
-  const [leaveCount, setLeaveCount] = useState(0);
-  const [profileName, setProfileName] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [taskCount,       setTaskCount]       = useState(0);
+  const [leaveCount,      setLeaveCount]      = useState(0);
+  const [submissionCount, setSubmissionCount] = useState<number | null>(null);
+  const [profileName,     setProfileName]     = useState('');
+  const [loading,         setLoading]         = useState(true);
 
   useEffect(() => {
     Promise.allSettled([
       getProfile(apiBase),
       getAssignedTasks(apiBase),
       getLeaveStatus(apiBase),
-    ]).then(([profileRes, tasksRes, leavesRes]) => {
+      getSubmissionCount(apiBase),
+    ]).then(([profileRes, tasksRes, leavesRes, subRes]) => {
       if (profileRes.status === 'fulfilled') {
         const p = profileRes.value;
         setProfileName(p.first_name ? `${p.first_name} ${p.last_name ?? ''}`.trim() : p.email);
       }
-      if (tasksRes.status === 'fulfilled') setTaskCount(tasksRes.value.length);
+      if (tasksRes.status === 'fulfilled')  setTaskCount(tasksRes.value.length);
       if (leavesRes.status === 'fulfilled') setLeaveCount(leavesRes.value.length);
+      if (subRes.status === 'fulfilled')    setSubmissionCount(subRes.value);
       setLoading(false);
     });
   }, [apiBase]);
@@ -47,7 +50,7 @@ export default function RoleOverviewPage({ apiBase, roleName }: RoleOverviewPage
       <div className="stats-grid">
         <StatCard label="Assigned Tasks" value={taskCount} icon={<ClipboardList size={20} />} color="green" />
         <StatCard label="Leave Requests" value={pendingLeaves} icon={<CalendarCheck size={20} />} color="blue" />
-        <StatCard label="Submissions" value="—" icon={<Send size={20} />} color="amber" />
+        <StatCard label="Submissions" value={submissionCount ?? '—'} icon={<Send size={20} />} color="amber" />
         <StatCard label="Profile Status" value="Active" icon={<User size={20} />} color="green" />
       </div>
 

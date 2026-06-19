@@ -1,0 +1,94 @@
+/* ══════════════════════════════════════════════
+   SAIC MIS — Analytics Page
+══════════════════════════════════════════════ */
+
+/* ─── KPI Grid ───────────────────────────── */
+.an-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0.85rem;
+  margin-bottom: 1.25rem;
+}
+@media (max-width: 1100px) { .an-kpi-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 640px)  { .an-kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+
+.an-kpi-card {
+  background: #fff; border: 1px solid #e4ede4; border-radius: 14px;
+  padding: 1.1rem 1rem; display: flex; align-items: center; gap: 0.9rem;
+  box-shadow: 0 2px 8px rgba(45,80,22,0.04);
+}
+.an-kpi-icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.an-kpi-total    .an-kpi-icon { background: #f0f7f0; color: #2D5016; }
+.an-kpi-approved .an-kpi-icon { background: #e8f5e9; color: #2e7d32; }
+.an-kpi-submitted .an-kpi-icon { background: #fff8e1; color: #f57f17; }
+.an-kpi-rejected .an-kpi-icon { background: #fce4ec; color: #c62828; }
+.an-kpi-overdue  .an-kpi-icon { background: #fff3e0; color: #e65100; }
+.an-kpi-rate     .an-kpi-icon { background: #e8eaf6; color: #283593; }
+
+.an-kpi-value {
+  font-size: 1.6rem; font-weight: 800; color: #1e3a1e;
+  margin: 0; letter-spacing: -0.03em; line-height: 1;
+}
+.an-kpi-label { font-size: 0.72rem; color: #9ab09a; font-weight: 500; margin: 0.2rem 0 0; }
+
+/* ─── Charts row ─────────────────────────── */
+.an-charts-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+@media (max-width: 800px) { .an-charts-row { grid-template-columns: 1fr; } }
+
+.an-chart-card, .an-table-card {
+  background: #fff; border: 1px solid #e4ede4; border-radius: 14px;
+  padding: 1.25rem 1.5rem; margin-bottom: 1.25rem;
+}
+.an-chart-card { margin-bottom: 0; }
+.an-card-title {
+  display: flex; align-items: center; gap: 0.4rem;
+  font-size: 0.9rem; font-weight: 700; color: #1e3a1e; margin: 0 0 1.1rem;
+}
+
+/* ─── Bar chart ──────────────────────────── */
+.an-bar-chart { display: flex; flex-direction: column; gap: 0.7rem; }
+.an-bar-row { display: flex; align-items: center; gap: 0.65rem; }
+.an-bar-label { font-size: 0.78rem; font-weight: 600; color: #4a6a4a; width: 85px; flex-shrink: 0; }
+.an-bar-track {
+  flex: 1; height: 10px; background: #f0f4f0;
+  border-radius: 100px; overflow: hidden;
+}
+.an-bar-fill {
+  height: 100%; border-radius: 100px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.an-bar-count {
+  font-size: 0.72rem; font-weight: 700;
+  border-radius: 100px; padding: 0.15rem 0.55rem;
+  min-width: 32px; text-align: center; flex-shrink: 0;
+}
+
+/* ─── Priority grid ──────────────────────── */
+.an-priority-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+.an-priority-card {
+  border: 2px solid; border-radius: 12px; padding: 0.85rem;
+  text-align: center;
+}
+.an-priority-count { font-size: 1.8rem; font-weight: 800; margin: 0; letter-spacing: -0.04em; }
+.an-priority-label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin: 0.1rem 0 0.05rem; }
+.an-priority-pct   { font-size: 0.78rem; opacity: 0.7; margin: 0; }
+
+/* ─── Rate bar ───────────────────────────── */
+.an-rate-bar-wrap {
+  display: flex; align-items: center; gap: 0.5rem;
+  width: 100%; min-width: 90px;
+}
+.an-rate-bar {
+  height: 8px; background: #2D5016; border-radius: 100px;
+  min-width: 4px; transition: width 0.4s;
+}
+.an-rate-text { font-size: 0.75rem; font-weight: 700; color: #2D5016; white-space: nowrap; }

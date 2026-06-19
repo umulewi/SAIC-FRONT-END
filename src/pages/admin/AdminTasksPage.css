@@ -1,0 +1,302 @@
+/* ══════════════════════════════════════════════
+   SAIC MIS — Admin Task Management Page
+══════════════════════════════════════════════ */
+
+.atm-root { display: flex; flex-direction: column; gap: 0; }
+
+/* ─── Filters ─────────────────────────────── */
+.atm-filters {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+  background: #fff;
+  border: 1px solid #e4ede4;
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+}
+.atm-search-box {
+  position: relative;
+  flex: 1;
+  min-width: 200px;
+  max-width: 360px;
+  display: flex;
+  align-items: center;
+}
+.atm-search-icon { position: absolute; left: 0.7rem; color: #a0b8a0; pointer-events: none; }
+.atm-search-input {
+  width: 100%;
+  padding: 0.55rem 2.2rem 0.55rem 2.1rem;
+  border: 1.5px solid #d4e4d4;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.atm-search-input:focus { border-color: #2D5016; box-shadow: 0 0 0 3px rgba(45,80,22,0.1); }
+.atm-search-clear {
+  position: absolute; right: 0.6rem; background: none; border: none;
+  cursor: pointer; color: #a0b8a0; display: flex; align-items: center; padding: 0;
+}
+.atm-search-clear:hover { color: #2D5016; }
+.atm-filter-group { display: flex; align-items: center; gap: 0.5rem; }
+.atm-select {
+  padding: 0.5rem 0.75rem;
+  border: 1.5px solid #d4e4d4;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  background: #fff;
+  color: #1e3a1e;
+  outline: none;
+  cursor: pointer;
+}
+.atm-select:focus { border-color: #2D5016; }
+
+/* ─── Create Task Panel ──────────────────── */
+.atm-panel {
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 8px 40px rgba(45,80,22,0.15), 0 2px 8px rgba(0,0,0,0.05);
+  margin-bottom: 1.25rem;
+  animation: atm-slide-in 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes atm-slide-in {
+  from { opacity: 0; transform: translateY(-16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Green gradient header */
+.atm-panel-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.3rem 1.75rem;
+  background: linear-gradient(135deg, #1a3310 0%, #2D5016 55%, #3a6e1a 100%);
+}
+.atm-panel-header-left { display: flex; align-items: center; gap: 1rem; }
+.atm-panel-icon {
+  width: 46px; height: 46px; border-radius: 13px; flex-shrink: 0;
+  background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2);
+  display: flex; align-items: center; justify-content: center; color: #fff;
+}
+.atm-panel-title { font-size: 1.05rem; font-weight: 800; color: #fff; margin: 0 0 0.18rem; }
+.atm-panel-sub   { font-size: 0.76rem; color: rgba(255,255,255,0.65); margin: 0; }
+.atm-panel-close {
+  width: 36px; height: 36px; border-radius: 10px; border: none; cursor: pointer;
+  background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.85);
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s; flex-shrink: 0;
+}
+.atm-panel-close:hover { background: rgba(255,255,255,0.25); }
+
+/* White body */
+.atm-panel-body { background: #fff; padding: 1.75rem; }
+
+/* Field grid */
+.atm-field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.1rem; }
+@media (max-width: 700px) { .atm-field-grid { grid-template-columns: 1fr; } }
+.atm-field      { display: flex; flex-direction: column; gap: 0.35rem; }
+.atm-field-full { grid-column: 1 / -1; }
+
+.atm-flabel {
+  display: flex; align-items: center; gap: 0.3rem;
+  font-size: 0.72rem; font-weight: 800; color: #2D5016;
+  text-transform: uppercase; letter-spacing: 0.07em;
+}
+.atm-flabel-opt {
+  font-size: 0.68rem; font-weight: 500; color: #9ab09a;
+  text-transform: none; letter-spacing: 0; margin-left: 0.25rem;
+}
+
+.atm-finput {
+  border: 1.5px solid #ddeadd; border-radius: 10px;
+  padding: 0.65rem 0.95rem; font-size: 0.875rem; color: #1e3a1e;
+  background: #fafff8; outline: none; width: 100%; box-sizing: border-box;
+  transition: border-color 0.18s, box-shadow 0.18s, background 0.18s;
+  font-family: inherit;
+}
+.atm-finput::placeholder { color: #b0c8b0; }
+.atm-finput:focus {
+  border-color: #2D5016; box-shadow: 0 0 0 3.5px rgba(45,80,22,0.1); background: #fff;
+}
+.atm-finput:disabled { opacity: 0.6; cursor: not-allowed; }
+.atm-ftextarea { resize: vertical; min-height: 70px; line-height: 1.55; }
+
+/* Priority pill buttons */
+.atm-priority-pills { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.atm-priority-pill {
+  padding: 0.4rem 1.1rem; border-radius: 100px; font-size: 0.8rem; font-weight: 700;
+  border: 2px solid; cursor: pointer; transition: all 0.15s; background: transparent;
+  font-family: inherit;
+}
+.atm-priority-pill:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.atm-p-low    { border-color: #a7d7a7; color: #2e7d32; }
+.atm-p-medium { border-color: #fbc976; color: #b45309; }
+.atm-p-high   { border-color: #fdba74; color: #c2410c; }
+.atm-p-urgent { border-color: #fca5a5; color: #b91c1c; }
+
+.atm-p-low.active    { background: #2e7d32; border-color: #2e7d32; color: #fff; box-shadow: 0 3px 10px rgba(46,125,50,0.35); }
+.atm-p-medium.active { background: #d97706; border-color: #d97706; color: #fff; box-shadow: 0 3px 10px rgba(217,119,6,0.35); }
+.atm-p-high.active   { background: #c2410c; border-color: #c2410c; color: #fff; box-shadow: 0 3px 10px rgba(194,65,12,0.35); }
+.atm-p-urgent.active { background: #b91c1c; border-color: #b91c1c; color: #fff; box-shadow: 0 3px 10px rgba(185,28,28,0.35); }
+
+.atm-p-low:not(.active):hover    { background: #e8f5e9; }
+.atm-p-medium:not(.active):hover { background: #fffbeb; }
+.atm-p-high:not(.active):hover   { background: #fff7ed; }
+.atm-p-urgent:not(.active):hover { background: #fff5f5; }
+
+/* Panel footer */
+.atm-panel-footer {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 1.25rem 1.75rem; background: #f6fbf4; border-top: 1px solid #e4ede4;
+  margin: 1.5rem -1.75rem -1.75rem;
+}
+.atm-submit-btn {
+  display: inline-flex; align-items: center; gap: 0.45rem;
+  padding: 0.65rem 1.5rem; font-size: 0.875rem; font-weight: 700;
+  border-radius: 10px; border: none; cursor: pointer;
+  background: linear-gradient(135deg, #2D5016 0%, #4a8022 100%);
+  color: #fff; box-shadow: 0 2px 12px rgba(45,80,22,0.3); font-family: inherit;
+  transition: box-shadow 0.2s, transform 0.15s, opacity 0.15s;
+}
+.atm-submit-btn:hover:not(:disabled) { box-shadow: 0 4px 20px rgba(45,80,22,0.4); transform: translateY(-1px); }
+.atm-submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.atm-cancel-btn {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  padding: 0.63rem 1.1rem; font-size: 0.85rem; font-weight: 600;
+  border-radius: 10px; border: 1.5px solid #c8dfc8;
+  background: #fff; color: #4a6a4a; cursor: pointer; font-family: inherit;
+  transition: background 0.15s, border-color 0.15s;
+}
+.atm-cancel-btn:hover:not(:disabled) { background: #f0f7f0; border-color: #9fca7f; }
+.atm-cancel-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* Legacy close btn (still used elsewhere) */
+.atm-close-btn {
+  background: none; border: none; cursor: pointer; color: #9aab9a;
+  display: flex; align-items: center; padding: 0.25rem;
+  border-radius: 6px; transition: background 0.15s, color 0.15s;
+}
+.atm-close-btn:hover { background: #f0f7f0; color: #2D5016; }
+
+.atm-staff-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1.5px solid #d4e4d4;
+  border-radius: 10px;
+  padding: 0.6rem;
+  background: #f8faf8;
+}
+.atm-staff-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1.5px solid #d4e4d4;
+  border-radius: 8px;
+  padding: 0.4rem 0.65rem;
+  background: #fff;
+  cursor: pointer;
+  font-size: 0.78rem;
+  transition: all 0.15s;
+}
+.atm-staff-chip:hover { border-color: #2D5016; background: #f0f7f0; }
+.atm-staff-chip.selected { border-color: #2D5016; background: rgba(45,80,22,0.08); color: #2D5016; }
+.chip-avatar {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: #2D5016;
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.chip-name { font-weight: 600; color: #1e3a1e; }
+.chip-role { color: #8fa88f; font-size: 0.72rem; }
+.chip-check { color: #2D5016; flex-shrink: 0; }
+.atm-assign-count {
+  display: flex; align-items: center; gap: 0.35rem;
+  font-size: 0.78rem; color: #2D5016; font-weight: 600;
+  margin: 0.4rem 0 0;
+}
+
+/* ─── Table Badges ──────────────────────── */
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.65rem;
+  border-radius: 100px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  letter-spacing: 0.02em;
+}
+.badge-low      { background: #e8f5e9; color: #2e7d32; }
+.badge-medium   { background: #fff8e1; color: #f57f17; }
+.badge-high     { background: #fff3e0; color: #e65100; }
+.badge-urgent   { background: #fce4ec; color: #c62828; }
+.badge-draft    { background: #f5f5f5; color: #757575; }
+.badge-assigned { background: #e3f2fd; color: #1565c0; }
+.badge-inprog   { background: #e8eaf6; color: #283593; }
+.badge-submitted { background: #fff8e1; color: #f57f17; }
+.badge-approved  { background: #e8f5e9; color: #2e7d32; }
+.badge-rejected  { background: #fce4ec; color: #c62828; }
+
+/* ─── Table helpers ─────────────────────── */
+.col-num { width: 42px; color: #a0b8a0; font-size: 0.78rem; }
+.task-title-cell { display: flex; flex-direction: column; gap: 0.2rem; }
+.task-desc-preview {
+  font-size: 0.76rem;
+  color: #9ab09a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;
+}
+.meta-pill {
+  display: inline-flex; align-items: center; gap: 0.25rem;
+  font-size: 0.78rem; color: #6a8c6a;
+}
+.overdue-text { color: #c0392b; font-weight: 600; }
+.row-overdue td { background: #fff9f9; }
+
+/* ─── Assignee cell name pills ──────────── */
+.atm-assignee-cell {
+  display: flex; align-items: center; gap: 0.3rem; flex-wrap: wrap;
+}
+.atm-name-pill {
+  display: inline-block;
+  padding: 0.18rem 0.55rem;
+  background: #f0f7f0; color: #2D5016;
+  border: 1px solid #c0d8c0;
+  border-radius: 20px;
+  font-size: 0.73rem; font-weight: 600;
+  white-space: nowrap; max-width: 130px;
+  overflow: hidden; text-overflow: ellipsis;
+}
+.atm-assignee-more {
+  font-size: 0.72rem; color: #6a8c6a; font-weight: 600;
+  background: #f5f5f5; border: 1px solid #ddd;
+  border-radius: 20px; padding: 0.18rem 0.45rem;
+}
+.atm-no-assignee {
+  font-size: 0.75rem; color: #b0c8b0; font-style: italic;
+}
+
+/* ─── Pagination ────────────────────────── */
+.atm-pagination {
+  display: flex; align-items: center; gap: 0.75rem;
+  justify-content: center; margin-top: 1.25rem;
+}
+.atm-pg-btn {
+  width: 34px; height: 34px;
+  display: flex; align-items: center; justify-content: center;
+  border: 1.5px solid #d4e4d4; border-radius: 8px;
+  background: #fff; cursor: pointer;
+  transition: all 0.15s;
+}
+.atm-pg-btn:hover:not(:disabled) { border-color: #2D5016; color: #2D5016; }
+.atm-pg-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.atm-pg-info { font-size: 0.82rem; color: #6a8c6a; }

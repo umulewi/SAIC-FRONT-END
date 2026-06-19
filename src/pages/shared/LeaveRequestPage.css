@@ -1,0 +1,81 @@
+/* ══════════════════════════════════════════════
+   SAIC MIS — Leave Request Page
+══════════════════════════════════════════════ */
+
+.lrp-root { display: flex; flex-direction: column; gap: 1.25rem; }
+
+/* ─── Section titles ──────────────────────── */
+.lrp-section-title {
+  font-size: 0.95rem; font-weight: 700; color: #1e3a1e;
+  margin: 0 0 1rem; display: flex; align-items: center; gap: 0.4rem;
+}
+
+/* ─── Balance overview ────────────────────── */
+.lrp-balance-section {
+  background: #fff; border-radius: 12px; padding: 1.25rem 1.5rem;
+  border: 1px solid #e4ede4; box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+}
+.lrp-bal-loading {
+  display: flex; align-items: center; gap: 0.5rem;
+  font-size: 0.82rem; color: #9ab09a; margin: 0;
+}
+.lrp-balance-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.75rem;
+}
+.lrp-bal-card {
+  background: #f8fdf8; border: 1.5px solid #e4ede4; border-radius: 10px;
+  padding: 0.85rem 1rem; cursor: pointer; transition: all 0.15s;
+}
+.lrp-bal-card:hover { border-color: #2D5016; background: #f2faf2; }
+.lrp-bal-card.active {
+  border-width: 2px;
+  box-shadow: 0 2px 8px rgba(45,80,22,0.12);
+}
+.lrp-bal-type { font-size: 0.72rem; font-weight: 600; margin: 0 0 0.3rem; text-transform: uppercase; letter-spacing: 0.04em; }
+.lrp-bal-days { font-size: 1.5rem; font-weight: 800; margin: 0 0 0.3rem; line-height: 1; }
+.lrp-bal-days span { font-size: 0.8rem; font-weight: 500; color: #9ab09a; }
+.lrp-bal-track {
+  height: 4px; background: #e8ede8; border-radius: 4px; overflow: hidden; margin: 0.3rem 0;
+}
+.lrp-bal-fill { height: 100%; border-radius: 4px; transition: width 0.3s; }
+.lrp-bal-sub { font-size: 0.7rem; color: #9ab09a; margin: 0; }
+
+/* ─── Form card ───────────────────────────── */
+.lrp-form-card {
+  background: #fff; border-radius: 12px; padding: 1.25rem 1.5rem;
+  border: 1px solid #e4ede4; box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+}
+
+/* ─── Leave type chips ────────────────────── */
+.lrp-type-grid {
+  display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.5rem;
+}
+.lrp-type-chip {
+  padding: 0.4rem 0.9rem; border-radius: 20px;
+  border: 1.5px solid #d4e4d4; background: #fff;
+  font-size: 0.8rem; font-weight: 600; color: #6a8c6a;
+  cursor: pointer; transition: all 0.15s;
+}
+.lrp-type-chip:hover { border-color: #2D5016; color: #2D5016; background: #f0f7f0; }
+.lrp-type-chip.selected { font-weight: 700; }
+.lrp-type-desc {
+  display: flex; align-items: center; gap: 0.35rem;
+  font-size: 0.76rem; color: #9ab09a; margin: 0;
+}
+
+/* ─── Live summary bar ────────────────────── */
+.lrp-summary {
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
+  gap: 0.5rem; background: #f0faf4; border: 1px solid #c6f0d8;
+  border-radius: 8px; padding: 0.65rem 1rem; font-size: 0.82rem; color: #276749;
+}
+.lrp-summary-warn { background: #fff8f0; border-color: #fde8b0; color: #7c5c00; }
+.lrp-ok  { color: #2e7d32; font-weight: 600; }
+.lrp-over { color: #c62828; font-weight: 600; }
+
+@media (max-width: 640px) {
+  .lrp-balance-grid { grid-template-columns: repeat(2, 1fr); }
+  .lrp-summary { flex-direction: column; align-items: flex-start; }
+}

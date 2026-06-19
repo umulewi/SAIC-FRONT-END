@@ -1,5 +1,8 @@
 import client from './client';
-import type { StaffProfile, Task, AssignedTask, LeaveRequest, StaffMember, RoleInfo, Department } from '../types';
+import type {
+  StaffProfile, Task, AssignedTask, LeaveRequest, LeaveBalance,
+  LeaveStats, LeaveTypeCount, StaffMember, RoleInfo, Department, PettyCash,
+} from '../types';
 
 // ─── Non-admin role endpoints ─────────────────────────────────────────────
 
@@ -23,7 +26,7 @@ export async function submitTask(
 
 export async function requestLeave(
   apiBase: string,
-  payload: { reason: string; start_date: string; end_date: string }
+  payload: { reason: string; start_date: string; end_date: string; leave_type: string }
 ) {
   const { data } = await client.post(`${apiBase}/leave_requests`, payload);
   return data;
@@ -32,6 +35,16 @@ export async function requestLeave(
 export async function getLeaveStatus(apiBase: string): Promise<LeaveRequest[]> {
   const { data } = await client.get(`${apiBase}/leave_status`);
   return data.leave_requests ?? [];
+}
+
+export async function getLeaveBalance(apiBase: string): Promise<LeaveBalance[]> {
+  const { data } = await client.get(`${apiBase}/leave_balance`);
+  return data.balances ?? [];
+}
+
+export async function getSubmissionCount(apiBase: string): Promise<number> {
+  const { data } = await client.get(`${apiBase}/submission_count`);
+  return data.count ?? 0;
 }
 
 // ─── Admin — roles & departments ─────────────────────────────────────────
@@ -111,12 +124,81 @@ export async function adminDeleteAssignedTask(id: number) {
 
 // ─── Admin — leave management ─────────────────────────────────────────────
 
-export async function adminGetLeaveRequests(): Promise<LeaveRequest[]> {
-  const { data } = await client.get('/admin/leave-management');
+export async function adminGetLeaveRequests(filters?: {
+  status?: string;
+  leave_type?: string;
+  search?: string;
+}): Promise<LeaveRequest[]> {
+  const params = new URLSearchParams();
+  if (filters?.status)     params.set('status',     filters.status);
+  if (filters?.leave_type) params.set('leave_type', filters.leave_type);
+  if (filters?.search)     params.set('search',     filters.search);
+  const { data } = await client.get(`/admin/leave-management?${params}`);
   return data.leave_requests ?? [];
 }
 
-export async function adminUpdateLeaveStatus(id: number, status: string) {
-  const { data } = await client.put(`/admin/leave-management/${id}`, { status });
+export async function adminGetLeaveStats(): Promise<{ stats: LeaveStats; by_type: LeaveTypeCount[] }> {
+  const { data } = await client.get('/admin/leave-management/stats');
+  return { stats: data.stats, by_type: data.by_type ?? [] };
+}
+
+export async function adminUpdateLeaveStatus(
+  id: number,
+  status: string,
+  rejection_reason?: string
+) {
+  const { data } = await client.put(`/admin/leave-management/${id}`, { status, rejection_reason });
   return data;
+}
+
+// ─── Petty Cash (Accountant) ──────────────────────────────────────────────
+
+export async function getPettyCash(
+  apiBase: string,
+  filters?: { from_date?: string; to_date?: string; search?: string }
+): Promise<PettyCash[]> {
+  const params = new URLSearchParams();
+  if (filters?.from_date) params.set('from_date', filters.from_date);
+  if (filters?.to_date)   params.set('to_date',   filters.to_date);
+  if (filters?.search)    params.set('search',    filters.search);
+  const qs = params.toString();
+  const { data } = await client.get(`${apiBase}/petty_cash${qs ? `?${qs}` : ''}`);
+  return data.petty_cash ?? [];
+}
+
+export async function createPettyCash(
+  apiBase: string,
+  payload: { item: string; cash: number; date: string }
+) {
+  const { data } = await client.post(`${apiBase}/petty_cash`, payload);
+  return data;
+}
+
+export async function updatePettyCash(
+  apiBase: string,
+  id: number,
+  payload: { item: string; cash: number; date: string }
+) {
+  const { data } = await client.put(`${apiBase}/petty_cash/${id}`, payload);
+  return data;
+}
+
+export async function deletePettyCash(apiBase: string, id: number) {
+  const { data } = await client.delete(`${apiBase}/petty_cash/${id}`);
+  return data;
+}
+
+// ─── Petty Cash (Admin) ───────────────────────────────────────────────────
+
+export async function adminGetPettyCash(filters?: {
+  search?: string;
+  from_date?: string;
+  to_date?: string;
+}): Promise<{ records: PettyCash[]; total: number }> {
+  const params = new URLSearchParams();
+  if (filters?.search)    params.set('search',    filters.search);
+  if (filters?.from_date) params.set('from_date', filters.from_date);
+  if (filters?.to_date)   params.set('to_date',   filters.to_date);
+  const { data } = await client.get(`/admin/petty-cash?${params}`);
+  return { records: data.petty_cash ?? [], total: data.total ?? 0 };
 }

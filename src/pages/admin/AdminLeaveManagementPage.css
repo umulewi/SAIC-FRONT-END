@@ -1,0 +1,147 @@
+/* ══════════════════════════════════════════════
+   SAIC MIS — Admin Leave Management Page
+══════════════════════════════════════════════ */
+
+.alm-root { display: flex; flex-direction: column; gap: 1.25rem; }
+
+/* ─── KPI stats row ──────────────────────── */
+.alm-stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 0.85rem;
+}
+.alm-stat-card {
+  display: flex; align-items: center; gap: 0.85rem;
+  border-radius: 12px; border: 1px solid transparent;
+  padding: 1rem 1.1rem;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+}
+.alm-stat-icon { flex-shrink: 0; }
+.alm-stat-val {
+  font-size: 1.55rem; font-weight: 800; line-height: 1; margin: 0 0 0.2rem;
+}
+.alm-stat-lbl {
+  font-size: 0.72rem; font-weight: 600; color: #718096;
+  text-transform: uppercase; letter-spacing: 0.04em; margin: 0;
+}
+
+/* ─── Filter bar ─────────────────────────── */
+.alm-filters {
+  display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;
+  background: #fff; border: 1px solid #e4ede4;
+  border-radius: 12px; padding: 0.75rem 1rem;
+}
+.alm-filter-group { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+
+/* ─── Staff cell ─────────────────────────── */
+.alm-staff-cell { display: flex; align-items: center; gap: 0.65rem; }
+.alm-avatar {
+  width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, #2D5016, #4a8022);
+  color: #fff; font-size: 0.7rem; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+}
+.alm-staff-name  { font-size: 0.83rem; font-weight: 600; color: #1e3a1e; margin: 0; }
+.alm-staff-email { font-size: 0.73rem; color: #9ab09a; margin: 0; }
+
+/* ─── Leave type badge ───────────────────── */
+.alm-type-badge {
+  display: inline-block; padding: 0.2rem 0.65rem;
+  border-radius: 20px; font-size: 0.73rem; font-weight: 700;
+  white-space: nowrap;
+}
+
+/* ─── Days pill ──────────────────────────── */
+.alm-days-pill {
+  display: inline-block; padding: 0.18rem 0.55rem;
+  background: #f0f7f0; color: #2D5016;
+  border: 1px solid #c8dfc8; border-radius: 20px;
+  font-size: 0.73rem; font-weight: 700;
+}
+
+/* ─── Reason + rejection note ────────────── */
+.alm-reason-text { font-size: 0.8rem; color: #4a5568; max-width: 200px; word-break: break-word; }
+.alm-rejection-note {
+  display: flex; align-items: flex-start; gap: 0.3rem;
+  margin: 0.35rem 0 0; font-size: 0.75rem; color: #c53030;
+}
+
+/* ─── Status badges ──────────────────────── */
+.alm-status-badge {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  font-size: 0.7rem; font-weight: 600; padding: 0.22rem 0.65rem; border-radius: 20px;
+  white-space: nowrap;
+}
+.alm-status-pending  { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
+.alm-status-approved { background: #f0faf4; color: #276749; border: 1px solid #c6f0d8; }
+.alm-status-rejected { background: #fff5f5; color: #c53030; border: 1px solid #fed7d7; }
+
+/* ─── Row tints for approved/rejected ───── */
+.row-approved td { background: #f6fdf7 !important; }
+.row-rejected td { background: #fff9f9 !important; }
+
+/* ─── Action buttons ─────────────────────── */
+.alm-action-btns { display: flex; flex-direction: column; gap: 0.35rem; }
+.alm-btn-approve,
+.alm-btn-reject {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  padding: 0.3rem 0.7rem; font-size: 0.75rem; font-weight: 600;
+  border: none; border-radius: 6px; cursor: pointer; transition: opacity 0.15s;
+  white-space: nowrap;
+}
+.alm-btn-approve { background: #276749; color: #fff; }
+.alm-btn-approve:hover:not(:disabled) { background: #1f5038; }
+.alm-btn-approve:disabled { opacity: 0.6; cursor: not-allowed; }
+.alm-btn-reject  { background: #fff5f5; color: #c53030; border: 1px solid #fed7d7; }
+.alm-btn-reject:hover:not(:disabled) { background: #ffe0e0; }
+.alm-btn-reject:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* ─── Reject confirm button ──────────────── */
+.alm-btn-reject-confirm {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  padding: 0.55rem 1.1rem; font-size: 0.83rem; font-weight: 600;
+  background: #c53030; color: #fff; border: none; border-radius: 8px;
+  cursor: pointer; transition: opacity 0.15s;
+}
+.alm-btn-reject-confirm:hover:not(:disabled) { opacity: 0.87; }
+.alm-btn-reject-confirm:disabled { opacity: 0.55; cursor: not-allowed; }
+
+/* ─── Reject modal extras ────────────────── */
+.alm-reject-modal { max-width: 460px; }
+.alm-reject-info {
+  display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;
+  background: #f8faf8; border: 1px solid #e4ede4; border-radius: 8px;
+  padding: 0.6rem 0.9rem; margin-bottom: 1rem;
+}
+
+/* ─── Shared helpers (also used here) ────── */
+.col-num { width: 42px; color: #a0b8a0; font-size: 0.78rem; }
+.atm-close-btn {
+  background: none; border: none; cursor: pointer; color: #9aab9a;
+  display: flex; align-items: center; padding: 0.25rem;
+  border-radius: 6px; transition: background 0.15s, color 0.15s;
+}
+.atm-close-btn:hover { background: #f0f7f0; color: #2D5016; }
+
+/* ─── Spin animation ─────────────────────── */
+@keyframes spin { to { transform: rotate(360deg); } }
+.spin { animation: spin 0.75s linear infinite; }
+
+/* ─── Horizontal scroll for leave table ─── */
+.alm-root .table-card {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.alm-root .saic-table {
+  min-width: 900px;
+}
+
+/* ─── Responsive ─────────────────────────── */
+@media (max-width: 1024px) {
+  .alm-stats-row { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 640px) {
+  .alm-stats-row { grid-template-columns: repeat(2, 1fr); }
+  .alm-filters { flex-direction: column; align-items: stretch; }
+  .alm-filter-group { width: 100%; }
+}
