@@ -1,7 +1,7 @@
 import client from './client';
 import type {
   StaffProfile, Task, AssignedTask, LeaveRequest, LeaveBalance,
-  LeaveStats, LeaveTypeCount, StaffMember, RoleInfo, Department, PettyCash,
+  LeaveStats, LeaveTypeCount, StaffMember, RoleInfo, Department, PettyCash, TeamMember,
 } from '../types';
 
 // ─── Non-admin role endpoints ─────────────────────────────────────────────
@@ -47,6 +47,11 @@ export async function getSubmissionCount(apiBase: string): Promise<number> {
   return data.count ?? 0;
 }
 
+export async function getMyTeam(apiBase: string): Promise<TeamMember[]> {
+  const { data } = await client.get(`${apiBase}/my_team`);
+  return data.team ?? [];
+}
+
 // ─── Admin — roles & departments ─────────────────────────────────────────
 
 export async function adminGetRoles(): Promise<RoleInfo[]> {
@@ -80,6 +85,35 @@ export async function adminUpdateStaff(staffId: number, payload: Record<string, 
 
 export async function adminDeleteStaff(staffId: number) {
   const { data } = await client.delete(`/admin/staff/${staffId}`);
+  return data;
+}
+
+export async function adminUploadStaffPhoto(staffId: number, formData: FormData) {
+  const { data } = await client.patch(`/admin/staff/${staffId}/photo`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return data;
+}
+
+export async function adminUploadStaffContract(staffId: number, formData: FormData) {
+  const { data } = await client.patch(`/admin/staff/${staffId}/contract`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return data;
+}
+
+export async function adminGetStaffDirectory(
+  params?: { date_from?: string; date_to?: string }
+): Promise<import('../types').DirectoryStaff[]> {
+  const { data } = await client.get('/admin/staff-directory', { params });
+  return data.staff ?? [];
+}
+
+export async function adminGetStaffPerformance(
+  staffId: number,
+  params?: { date_from?: string; date_to?: string }
+): Promise<import('../types').StaffPerformanceDetail> {
+  const { data } = await client.get(`/admin/staff/${staffId}/performance`, { params });
   return data;
 }
 
@@ -168,9 +202,11 @@ export async function getPettyCash(
 
 export async function createPettyCash(
   apiBase: string,
-  payload: { item: string; cash: number; date: string }
+  payload: FormData
 ) {
-  const { data } = await client.post(`${apiBase}/petty_cash`, payload);
+  const { data } = await client.post(`${apiBase}/petty_cash`, payload, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
   return data;
 }
 

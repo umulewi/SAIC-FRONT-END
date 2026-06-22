@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Plus, Pencil, Trash2, X, CheckCircle, AlertCircle,
   RefreshCw, Loader2, DollarSign, Search, FileDown,
-  ChevronLeft, ChevronRight,
+  ChevronLeft, ChevronRight, Paperclip, ExternalLink,
 } from 'lucide-react';
 import { getPettyCash, createPettyCash, updatePettyCash, deletePettyCash } from '../../api/role';
 import type { PettyCash } from '../../types';
@@ -58,9 +58,11 @@ export default function AccountantPettyCashPage({ apiBase }: Props) {
   const [fItem,    setFItem]    = useState('');
   const [fCash,    setFCash]    = useState('');
   const [fDate,    setFDate]    = useState(TODAY);
+  const [fReceipt, setFReceipt] = useState<File | null>(null);
   const [saving,   setSaving]   = useState(false);
   const [formErr,  setFormErr]  = useState('');
   const [success,  setSuccess]  = useState('');
+  const receiptInputRef = useRef<HTMLInputElement>(null);
 
   // Delete confirm
   const [deleteTarget, setDeleteTarget] = useState<PettyCash | null>(null);
@@ -108,7 +110,7 @@ export default function AccountantPettyCashPage({ apiBase }: Props) {
   };
 
   const openCreate = () => {
-    setEditing(null); setFItem(''); setFCash(''); setFDate(TODAY);
+    setEditing(null); setFItem(''); setFCash(''); setFDate(TODAY); setFReceipt(null);
     setFormErr(''); setSuccess(''); setFormOpen(true);
   };
 
@@ -117,24 +119,35 @@ export default function AccountantPettyCashPage({ apiBase }: Props) {
     setFItem(r.item);
     setFCash(String(r.cash));
     setFDate(r.date?.slice(0, 10) ?? TODAY);
+    setFReceipt(null);
     setFormErr(''); setSuccess(''); setFormOpen(true);
   };
 
-  const closeForm = () => { setFormOpen(false); setEditing(null); };
+  const closeForm = () => {
+    setFormOpen(false); setEditing(null); setFReceipt(null);
+    if (receiptInputRef.current) receiptInputRef.current.value = '';
+  };
 
   const handleSave = async (e: { preventDefault(): void }) => {
     e.preventDefault();
     if (!fItem.trim())                                           { setFormErr('Item description is required.'); return; }
     if (!fCash || isNaN(Number(fCash)) || Number(fCash) === 0) { setFormErr('Enter a valid cash amount.'); return; }
     if (!fDate)                                                  { setFormErr('Date is required.'); return; }
+    // Receipt is mandatory only for new entries
+    if (!editing && !fReceipt)                                  { setFormErr('A receipt (PDF or image) is required.'); return; }
+
     setSaving(true); setFormErr(''); setSuccess('');
     try {
-      const payload = { item: fItem.trim(), cash: Number(fCash), date: fDate };
       if (editing?.id) {
-        await updatePettyCash(apiBase, editing.id, payload);
+        await updatePettyCash(apiBase, editing.id, { item: fItem.trim(), cash: Number(fCash), date: fDate });
         setSuccess('Record updated.');
       } else {
-        await createPettyCash(apiBase, payload);
+        const fd = new FormData();
+        fd.append('item', fItem.trim());
+        fd.append('cash', String(Number(fCash)));
+        fd.append('date', fDate);
+        fd.append('receipt', fReceipt!);
+        await createPettyCash(apiBase, fd);
         setSuccess('Record added.');
       }
       closeForm();
@@ -220,6 +233,28 @@ export default function AccountantPettyCashPage({ apiBase }: Props) {
                 <input type="date" value={fDate}
                   onChange={e => { setFDate(e.target.value); setFormErr(''); }} disabled={saving} />
               </div>
+
+              {/* Receipt upload — mandatory for new entries */}
+              {!editing && (
+                <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                  <label>
+                    <Paperclip size={12} style={{ display: 'inline', marginRight: 4 }} />
+                    Receipt (PDF or Image) *
+                  </label>
+                  <input
+                    ref={receiptInputRef}
+                    type="file"
+                    accept="image/*,.pdf"
+                    onChange={e => { setFReceipt(e.target.files?.[0] ?? null); setFormErr(''); }}
+                    disabled={saving}
+                    className="pcp-file-input"
+                  />
+                  {fReceipt && (
+                    <p className="pcp-file-name"><Paperclip size={11} /> {fReceipt.name}</p>
+                  )}
+                  <p className="sm-field-hint">Upload the original receipt. Accepted formats: PDF, JPG, PNG, WEBP.</p>
+                </div>
+              )}
             </div>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <button type="submit" className="btn-primary" disabled={saving}>
@@ -279,45 +314,64 @@ export default function AccountantPettyCashPage({ apiBase }: Props) {
       {loading ? <LoadingSpinner message="Loading petty cash…" /> : (
         <>
           <div className="table-card">
-            <table className="saic-table">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Item / Description</th>
-                  <th>Amount (RWF)</th>
-                  <th>Date</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {records.length === 0 && (
-                  <tr><td colSpan={5}>
-                    <div className="empty-state"><DollarSign size={38} /><p>No petty cash entries yet.</p></div>
-                  </td></tr>
-                )}
-                {pcPaged.map((r, i) => (
-                  <tr key={r.id}>
-                    <td className="col-num">{(pcPage - 1) * PC_PAGE_SIZE + i + 1}</td>
-                    <td className="pcp-item-cell">{r.item}</td>
-                    <td className="pcp-cash-cell">RWF {fmtCash(Number(r.cash))}</td>
-                    <td style={{ fontSize: '0.82rem', color: '#6a8c6a', whiteSpace: 'nowrap' }}>{fmtDate(r.date)}</td>
-                    <td>
-                      <div className="table-actions">
-                        <button className="pcp-btn-edit" onClick={() => openEdit(r)} title="Edit"><Pencil size={13} /></button>
-                        <button className="pcp-btn-delete" onClick={() => setDeleteTarget(r)} title="Delete"><Trash2 size={13} /></button>
-                      </div>
-                    </td>
+            <div style={{ overflowX: 'auto' }}>
+              <table className="saic-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Item / Description</th>
+                    <th>Amount (RWF)</th>
+                    <th>Date</th>
+                    <th>Receipt</th>
+                    <th>Actions</th>
                   </tr>
-                ))}
-                {records.length > 0 && (
-                  <tr className="pcp-total-row">
-                    <td colSpan={2} style={{ fontWeight: 700, color: '#1e3a1e' }}>Total</td>
-                    <td className="pcp-cash-cell pcp-total-val">RWF {fmtCash(total)}</td>
-                    <td colSpan={2} />
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {records.length === 0 && (
+                    <tr><td colSpan={6}>
+                      <div className="empty-state"><DollarSign size={38} /><p>No petty cash entries yet.</p></div>
+                    </td></tr>
+                  )}
+                  {pcPaged.map((r, i) => (
+                    <tr key={r.id}>
+                      <td className="col-num">{(pcPage - 1) * PC_PAGE_SIZE + i + 1}</td>
+                      <td className="pcp-item-cell">{r.item}</td>
+                      <td className="pcp-cash-cell">RWF {fmtCash(Number(r.cash))}</td>
+                      <td style={{ fontSize: '0.82rem', color: '#6a8c6a', whiteSpace: 'nowrap' }}>{fmtDate(r.date)}</td>
+                      <td>
+                        {r.receipt_file
+                          ? <a
+                              href={`/uploads/${r.receipt_file}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="pcp-receipt-link"
+                              title={r.receipt_original ?? 'Receipt'}
+                            >
+                              <Paperclip size={12} />
+                              <span className="pcp-receipt-name">{r.receipt_original ?? 'Receipt'}</span>
+                              <ExternalLink size={11} />
+                            </a>
+                          : <span className="sm-dash">—</span>
+                        }
+                      </td>
+                      <td>
+                        <div className="table-actions">
+                          <button className="pcp-btn-edit" onClick={() => openEdit(r)} title="Edit"><Pencil size={13} /></button>
+                          <button className="pcp-btn-delete" onClick={() => setDeleteTarget(r)} title="Delete"><Trash2 size={13} /></button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                  {records.length > 0 && (
+                    <tr className="pcp-total-row">
+                      <td colSpan={2} style={{ fontWeight: 700, color: '#1e3a1e' }}>Total</td>
+                      <td className="pcp-cash-cell pcp-total-val">RWF {fmtCash(total)}</td>
+                      <td colSpan={3} />
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
 
           {pcTotalPages > 1 && (

@@ -270,6 +270,92 @@
 }
 .sm-confirm-delete-btn:disabled { opacity: 0.55; cursor: not-allowed; }
 
+/* ─── Section labels ─────────────────────── */
+.sm-section-label {
+  font-size: 0.72rem; font-weight: 800; color: #2D5016;
+  text-transform: uppercase; letter-spacing: 0.08em;
+  margin: 0 0 0.75rem; padding-bottom: 0.4rem;
+  border-bottom: 1.5px solid #e4ede4;
+}
+
+/* ─── Profile photo section ──────────────── */
+.sm-photo-section {
+  margin-bottom: 1.5rem;
+  padding: 1rem 1.25rem;
+  background: #f6fbf4;
+  border-radius: 12px;
+  border: 1.5px dashed #b5d5b5;
+}
+.sm-photo-row {
+  display: flex; align-items: center; gap: 1.25rem;
+  margin-top: 0.65rem;
+  flex-wrap: wrap;
+}
+.sm-photo-thumb {
+  width: 72px; height: 72px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, #2D5016, #4a8022);
+  overflow: hidden; display: flex; align-items: center; justify-content: center;
+  border: 3px solid #c8dfc8;
+}
+.sm-photo-img {
+  width: 100%; height: 100%; object-fit: cover;
+}
+.sm-photo-initials {
+  color: #fff; font-size: 1.1rem; font-weight: 800; letter-spacing: 0.05em;
+}
+.sm-photo-controls {
+  display: flex; align-items: center; gap: 0.65rem; flex-wrap: wrap;
+}
+.sm-photo-file-input { display: none; }
+.sm-photo-pick-btn {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  padding: 0.5rem 1rem; font-size: 0.8rem; font-weight: 600;
+  border-radius: 8px; border: 1.5px solid #9fca7f;
+  background: #fff; color: #2D5016; cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.sm-photo-pick-btn:hover { background: #f0f7f0; border-color: #2D5016; }
+.sm-photo-upload-btn {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  padding: 0.5rem 1rem; font-size: 0.8rem; font-weight: 700;
+  border-radius: 8px; border: none;
+  background: linear-gradient(135deg, #2D5016 0%, #4a8022 100%);
+  color: #fff; cursor: pointer;
+  box-shadow: 0 2px 8px rgba(45,80,22,0.25);
+  transition: opacity 0.15s, transform 0.12s;
+}
+.sm-photo-upload-btn:hover:not(:disabled) { opacity: 0.88; transform: translateY(-1px); }
+.sm-photo-upload-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+.sm-photo-name {
+  font-size: 0.75rem; color: #7a9a7a; max-width: 180px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* ─── Avatar image in table ──────────────── */
+.sm-avatar-img {
+  width: 100%; height: 100%; object-fit: cover; border-radius: 50%;
+}
+
+/* ─── Contract status badges ─────────────── */
+.sm-contract-badge {
+  display: inline-block; padding: 0.2rem 0.65rem;
+  border-radius: 100px; font-size: 0.72rem; font-weight: 700;
+  text-transform: capitalize; white-space: nowrap;
+}
+.sm-contract-active     { background: #dcfce7; color: #166534; }
+.sm-contract-probation  { background: #fef9c3; color: #854d0e; }
+.sm-contract-expired    { background: #fee2e2; color: #991b1b; }
+.sm-contract-terminated { background: #f3f4f6; color: #374151; }
+
+/* ─── Contract upload area ────────────────── */
+.sm-contract-upload { display: flex; flex-direction: column; gap: 0.3rem; }
+.sm-contract-link {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  font-size: 0.78rem; color: #2D5016; text-decoration: none; font-weight: 600;
+}
+.sm-contract-link:hover { text-decoration: underline; }
+.sm-field-hint { font-size: 0.72rem; color: #9ab09a; margin: 0.2rem 0 0; }
+
 /* ─── Shared ─────────────────────────────── */
 .col-num { width: 42px; color: #a0b8a0; font-size: 0.78rem; }
 @keyframes spin { to { transform: rotate(360deg); } }

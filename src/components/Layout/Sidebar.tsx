@@ -4,6 +4,7 @@ import {
   Scale, Handshake, Megaphone, BarChart3, Banknote, Calculator,
   GraduationCap, BookOpen, Leaf, Sprout, Beef, TrendingUp,
   Briefcase, Receipt, Car, Mail, DollarSign,
+  FolderOpen, Target, Users, Star, Award, BookMarked,
 } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router-dom';
 import type { MenuItem } from '../../types';
@@ -16,28 +17,40 @@ const ICON_MAP: Record<string, React.ComponentType<{ size?: number }>> = {
   Scale, Handshake, Megaphone, BarChart3, Banknote, Calculator,
   GraduationCap, BookOpen, Leaf, Sprout, Beef, TrendingUp,
   Briefcase, Receipt, Car, Mail, DollarSign,
+  FolderOpen, Target, Users, Star, Award, BookMarked,
 };
 
 const ADMIN_GROUPS = [
-  { label: 'Management',            items: ['overview', 'tasks', 'assigned-tasks', 'leave-management', 'petty-cash'] },
+  { label: 'Management',            items: ['overview', 'tasks', 'assigned-tasks', 'leave-management', 'petty-cash', 'staff-directory', 'documents'] },
   { label: 'Administration Office', items: ['admin-manager', 'it-officer', 'legal-officer', 'partnership-off', 'marketing-officer', 'mel-officer'] },
   { label: 'Finance',               items: ['finance-manager', 'accountant'] },
   { label: 'Training',              items: ['training-manager', 'training-officer'] },
   { label: 'Farm & Carbon Credits', items: ['farm-manager', 'crop-officer', 'livestock-officer'] },
   { label: 'Transaction Advisory',  items: ['transaction-mgr', 'business-dev'] },
   { label: 'Supporting Staff',      items: ['cashier', 'driver', 'messenger'] },
+  { label: 'Human Resources',       items: ['hr-manager-staff'] },
 ];
 
 interface SidebarProps {
   collapsed: boolean;
+  mobileOpen: boolean;
+  isMobile: boolean;
   menuItems: MenuItem[];
   basePath: string;
+  onNavClick: () => void;
 }
 
-export default function Sidebar({ collapsed, menuItems, basePath }: SidebarProps) {
+export default function Sidebar({ collapsed, mobileOpen, isMobile, menuItems, basePath, onNavClick }: SidebarProps) {
   const { user } = useAuth();
   const location = useLocation();
   const isAdmin = user?.role === 'Admin';
+
+  const sidebarClass = [
+    'saic-sidebar',
+    collapsed && !isMobile ? 'collapsed' : '',
+    isMobile ? 'mobile' : '',
+    isMobile && mobileOpen ? 'mobile-open' : '',
+  ].filter(Boolean).join(' ');
 
   const renderItem = (item: MenuItem) => {
     const IconComponent = ICON_MAP[item.icon] ?? LayoutDashboard;
@@ -45,10 +58,16 @@ export default function Sidebar({ collapsed, menuItems, basePath }: SidebarProps
     const isActive = location.pathname === to || location.pathname.startsWith(to + '/');
 
     return (
-      <NavLink key={item.id} to={to} className={`sb-item${isActive ? ' active' : ''}`} title={collapsed ? item.label : undefined}>
+      <NavLink
+        key={item.id}
+        to={to}
+        className={`sb-item${isActive ? ' active' : ''}`}
+        title={collapsed && !isMobile ? item.label : undefined}
+        onClick={onNavClick}
+      >
         <span className="sb-icon"><IconComponent size={17} /></span>
-        {!collapsed && <span className="sb-label">{item.label}</span>}
-        {!collapsed && isActive && <span className="sb-active-dot" />}
+        {(!collapsed || isMobile) && <span className="sb-label">{item.label}</span>}
+        {(!collapsed || isMobile) && isActive && <span className="sb-active-dot" />}
       </NavLink>
     );
   };
@@ -59,7 +78,7 @@ export default function Sidebar({ collapsed, menuItems, basePath }: SidebarProps
       if (groupItems.length === 0) return null;
       return (
         <div key={group.label} className="sb-group">
-          {!collapsed
+          {(!collapsed || isMobile)
             ? <span className="sb-group-label">{group.label}</span>
             : <div className="sb-group-divider" />
           }
@@ -69,14 +88,13 @@ export default function Sidebar({ collapsed, menuItems, basePath }: SidebarProps
     });
 
   return (
-    <aside className={`saic-sidebar${collapsed ? ' collapsed' : ''}`}>
-
+    <aside className={sidebarClass}>
       {/* Logo section */}
       <div className="sb-logo-area">
         <div className="sb-logo-card">
           <img src="/logo.png" alt="SAIC" className="sb-logo-img" />
         </div>
-        {!collapsed && (
+        {(!collapsed || isMobile) && (
           <div className="sb-logo-text">
             <span className="sb-logo-title">SAIC MIS</span>
             <span className="sb-logo-sub">Management Portal</span>
@@ -88,7 +106,7 @@ export default function Sidebar({ collapsed, menuItems, basePath }: SidebarProps
       <nav className="sb-nav">
         {isAdmin ? renderGrouped() : (
           <div className="sb-group">
-            {!collapsed && <span className="sb-group-label">Navigation</span>}
+            {(!collapsed || isMobile) && <span className="sb-group-label">Navigation</span>}
             {menuItems.map(renderItem)}
           </div>
         )}
@@ -96,7 +114,7 @@ export default function Sidebar({ collapsed, menuItems, basePath }: SidebarProps
 
       {/* Bottom footer */}
       <div className="sb-bottom">
-        {!collapsed && (
+        {(!collapsed || isMobile) && (
           <p className="sb-copyright">© {new Date().getFullYear()} SAIC</p>
         )}
       </div>

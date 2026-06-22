@@ -357,7 +357,7 @@
   border-radius: 12px;
   box-shadow: 0 1px 6px rgba(0,0,0,0.06);
   border: 1px solid #e8edf3;
-  overflow: hidden;
+  overflow: auto;
 }
 
 .saic-table {
@@ -472,3 +472,109 @@
 
 /* Table action buttons */
 .table-actions { display: flex; gap: 0.4rem; }
+
+/* Spinner animation */
+@keyframes spin { to { transform: rotate(360deg); } }
+.spin { animation: spin 0.75s linear infinite; }
+
+/* ─── My Documents page ──────────────────── */
+.myd-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+}
+.myd-card {
+  display: flex; align-items: flex-start; gap: 1rem;
+  background: #fff; border-radius: 14px;
+  border: 1.5px solid #e4ede4;
+  padding: 1.1rem 1.25rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+.myd-card:hover { box-shadow: 0 4px 16px rgba(45,80,22,0.1); border-color: #c8dfc8; }
+.myd-card-icon {
+  width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+  background: linear-gradient(135deg, #2D5016, #4a8022);
+  display: flex; align-items: center; justify-content: center; color: #fff;
+}
+.myd-card-body { flex: 1; min-width: 0; }
+.myd-card-title {
+  font-size: 0.9rem; font-weight: 700; color: #1e3a1e;
+  margin: 0 0 0.25rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.myd-card-desc {
+  font-size: 0.78rem; color: #7a9a7a; margin: 0 0 0.4rem;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.myd-card-meta {
+  display: flex; gap: 0.75rem; flex-wrap: wrap;
+  font-size: 0.72rem; color: #9ab09a;
+}
+.myd-open-btn {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  padding: 0.45rem 0.9rem; font-size: 0.78rem; font-weight: 700;
+  border-radius: 8px; border: 1.5px solid #2D5016;
+  background: #2D5016; color: #fff; text-decoration: none; white-space: nowrap;
+  flex-shrink: 0; transition: background 0.15s;
+}
+.myd-open-btn:hover { background: #3a6320; }
+
+/* ─── Global mobile responsiveness ──────── */
+@media (max-width: 640px) {
+  /* Page header: stack vertically */
+  .page-header    { flex-direction: column; align-items: flex-start; gap: 0.65rem; }
+  .page-header-actions { flex-wrap: wrap; width: 100%; }
+
+  /* Smaller page title */
+  .page-title     { font-size: 1.15rem; }
+
+  /* Table: always allow horizontal scroll */
+  .table-card     { overflow-x: auto; }
+  .saic-table th,
+  .saic-table td  { padding: 0.6rem 0.75rem; font-size: 0.78rem; white-space: nowrap; }
+
+  /* Forms: single column */
+  .form-row       { grid-template-columns: 1fr !important; }
+  .sm-field-grid  { grid-template-columns: 1fr !important; }
+  .sm-field-full  { grid-column: 1 !important; }
+  .adp-field-grid { grid-template-columns: 1fr !important; }
+  .adp-field-full { grid-column: 1 !important; }
+
+  /* Form footer: stack buttons */
+  .sm-form-footer { flex-wrap: wrap; }
+
+  /* Pagination: compact */
+  .atm-pagination { flex-wrap: wrap; gap: 0.4rem; }
+  .atm-pg-info    { font-size: 0.75rem; }
+
+  /* Modal overlays: full screen */
+  .leave-modal,
+  .sm-delete-modal,
+  .adp-modal      { max-width: 100%; border-radius: 16px; }
+
+  /* Buttons: allow wrapping */
+  .btn-primary, .btn-secondary, .btn-danger { font-size: 0.8rem; }
+
+  /* Summary cards: full width */
+  .pcp-summary-card { flex: 1 1 100%; }
+
+  /* Filters: wrap */
+  .apc-filters    { flex-direction: column; align-items: stretch; }
+  .apc-date-group { flex-wrap: wrap; }
+
+  /* My documents grid: single column */
+  .myd-grid       { grid-template-columns: 1fr; }
+  .myd-card       { flex-direction: column; }
+  .myd-open-btn   { width: 100%; justify-content: center; }
+
+  /* HR tabs: scroll horizontally */
+  .hrm-tabs       { overflow-x: auto; flex-wrap: nowrap; }
+}
+
+/* Very small phones */
+@media (max-width: 400px) {
+  .page-title     { font-size: 1rem; }
+  .dashboard-main { padding: 0.75rem !important; }
+  .saic-table th,
+  .saic-table td  { padding: 0.5rem 0.6rem; font-size: 0.72rem; }
+}

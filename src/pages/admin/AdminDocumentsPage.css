@@ -1,0 +1,144 @@
+/* ══════════════════════════════════════════════
+   SAIC MIS — Admin Document Management Page
+══════════════════════════════════════════════ */
+
+.adp-root { display: flex; flex-direction: column; gap: 1.25rem; }
+
+/* ─── Upload form panel ──────────────────── */
+.adp-form-panel {
+  border-radius: 18px; overflow: hidden;
+  box-shadow: 0 8px 40px rgba(45,80,22,0.16), 0 2px 8px rgba(0,0,0,0.06);
+  animation: sm-slide-in 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes sm-slide-in {
+  from { opacity: 0; transform: translateY(-14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.adp-form-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  background: linear-gradient(135deg, #1a3310 0%, #2D5016 55%, #3a6e1a 100%);
+}
+.adp-form-icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  background: rgba(255,255,255,0.15);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; flex-shrink: 0;
+}
+.adp-form-title   { font-size: 1rem; font-weight: 800; color: #fff; margin: 0 0 0.15rem; }
+.adp-form-subtitle { font-size: 0.75rem; color: rgba(255,255,255,0.7); margin: 0; }
+.adp-form-body    { background: #fff; padding: 1.5rem; }
+.adp-field-grid   { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.adp-field        { display: flex; flex-direction: column; gap: 0.35rem; }
+.adp-field-full   { grid-column: 1 / -1; }
+.adp-textarea     { resize: vertical; min-height: 60px; font-family: inherit; }
+@media (max-width: 640px) { .adp-field-grid { grid-template-columns: 1fr; } }
+
+/* ─── Document table cells ───────────────── */
+.adp-doc-cell {
+  display: flex; align-items: flex-start; gap: 0.75rem;
+  max-width: 280px;
+}
+.adp-doc-icon {
+  width: 36px; height: 36px; flex-shrink: 0; border-radius: 10px;
+  background: #f0f7f0; border: 1px solid #c8dfc8;
+  display: flex; align-items: center; justify-content: center;
+  color: #2D5016;
+}
+.adp-doc-title {
+  font-size: 0.85rem; font-weight: 700; color: #1e3a1e; margin: 0 0 0.15rem;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;
+}
+.adp-doc-desc {
+  font-size: 0.75rem; color: #7a9a7a; margin: 0 0 0.2rem;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;
+}
+.adp-file-link {
+  display: inline-flex; align-items: center; gap: 0.25rem;
+  font-size: 0.72rem; color: #2D5016; text-decoration: none;
+  padding: 0.15rem 0.5rem; border-radius: 5px; border: 1px solid #c8dfc8;
+  background: #f0f7f0; transition: background 0.15s;
+  max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.adp-file-link:hover { background: #e0f0e0; }
+
+.adp-assign-count {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  font-size: 0.78rem; color: #4a6c4a; font-weight: 600;
+  background: #f0f7f0; padding: 0.2rem 0.6rem; border-radius: 6px;
+  border: 1px solid #c8dfc8;
+}
+
+.adp-btn-assign {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  padding: 0.35rem 0.75rem; font-size: 0.75rem; font-weight: 600;
+  border-radius: 7px; border: 1px solid #bbdefb;
+  background: #e3f2fd; color: #1565c0; cursor: pointer;
+  transition: background 0.15s;
+}
+.adp-btn-assign:hover { background: #bbdefb; }
+
+/* ─── Assign modal ───────────────────────── */
+.adp-modal-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(15,10,10,0.5); backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center; padding: 1rem;
+}
+.adp-modal {
+  background: #fff; border-radius: 20px; width: 100%; max-width: 480px;
+  max-height: 85vh; display: flex; flex-direction: column;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.2);
+  animation: sm-slide-in 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.adp-modal-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  padding: 1.25rem 1.5rem; border-bottom: 1px solid #e4ede4; flex-shrink: 0;
+}
+.adp-modal-title { font-size: 1rem; font-weight: 800; color: #1e3a1e; margin: 0 0 0.2rem; }
+.adp-modal-sub   { font-size: 0.8rem; color: #7a9a7a; margin: 0; }
+.adp-modal-body  { padding: 1.25rem 1.5rem; overflow-y: auto; flex: 1; }
+.adp-modal-section-label {
+  font-size: 0.7rem; font-weight: 800; color: #2D5016;
+  text-transform: uppercase; letter-spacing: 0.07em;
+  margin: 0 0 0.6rem;
+}
+
+/* Currently assigned list */
+.adp-assigned-list  { display: flex; flex-direction: column; gap: 0.45rem; margin-bottom: 0.75rem; }
+.adp-assigned-item  {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.55rem 0.85rem; background: #f6fbf4;
+  border: 1px solid #c8dfc8; border-radius: 10px;
+}
+.adp-assigned-info  { display: flex; flex-direction: column; }
+.adp-assigned-name  { font-size: 0.82rem; font-weight: 700; color: #1e3a1e; }
+.adp-assigned-role  { font-size: 0.72rem; color: #7a9a7a; }
+.adp-remove-btn {
+  width: 28px; height: 28px; border-radius: 7px; border: 1px solid #fecaca;
+  background: #fff5f5; color: #c53030; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s; flex-shrink: 0;
+}
+.adp-remove-btn:hover:not(:disabled) { background: #fed7d7; }
+.adp-remove-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Add staff list */
+.adp-staff-list {
+  max-height: 220px; overflow-y: auto;
+  border: 1.5px solid #ddeadd; border-radius: 10px;
+  display: flex; flex-direction: column; gap: 0;
+}
+.adp-staff-item {
+  display: flex; align-items: center; gap: 0.65rem;
+  padding: 0.6rem 0.85rem; cursor: pointer;
+  transition: background 0.12s; border-bottom: 1px solid #f0f7f0;
+}
+.adp-staff-item:last-child { border-bottom: none; }
+.adp-staff-item:hover { background: #f6fbf4; }
+.adp-staff-item.selected { background: #e8f5e8; }
+.adp-staff-item input[type=checkbox] { accent-color: #2D5016; flex-shrink: 0; }
+.adp-staff-info  { display: flex; flex-direction: column; }
+.adp-staff-name  { font-size: 0.82rem; font-weight: 700; color: #1e3a1e; }
+.adp-staff-role  { font-size: 0.72rem; color: #7a9a7a; }
+
+.adp-empty-msg { font-size: 0.82rem; color: #9ab09a; text-align: center; padding: 0.75rem 0; }

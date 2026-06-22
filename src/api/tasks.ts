@@ -3,10 +3,12 @@ import type { EnhancedTask, TasksResponse, AnalyticsData } from '../types';
 
 export interface TaskFilters {
   status?: string;
+  workflow_stage?: string;
   priority?: string;
   search?: string;
   page?: number;
   limit?: number;
+  view?: 'received' | 'given';
 }
 
 export interface CreateTaskPayload {
@@ -15,6 +17,7 @@ export interface CreateTaskPayload {
   priority?: string;
   instructions?: string;
   deadline?: string;
+  deadline_time?: string;
   assign_to?: number[];
 }
 
@@ -74,6 +77,12 @@ export async function submitTask(taskId: number, files: File[], comment?: string
   });
 }
 
+// ─── Assign to team (manager → team member) ──────────────────────────────────
+
+export async function assignToTeam(taskId: number, userIds: number[]): Promise<void> {
+  await client.post(`/tasks/${taskId}/assign-to-team`, { user_ids: userIds });
+}
+
 // ─── Review ───────────────────────────────────────────────────────────────────
 
 export async function reviewTask(
@@ -86,6 +95,34 @@ export async function reviewTask(
     decision,
     feedback,
     assignment_id: assignmentId,
+  });
+}
+
+export async function managerReviewTask(
+  taskId: number,
+  decision: 'approved' | 'rejected',
+  feedback?: string,
+  assignmentId?: number
+): Promise<void> {
+  await client.post(`/tasks/${taskId}/manager-review`, {
+    decision,
+    feedback,
+    assignment_id: assignmentId,
+  });
+}
+
+// ─── Extend deadline (admin only) ─────────────────────────────────────────────
+
+export async function extendDeadline(
+  taskId: number,
+  deadline: string,
+  reason?: string,
+  deadlineTime?: string
+): Promise<void> {
+  await client.post(`/tasks/${taskId}/extend-deadline`, {
+    deadline,
+    deadline_time: deadlineTime || undefined,
+    reason,
   });
 }
 

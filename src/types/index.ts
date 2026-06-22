@@ -5,6 +5,35 @@ export type TaskStatus   = 'draft' | 'assigned' | 'in_progress' | 'submitted' | 
 export type AssignmentStatus = 'assigned' | 'in_progress' | 'submitted' | 'approved' | 'rejected';
 export type FileType = 'attachment' | 'submission' | 'feedback';
 
+export type WorkflowStage =
+  | 'draft'
+  | 'pending_manager'
+  | 'pending_team'
+  | 'pending_manager_review'
+  | 'pending_admin_review'
+  | 'completed'
+  | 'rejected_to_manager';
+
+export const WORKFLOW_LABELS: Record<WorkflowStage, string> = {
+  draft:                  'Draft',
+  pending_manager:        'Awaiting Manager',
+  pending_team:           'In Progress',
+  pending_manager_review: 'Manager Review',
+  pending_admin_review:   'Admin Review',
+  completed:              'Completed',
+  rejected_to_manager:    'Returned to Manager',
+};
+
+export const WORKFLOW_BADGE: Record<WorkflowStage, string> = {
+  draft:                  'badge-draft',
+  pending_manager:        'badge-assigned',
+  pending_team:           'badge-inprog',
+  pending_manager_review: 'badge-submitted',
+  pending_admin_review:   'badge-submitted',
+  completed:              'badge-approved',
+  rejected_to_manager:    'badge-rejected',
+};
+
 export interface TaskAssignment {
   assignment_id: number;
   users_id: number;
@@ -14,10 +43,27 @@ export interface TaskAssignment {
   feedback?: string;
   reviewed_at?: string;
   assigned_by?: number;
+  assigned_by_role?: 'admin' | 'manager';
+  manager_reviewed_at?: string;
+  manager_reviewed_by?: number;
+  manager_feedback?: string;
   first_name?: string;
   last_name?: string;
   email: string;
   reviewer_email?: string;
+}
+
+export interface DeadlineExtension {
+  id: number;
+  old_deadline?: string;
+  new_deadline: string;
+  old_time?: string;
+  new_time?: string;
+  extended_by_email?: string;
+  first_name?: string;
+  last_name?: string;
+  reason?: string;
+  created_at: string;
 }
 
 export interface TaskComment {
@@ -46,8 +92,11 @@ export interface EnhancedTask {
   description?: string;
   priority: TaskPriority;
   status: TaskStatus;
+  workflow_stage?: WorkflowStage;
+  scope?: 'standard' | 'team_only';
   instructions?: string;
   deadline?: string;
+  deadline_time?: string;
   created_by?: number;
   created_at?: string;
   updated_at?: string;
@@ -59,6 +108,7 @@ export interface EnhancedTask {
   assignees?: TaskAssignment[];
   comments?: TaskComment[];
   files?: TaskFile[];
+  deadline_extensions?: DeadlineExtension[];
 }
 
 export interface TasksResponse {
@@ -201,6 +251,8 @@ export interface PettyCash {
   first_name?: string;
   last_name?: string;
   grand_total?: number;
+  receipt_file?: string | null;
+  receipt_original?: string | null;
 }
 
 export type LeaveType = 'annual' | 'sick' | 'maternity' | 'paternity' | 'emergency' | 'unpaid' | 'other';
@@ -248,6 +300,24 @@ export interface LeaveTypeCount {
   count: number;
 }
 
+export interface TeamMember {
+  staff_id: number;
+  users_id: number;
+  email: string;
+  first_name: string;
+  last_name: string;
+  telephone?: string;
+  gender?: string;
+  province?: string;
+  district?: string;
+  role_name?: string;
+  total_tasks: number;
+  in_progress: number;
+  submitted: number;
+  approved: number;
+  rejected: number;
+}
+
 /** Unified staff record returned by GET /api/admin/staff */
 export interface StaffMember {
   staff_id: number;
@@ -267,6 +337,66 @@ export interface StaffMember {
   cell?: string;
   village?: string;
   manager_id?: number | null;
+  profile_photo?: string | null;
+  bank_name?: string | null;
+  bank_account_no?: string | null;
+  contract_start?: string | null;
+  contract_end?: string | null;
+  contract_status?: 'active' | 'expired' | 'terminated' | 'probation' | null;
+  contract_file?: string | null;
+  contract_original?: string | null;
+}
+
+export interface DirectoryStaff extends StaffMember {
+  total_points: number;
+  eval_count: number;
+  kpi_count: number;
+  task_total: number;
+  task_completed: number;
+}
+
+export interface StaffPerformanceEval {
+  id: number;
+  rating: string;
+  points: number;
+  notes?: string | null;
+  evaluated_at: string;
+  kpi_title?: string | null;
+  evaluator_name?: string | null;
+}
+
+export interface StaffPerformanceKpi {
+  staff_kpi_id: number;
+  title: string;
+  description?: string | null;
+  target?: string | null;
+  due_date?: string | null;
+  assigned_at: string;
+}
+
+export interface StaffPerformanceDetail {
+  staff: {
+    staff_id: number;
+    users_id: number;
+    first_name: string;
+    last_name: string;
+    email: string;
+    role_name?: string;
+    department_name?: string;
+    profile_photo?: string | null;
+  };
+  evaluations: StaffPerformanceEval[];
+  kpis: StaffPerformanceKpi[];
+  summary: {
+    total_points: number;
+    eval_count: number;
+    kpi_count: number;
+    task_total: number;
+    task_completed: number;
+    kpi_score: number;
+    task_score: number;
+    performance_pct: number;
+  };
 }
 
 export interface RoleInfo {

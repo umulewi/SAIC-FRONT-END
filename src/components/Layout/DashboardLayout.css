@@ -40,10 +40,23 @@ html, body, #root {
   background: #f2f6f2;
 }
 
+/* ─── Mobile overlay (closes sidebar) ─── */
+.sb-mobile-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 105;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(2px);
+}
+
 /* ─── Responsive ──────────────────────────── */
 @media (max-width: 768px) {
   .dashboard-body {
-    margin-left: 0;
+    margin-left: 0 !important;
     padding-top: 64px;
+  }
+
+  .dashboard-main {
+    padding: 1rem;
   }
 }

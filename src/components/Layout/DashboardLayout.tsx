@@ -13,9 +13,20 @@ interface DashboardLayoutProps {
 }
 
 export default function DashboardLayout({ menuItems, basePath }: DashboardLayoutProps) {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed,   setCollapsed]   = useState(false);
+  const [mobileOpen,  setMobileOpen]  = useState(false);
+  const [isMobile,    setIsMobile]    = useState(window.innerWidth < 768);
   const location = useLocation();
   const { user } = useAuth();
+
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
+
+  // Close mobile sidebar on route change
+  useEffect(() => { setMobileOpen(false); }, [location.pathname]);
 
   useEffect(() => {
     const role = user?.role ?? 'Portal';
@@ -28,10 +39,37 @@ export default function DashboardLayout({ menuItems, basePath }: DashboardLayout
       : `${role} — Dashboard`;
   }, [location.pathname, menuItems, basePath, user?.role]);
 
+  const handleToggle = () => {
+    if (isMobile) {
+      setMobileOpen(v => !v);
+    } else {
+      setCollapsed(c => !c);
+    }
+  };
+
+  const sidebarCollapsedForHeader = isMobile ? !mobileOpen : collapsed;
+
   return (
-    <div className={`dashboard-root${collapsed ? ' sb-collapsed' : ''}`}>
-      <Sidebar collapsed={collapsed} menuItems={menuItems} basePath={basePath} />
-      <Header onToggleSidebar={() => setCollapsed((c) => !c)} sidebarCollapsed={collapsed} />
+    <div className={`dashboard-root${collapsed && !isMobile ? ' sb-collapsed' : ''}`}>
+      {/* Mobile overlay */}
+      {isMobile && mobileOpen && (
+        <div className="sb-mobile-overlay" onClick={() => setMobileOpen(false)} />
+      )}
+
+      <Sidebar
+        collapsed={isMobile ? false : collapsed}
+        mobileOpen={mobileOpen}
+        isMobile={isMobile}
+        menuItems={menuItems}
+        basePath={basePath}
+        onNavClick={() => isMobile && setMobileOpen(false)}
+      />
+
+      <Header
+        onToggleSidebar={handleToggle}
+        sidebarCollapsed={sidebarCollapsedForHeader}
+      />
+
       <div className="dashboard-body">
         <main className="dashboard-main">
           <Outlet />

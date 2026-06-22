@@ -10,10 +10,12 @@ import ResetPasswordPage from './pages/Login/ResetPasswordPage';
 // Shared pages
 import ProfilePage from './pages/shared/ProfilePage';
 import MyTasksPage from './pages/shared/MyTasksPage';
+import MyTeamPage from './pages/shared/MyTeamPage';
 import TaskDetailPage from './pages/shared/TaskDetailPage';
 import LeaveRequestPage from './pages/shared/LeaveRequestPage';
 import LeaveStatusPage from './pages/shared/LeaveStatusPage';
 import RoleOverviewPage from './pages/shared/RoleOverviewPage';
+import MyDocumentsPage from './pages/shared/MyDocumentsPage';
 
 // Admin pages
 import AdminOverviewPage from './pages/admin/AdminOverviewPage';
@@ -21,10 +23,23 @@ import AdminTasksPage from './pages/admin/AdminTasksPage';
 import AdminTaskDetailPage from './pages/admin/AdminTaskDetailPage';
 import AdminLeaveManagementPage from './pages/admin/AdminLeaveManagementPage';
 import AdminPettyCashPage from './pages/admin/AdminPettyCashPage';
+import AdminDocumentsPage from './pages/admin/AdminDocumentsPage';
+import AdminStaffDirectoryPage from './pages/admin/AdminStaffDirectoryPage';
 import StaffManagementPage from './pages/admin/StaffManagementPage';
 
 // Role-specific pages
 import AccountantPettyCashPage from './pages/accountant/AccountantPettyCashPage';
+
+// HR Manager page
+import HRManagerPage from './pages/hr/HRManagerPage';
+
+const MANAGER_SLUGS = new Set([
+  'admin_manager',
+  'finance_manager',
+  'training_department_manager',
+  'farm_and_carbon_credit_department_manager',
+  'transaction_advisory_department_manager',
+]);
 
 // Non-admin roles: slug → { roleLabel, apiBase }
 const NON_ADMIN_ROLES: { slug: string; roleLabel: string; apiBase: string }[] = [
@@ -73,6 +88,8 @@ function AppRoutes() {
           <Route path="tasks/:id"         element={<AdminTaskDetailPage />} />
           <Route path="leave-management"  element={<AdminLeaveManagementPage />} />
           <Route path="petty-cash"        element={<AdminPettyCashPage />} />
+          <Route path="documents"         element={<AdminDocumentsPage />} />
+          <Route path="staff-directory"  element={<AdminStaffDirectoryPage role="admin" />} />
 
           {/* Staff management — keyed by role ID, matching sidebar paths */}
           {Object.entries(ADMIN_STAFF_ROLES).map(([roleId, label]) => (
@@ -82,6 +99,23 @@ function AppRoutes() {
               element={<StaffManagementPage roleId={Number(roleId)} label={label} />}
             />
           ))}
+        </Route>
+
+        {/* HR Manager routes */}
+        <Route
+          path="/dashboard/hr_manager"
+          element={<RoleRoute allowedRoles={['HR Manager']} basePath="/dashboard/hr_manager" />}
+        >
+          <Route index element={<Navigate to="overview" replace />} />
+          <Route path="overview"    element={<RoleOverviewPage apiBase="/hr_manager" roleName="HR Manager" />} />
+          <Route path="hr-manager"      element={<HRManagerPage />} />
+          <Route path="staff-directory" element={<AdminStaffDirectoryPage role="hr" />} />
+          <Route path="profile"         element={<ProfilePage apiBase="/hr_manager" />} />
+          <Route path="tasks"       element={<MyTasksPage apiBase="/hr_manager" />} />
+          <Route path="tasks/:id"   element={<TaskDetailPage apiBase="/hr_manager" />} />
+          <Route path="leave-request" element={<LeaveRequestPage apiBase="/hr_manager" />} />
+          <Route path="leave-status"  element={<LeaveStatusPage apiBase="/hr_manager" />} />
+          <Route path="my-documents"  element={<MyDocumentsPage />} />
         </Route>
 
         {/* Non-admin role routes */}
@@ -98,6 +132,10 @@ function AppRoutes() {
             <Route path="tasks/:id"     element={<TaskDetailPage apiBase={apiBase} />} />
             <Route path="leave-request" element={<LeaveRequestPage apiBase={apiBase} />} />
             <Route path="leave-status"  element={<LeaveStatusPage apiBase={apiBase} />} />
+            <Route path="my-documents"  element={<MyDocumentsPage />} />
+            {MANAGER_SLUGS.has(slug) && (
+              <Route path="my-team" element={<MyTeamPage apiBase={apiBase} />} />
+            )}
             {slug === 'accountant' && (
               <Route path="petty-cash" element={<AccountantPettyCashPage apiBase={apiBase} />} />
             )}

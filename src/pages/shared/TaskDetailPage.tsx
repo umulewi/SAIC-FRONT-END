@@ -3,9 +3,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Calendar, Clock, MessageSquare, Paperclip, Send,
   Loader2, CheckCircle, AlertCircle, Upload, Download, FileText,
-  Image, FileSpreadsheet, Archive, PlayCircle,
+  Image, FileSpreadsheet, Archive, PlayCircle, ThumbsUp, ThumbsDown,
 } from 'lucide-react';
-import { getTask, updateTaskStatus, submitTask, addComment, uploadTaskFiles } from '../../api/tasks';
+import { getTask, updateTaskStatus, submitTask, addComment, managerReviewTask } from '../../api/tasks';
 import type { EnhancedTask, TaskPriority, TaskStatus, TaskAssignment } from '../../types';
 import { useAuth } from '../../context/AuthContext';
 import LoadingSpinner from '../../components/Common/LoadingSpinner';
@@ -21,6 +21,11 @@ const STATUS_COLORS: Record<TaskStatus, string> = {
   draft: 'badge-draft', assigned: 'badge-assigned', in_progress: 'badge-inprog',
   submitted: 'badge-submitted', approved: 'badge-approved', rejected: 'badge-rejected',
 };
+
+const NON_ADMIN_MGR_ROLES = [
+  'Admin Manager', 'Finance Manager', 'Training Department Manager',
+  'Farm and Carbon Credit Department Manager', 'Transaction Advisory Department Manager',
+];
 
 function fmtDate(d?: string, withTime = false) {
   if (!d) return '—';
@@ -52,6 +57,8 @@ export default function TaskDetailPage({ apiBase }: TaskDetailPageProps) {
   const taskId = parseInt(id ?? '0', 10);
   const roleSlug = apiBase.replace(/^\//, '');
 
+  const isManager = NON_ADMIN_MGR_ROLES.includes(user?.role ?? '');
+
   const [task,    setTask]    = useState<EnhancedTask | null>(null);
   const [loading, setLoading] = useState(true);
   const [error,   setError]   = useState('');
@@ -74,6 +81,14 @@ export default function TaskDetailPage({ apiBase }: TaskDetailPageProps) {
 
   // Status: start progress
   const [starting, setStarting] = useState(false);
+
+  // Manager review (team_only tasks)
+  const [reviewOpen,     setReviewOpen]     = useState(false);
+  const [reviewDecision, setReviewDecision] = useState<'approved' | 'rejected' | ''>('');
+  const [reviewFeedback, setReviewFeedback] = useState('');
+  const [reviewing,      setReviewing]      = useState(false);
+  const [reviewError,    setReviewError]    = useState('');
+  const [reviewOk,       setReviewOk]       = useState(false);
 
   const reload = async () => {
     setLoading(true); setError('');
@@ -120,6 +135,20 @@ export default function TaskDetailPage({ apiBase }: TaskDetailPageProps) {
     } finally { setSubmitting(false); }
   };
 
+  const handleManagerReview = async () => {
+    if (!reviewDecision) return;
+    setReviewing(true); setReviewError('');
+    try {
+      const teamAsgn = (task?.assignees ?? []).find(a => a.assigned_by_role === 'manager');
+      await managerReviewTask(taskId, reviewDecision, reviewFeedback || undefined, teamAsgn?.assignment_id);
+      setReviewOpen(false); setReviewDecision(''); setReviewFeedback(''); setReviewOk(true);
+      reload();
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Review failed.';
+      setReviewError(msg);
+    } finally { setReviewing(false); }
+  };
+
   if (loading) return <LoadingSpinner message="Loading task…" />;
   if (error || !task) return (
     <div className="page-error">
@@ -127,10 +156,22 @@ export default function TaskDetailPage({ apiBase }: TaskDetailPageProps) {
     </div>
   );
 
-  const canStart  = myAssignment?.assignment_status === 'assigned';
-  const canSubmit = myAssignment && ['assigned','in_progress','rejected'].includes(myAssignment.assignment_status);
-  const isApproved = myAssignment?.assignment_status === 'approved';
+  const isRejectedByAdmin = task.workflow_stage === 'rejected_to_manager';
+  const isTeamOnly = task.scope === 'team_only';
+
+  const canStart   = myAssignment?.assignment_status === 'assigned' && !isRejectedByAdmin;
+  // Allow resubmit when admin rejected, even if assignment was previously approved
+  const canSubmit  = myAssignment && (
+    ['assigned', 'in_progress', 'rejected'].includes(myAssignment.assignment_status) ||
+    isRejectedByAdmin
+  );
+  const isApproved = myAssignment?.assignment_status === 'approved' && !isRejectedByAdmin;
   const isRejected = myAssignment?.assignment_status === 'rejected';
+
+  // Manager can review their own team_only tasks when pending_manager_review
+  const canManagerReview = isManager && isTeamOnly &&
+    task.workflow_stage === 'pending_manager_review' &&
+    task.created_by === user?.id;
 
   return (
     <div className="tdp-root">
@@ -148,6 +189,11 @@ export default function TaskDetailPage({ apiBase }: TaskDetailPageProps) {
             <div className="atd-meta-row" style={{ marginTop: '0.5rem' }}>
               <span className="atd-meta-item"><Calendar size={12} /> Due: {fmtDate(task.deadline)}</span>
               <span className="atd-meta-item"><Clock size={12} /> Created: {fmtDate(task.created_at)}</span>
+              {isTeamOnly && (
+                <span className="atd-meta-item" style={{ color: '#7b5ea7', fontWeight: 600, background: '#f3eeff', padding: '1px 8px', borderRadius: 10, border: '1px solid #d4bbff' }}>
+                  Team Task
+                </span>
+              )}
             </div>
           </div>
           <div className="tdp-badges">
@@ -156,8 +202,18 @@ export default function TaskDetailPage({ apiBase }: TaskDetailPageProps) {
           </div>
         </div>
 
-        {/* Feedback banner (if rejected) */}
-        {isRejected && myAssignment?.feedback && (
+        {/* Admin rejection banner */}
+        {isRejectedByAdmin && (
+          <div className="tdp-feedback-banner" style={{ borderColor: '#c0392b', background: '#fff5f5' }}>
+            <AlertCircle size={15} />
+            <div>
+              <strong>Returned for Revision:</strong> Admin rejected this submission. You may upload a revised document below.
+            </div>
+          </div>
+        )}
+
+        {/* Feedback banner (if rejected by manager) */}
+        {isRejected && !isRejectedByAdmin && myAssignment?.feedback && (
           <div className="tdp-feedback-banner">
             <AlertCircle size={15} />
             <div>
@@ -174,11 +230,19 @@ export default function TaskDetailPage({ apiBase }: TaskDetailPageProps) {
           </div>
         )}
 
+        {/* Review success */}
+        {reviewOk && (
+          <div className="tdp-approved-banner">
+            <CheckCircle size={15} />
+            Review submitted successfully.
+          </div>
+        )}
+
         {/* Submit success */}
         {submitOk && (
           <div className="tdp-success-banner">
             <CheckCircle size={15} />
-            Task submitted for review. You will be notified once reviewed.
+            {isRejectedByAdmin ? 'Resubmission sent for review.' : 'Task submitted for review. You will be notified once reviewed.'}
           </div>
         )}
 
@@ -192,7 +256,13 @@ export default function TaskDetailPage({ apiBase }: TaskDetailPageProps) {
           )}
           {canSubmit && !isApproved && (
             <button className="btn-submit" onClick={() => setSubmitOpen(true)}>
-              <Upload size={14} /> Submit for Review
+              <Upload size={14} /> {isRejectedByAdmin ? 'Resubmit Document' : 'Submit for Review'}
+            </button>
+          )}
+          {canManagerReview && (
+            <button className="btn-primary" onClick={() => setReviewOpen(true)}
+              style={{ background: 'linear-gradient(135deg, #7b5ea7 0%, #5c3d82 100%)' }}>
+              <ThumbsUp size={14} /> Review Submission
             </button>
           )}
         </div>
@@ -218,10 +288,63 @@ export default function TaskDetailPage({ apiBase }: TaskDetailPageProps) {
             </div>
           )}
 
+          {/* Manager review form (team_only tasks) */}
+          {reviewOpen && (
+            <div className="tdp-submit-card" style={{ borderColor: '#7b5ea7' }}>
+              <h3 className="tdp-submit-title" style={{ color: '#5c3d82' }}>
+                <ThumbsUp size={16} /> Review Team Submission
+              </h3>
+              {reviewError && <div className="alert alert-error"><AlertCircle size={14} />{reviewError}</div>}
+              <div className="form-group">
+                <label>Decision</label>
+                <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.25rem' }}>
+                  <button type="button"
+                    onClick={() => setReviewDecision('approved')}
+                    className={reviewDecision === 'approved' ? 'btn-submit' : 'btn-secondary'}
+                    style={{ flex: 1 }}>
+                    <ThumbsUp size={14} /> Approve &amp; Complete
+                  </button>
+                  <button type="button"
+                    onClick={() => setReviewDecision('rejected')}
+                    style={{ flex: 1, ...(reviewDecision === 'rejected' ? { background: '#c0392b', color: '#fff', border: 'none' } : {}) }}
+                    className={reviewDecision === 'rejected' ? '' : 'btn-secondary'}>
+                    <ThumbsDown size={14} /> Request Revision
+                  </button>
+                </div>
+              </div>
+              <div className="form-group">
+                <label>Feedback {reviewDecision === 'rejected' ? '(required)' : '(optional)'}</label>
+                <textarea rows={3} value={reviewFeedback} onChange={e => setReviewFeedback(e.target.value)}
+                  placeholder={reviewDecision === 'rejected' ? 'Explain what needs to be revised…' : 'Add any notes for the team member…'}
+                  disabled={reviewing}
+                />
+              </div>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button
+                  className="btn-submit"
+                  onClick={handleManagerReview}
+                  disabled={reviewing || !reviewDecision || (reviewDecision === 'rejected' && !reviewFeedback.trim())}
+                  style={reviewDecision === 'rejected' ? { background: '#c0392b' } : {}}
+                >
+                  {reviewing ? <Loader2 size={14} className="spin" /> : <CheckCircle size={14} />}
+                  {reviewing ? 'Submitting…' : 'Confirm Review'}
+                </button>
+                <button className="btn-secondary" onClick={() => setReviewOpen(false)} disabled={reviewing}>
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Submit form */}
           {submitOpen && (
             <div className="tdp-submit-card">
-              <h3 className="tdp-submit-title"><Upload size={16} /> Submit Your Work</h3>
+              <h3 className="tdp-submit-title"><Upload size={16} /> {isRejectedByAdmin ? 'Resubmit Your Work' : 'Submit Your Work'}</h3>
+              {isRejectedByAdmin && (
+                <p style={{ fontSize: '0.82rem', color: '#9b2226', margin: '0 0 1rem', background: '#fff5f5', padding: '0.5rem 0.75rem', borderRadius: 6, border: '1px solid #f8d7da' }}>
+                  Upload the revised document to address admin feedback.
+                </p>
+              )}
               {submitError && <div className="alert alert-error"><AlertCircle size={14} />{submitError}</div>}
               <div className="form-group">
                 <label>Submission Note (optional)</label>

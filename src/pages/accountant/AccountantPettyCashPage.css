@@ -84,6 +84,33 @@
 @keyframes spin { to { transform: rotate(360deg); } }
 .spin { animation: spin 0.75s linear infinite; }
 
+/* ─── Receipt file input & link ─────────── */
+.pcp-file-input {
+  display: block; width: 100%; box-sizing: border-box;
+  padding: 0.55rem 0.85rem;
+  border: 1.5px dashed #b5d5b5; border-radius: 10px;
+  font-size: 0.85rem; color: #4a6a4a; background: #fafff8;
+  cursor: pointer;
+}
+.pcp-file-input:focus { outline: none; border-color: #2D5016; }
+.pcp-file-name {
+  font-size: 0.75rem; color: #2D5016; margin: 0.3rem 0 0;
+  display: flex; align-items: center; gap: 0.3rem;
+}
+.pcp-receipt-link {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  font-size: 0.78rem; color: #2D5016; text-decoration: none;
+  padding: 0.25rem 0.6rem; border-radius: 6px;
+  border: 1px solid #c8dfc8; background: #f0f7f0;
+  transition: background 0.15s, border-color 0.15s;
+  max-width: 160px;
+}
+.pcp-receipt-link:hover { background: #e0f0e0; border-color: #9fca7f; }
+.pcp-receipt-name {
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  max-width: 100px; display: inline-block;
+}
+
 /* ─── Shared helpers used here ───────────── */
 .col-num { width: 42px; color: #a0b8a0; font-size: 0.78rem; }
 .atm-close-btn {

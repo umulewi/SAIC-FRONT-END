@@ -57,3 +57,80 @@
   flex-shrink: 0; white-space: nowrap;
 }
 .mt-view-btn:hover { background: #3d6b20; }
+
+/* ─── Modal (shared styles for assign/review overlays) ── */
+.atd-modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.45); backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center; z-index: 600; padding: 1rem;
+}
+.atd-modal {
+  background: #fff; border-radius: 16px; padding: 1.75rem 2rem; width: 100%;
+  max-width: 480px; box-shadow: 0 24px 60px rgba(0,0,0,0.2);
+  display: flex; flex-direction: column; gap: 1rem;
+}
+.atd-modal-title {
+  display: flex; align-items: center; gap: 0.5rem;
+  font-size: 1.05rem; font-weight: 700; color: #1e3a1e; margin: 0;
+}
+.atd-modal-sub { font-size: 0.85rem; color: #6a8c6a; margin: 0; }
+.atd-modal-actions { display: flex; gap: 0.5rem; }
+.icon-green { color: #2D5016; }
+.icon-red   { color: #c0392b; }
+.btn-approve {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  background: #2D5016; color: #fff; border: none; border-radius: 7px;
+  padding: 0.4rem 0.85rem; font-size: 0.8rem; font-weight: 600;
+  cursor: pointer; font-family: inherit; transition: background 0.15s;
+}
+.btn-approve:hover:not(:disabled) { background: #3d6b20; }
+.btn-approve:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-reject {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  background: #c0392b; color: #fff; border: none; border-radius: 7px;
+  padding: 0.4rem 0.85rem; font-size: 0.8rem; font-weight: 600;
+  cursor: pointer; font-family: inherit; transition: background 0.15s;
+}
+.btn-reject:hover:not(:disabled) { background: #a93226; }
+.btn-reject:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ─── Manager tabs ──────────────────────── */
+.mt-tabs {
+  display: flex; gap: 0.25rem; margin-bottom: 1rem;
+  background: #fff; border: 1px solid #e4ede4; border-radius: 12px;
+  padding: 0.35rem;
+}
+.mt-tab {
+  flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;
+  padding: 0.55rem 1rem; border-radius: 9px; border: none; cursor: pointer;
+  font-size: 0.83rem; font-weight: 600; color: #6a8c6a; background: transparent;
+  font-family: inherit; transition: all 0.15s; position: relative;
+}
+.mt-tab:hover:not(.active) { background: #f4faf4; color: #2D5016; }
+.mt-tab.active { background: #2D5016; color: #fff; }
+.mt-tab-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 18px; height: 18px; padding: 0 4px;
+  background: #e65100; color: #fff; border-radius: 100px;
+  font-size: 0.68rem; font-weight: 700;
+}
+.mt-tab.active .mt-tab-badge { background: rgba(255,255,255,0.25); }
+
+/* ─── Task card action buttons ──────────── */
+.mt-task-actions {
+  display: flex; flex-direction: column; gap: 0.4rem;
+  align-items: flex-end; flex-shrink: 0;
+}
+.mt-action-btn {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  padding: 0.4rem 0.75rem; border-radius: 8px; border: none; cursor: pointer;
+  font-size: 0.78rem; font-weight: 600; font-family: inherit; transition: all 0.15s;
+  white-space: nowrap;
+}
+.mt-action-assign {
+  background: #e3f2fd; color: #1565c0; border: 1.5px solid #bbdefb;
+}
+.mt-action-assign:hover { background: #bbdefb; }
+.mt-action-review {
+  background: #e8f5e9; color: #2e7d32; border: 1.5px solid #c8e6c9;
+}
+.mt-action-review:hover { background: #c8e6c9; }

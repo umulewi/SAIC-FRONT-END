@@ -3,11 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import {
   Plus, Search, Filter, ChevronLeft, ChevronRight, Eye,
   Trash2, X, CheckCircle, Loader2, Users, Calendar, AlertCircle,
-  ClipboardList, UserPlus, FileText, AlignLeft, BookOpen,
+  ClipboardList, UserPlus, FileText, AlignLeft, BookOpen, Clock,
 } from 'lucide-react';
 import { getTasks, createTask, deleteTask } from '../../api/tasks';
 import { adminGetStaff } from '../../api/role';
-import type { EnhancedTask, TaskPriority, TaskStatus, StaffMember } from '../../types';
+import type { EnhancedTask, TaskPriority, StaffMember, WorkflowStage } from '../../types';
+import { WORKFLOW_LABELS, WORKFLOW_BADGE } from '../../types';
 import PageHeader from '../../components/Common/PageHeader';
 import LoadingSpinner from '../../components/Common/LoadingSpinner';
 import '../shared/SharedPages.css';
@@ -16,52 +17,49 @@ import './AdminTasksPage.css';
 const PRIORITY_COLORS: Record<TaskPriority, string> = {
   low: 'badge-low', medium: 'badge-medium', high: 'badge-high', urgent: 'badge-urgent',
 };
-const STATUS_COLORS: Record<TaskStatus, string> = {
-  draft: 'badge-draft', assigned: 'badge-assigned', in_progress: 'badge-inprog',
-  submitted: 'badge-submitted', approved: 'badge-approved', rejected: 'badge-rejected',
-};
 
 function fmtDate(d?: string) {
   if (!d) return '—';
   return new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 }
-function isOverdue(deadline?: string, status?: string) {
-  if (!deadline || status === 'approved' || status === 'rejected') return false;
+function isOverdue(deadline?: string, stage?: WorkflowStage) {
+  if (!deadline || stage === 'completed') return false;
   return new Date(deadline) < new Date();
 }
 
 export default function AdminTasksPage() {
   const nav = useNavigate();
 
-  // List state
   const [tasks,   setTasks]   = useState<EnhancedTask[]>([]);
   const [total,   setTotal]   = useState(0);
   const [page,    setPage]    = useState(1);
   const [loading, setLoading] = useState(true);
   const [error,   setError]   = useState('');
 
-  // Filters
-  const [search,   setSearch]   = useState('');
-  const [filterStatus,   setFilterStatus]   = useState('');
+  const [search,         setSearch]         = useState('');
+  const [filterStage,    setFilterStage]    = useState('');
   const [filterPriority, setFilterPriority] = useState('');
   const LIMIT = 10;
 
-  // Create form
-  const [showCreate, setShowCreate] = useState(false);
-  const [title,         setTitle]        = useState('');
-  const [description,   setDescription]  = useState('');
-  const [priority,      setPriority]     = useState<TaskPriority>('medium');
-  const [instructions,  setInstructions] = useState('');
-  const [deadline,      setDeadline]     = useState('');
-  const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
-  const [staff,         setStaff]         = useState<StaffMember[]>([]);
-  const [submitting,    setSubmitting]    = useState(false);
-  const [createError,   setCreateError]  = useState('');
+  const [showCreate,   setShowCreate]   = useState(false);
+  const [title,        setTitle]        = useState('');
+  const [description,  setDescription]  = useState('');
+  const [priority,     setPriority]     = useState<TaskPriority>('medium');
+  const [instructions, setInstructions] = useState('');
+  const [deadline,     setDeadline]     = useState('');
+  const [deadlineTime, setDeadlineTime] = useState('');
+  const [selectedUsers,setSelectedUsers]= useState<number[]>([]);
+  const [staff,        setStaff]        = useState<StaffMember[]>([]);
+  const [submitting,   setSubmitting]   = useState(false);
+  const [createError,  setCreateError]  = useState('');
+
+  // Only show Department Managers in the assignee list (admin tasks go to managers first)
+  const managerStaff = staff.filter(s => (s.role_name ?? '').endsWith('Manager'));
 
   const load = async (p = page) => {
     setLoading(true); setError('');
     try {
-      const res = await getTasks({ status: filterStatus, priority: filterPriority, search, page: p, limit: LIMIT });
+      const res = await getTasks({ workflow_stage: filterStage, priority: filterPriority, search, page: p, limit: LIMIT });
       setTasks(res.tasks); setTotal(res.total);
     } catch {
       setError('Failed to load tasks.');
@@ -70,7 +68,7 @@ export default function AdminTasksPage() {
     }
   };
 
-  useEffect(() => { load(1); setPage(1); }, [filterStatus, filterPriority]);
+  useEffect(() => { load(1); setPage(1); }, [filterStage, filterPriority]);
   useEffect(() => { load(page); }, [page]);
 
   const openCreate = async () => {
@@ -82,7 +80,7 @@ export default function AdminTasksPage() {
 
   const resetCreate = () => {
     setShowCreate(false); setTitle(''); setDescription(''); setPriority('medium');
-    setInstructions(''); setDeadline(''); setSelectedUsers([]); setCreateError('');
+    setInstructions(''); setDeadline(''); setDeadlineTime(''); setSelectedUsers([]); setCreateError('');
   };
 
   const toggleUser = (uid: number) =>
@@ -93,11 +91,16 @@ export default function AdminTasksPage() {
     if (!title.trim()) { setCreateError('Title is required.'); return; }
     setSubmitting(true); setCreateError('');
     try {
-      await createTask({ title: title.trim(), description: description.trim() || undefined,
-        priority, instructions: instructions.trim() || undefined,
-        deadline: deadline || undefined, assign_to: selectedUsers });
-      resetCreate();
-      load(1); setPage(1);
+      await createTask({
+        title: title.trim(),
+        description: description.trim() || undefined,
+        priority,
+        instructions: instructions.trim() || undefined,
+        deadline: deadline || undefined,
+        deadline_time: deadlineTime || undefined,
+        assign_to: selectedUsers,
+      });
+      resetCreate(); load(1); setPage(1);
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Failed to create task.';
       setCreateError(msg);
@@ -106,8 +109,8 @@ export default function AdminTasksPage() {
     }
   };
 
-  const handleDelete = async (id: number, title: string) => {
-    if (!confirm(`Delete task "${title}"? This cannot be undone.`)) return;
+  const handleDelete = async (id: number, t: string) => {
+    if (!confirm(`Delete task "${t}"? This cannot be undone.`)) return;
     try { await deleteTask(id); load(page); }
     catch { setError('Failed to delete task.'); }
   };
@@ -119,24 +122,16 @@ export default function AdminTasksPage() {
       <PageHeader
         title="Task Management"
         subtitle={`${total} total task${total !== 1 ? 's' : ''}`}
-        actions={
-          <button className="btn-primary" onClick={openCreate}>
-            <Plus size={15} /> New Task
-          </button>
-        }
+        actions={<button className="btn-primary" onClick={openCreate}><Plus size={15} /> New Task</button>}
       />
 
       {/* ── Filters ── */}
       <div className="atm-filters">
         <div className="atm-search-box">
           <Search size={15} className="atm-search-icon" />
-          <input
-            className="atm-search-input"
-            placeholder="Search tasks…"
-            value={search}
+          <input className="atm-search-input" placeholder="Search tasks…" value={search}
             onChange={e => setSearch(e.target.value)}
-            onKeyDown={e => { if (e.key === 'Enter') { load(1); setPage(1); } }}
-          />
+            onKeyDown={e => { if (e.key === 'Enter') { load(1); setPage(1); } }} />
           {search && (
             <button className="atm-search-clear" onClick={() => { setSearch(''); load(1); setPage(1); }}>
               <X size={13} />
@@ -145,14 +140,15 @@ export default function AdminTasksPage() {
         </div>
         <div className="atm-filter-group">
           <Filter size={14} style={{ color: '#6a8c6a' }} />
-          <select className="atm-select" value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
-            <option value="">All Statuses</option>
+          <select className="atm-select" value={filterStage} onChange={e => setFilterStage(e.target.value)}>
+            <option value="">All Stages</option>
             <option value="draft">Draft</option>
-            <option value="assigned">Assigned</option>
-            <option value="in_progress">In Progress</option>
-            <option value="submitted">Submitted</option>
-            <option value="approved">Approved</option>
-            <option value="rejected">Rejected</option>
+            <option value="pending_manager">Awaiting Manager</option>
+            <option value="pending_team">In Progress</option>
+            <option value="pending_manager_review">Manager Review</option>
+            <option value="pending_admin_review">Admin Review</option>
+            <option value="completed">Completed</option>
+            <option value="rejected_to_manager">Returned to Manager</option>
           </select>
           <select className="atm-select" value={filterPriority} onChange={e => setFilterPriority(e.target.value)}>
             <option value="">All Priorities</option>
@@ -167,25 +163,24 @@ export default function AdminTasksPage() {
       {/* ── Create Task Panel ── */}
       {showCreate && (
         <div className="atm-panel">
-          {/* Green gradient header */}
           <div className="atm-panel-header">
             <div className="atm-panel-header-left">
               <div className="atm-panel-icon"><ClipboardList size={19} /></div>
               <div>
                 <h3 className="atm-panel-title">Create New Task</h3>
-                <p className="atm-panel-sub">Fill in the details and assign to staff members</p>
+                <p className="atm-panel-sub">Assign to a Department Manager — they will delegate to their team</p>
               </div>
             </div>
             <button className="atm-panel-close" onClick={resetCreate} type="button"><X size={18} /></button>
           </div>
-
           <div className="atm-panel-body">
-            {createError && <div className="alert alert-error" style={{ marginBottom: '1rem' }}><AlertCircle size={14} />{createError}</div>}
-
+            {createError && (
+              <div className="alert alert-error" style={{ marginBottom: '1rem' }}>
+                <AlertCircle size={14} />{createError}
+              </div>
+            )}
             <form onSubmit={handleCreate}>
               <div className="atm-field-grid">
-
-                {/* Title */}
                 <div className="atm-field atm-field-full">
                   <label className="atm-flabel"><FileText size={12} /> Task Title *</label>
                   <input className="atm-finput" value={title}
@@ -193,7 +188,6 @@ export default function AdminTasksPage() {
                     placeholder="e.g. Prepare quarterly report" disabled={submitting} />
                 </div>
 
-                {/* Priority pills */}
                 <div className="atm-field atm-field-full">
                   <label className="atm-flabel">Priority Level</label>
                   <div className="atm-priority-pills">
@@ -207,14 +201,17 @@ export default function AdminTasksPage() {
                   </div>
                 </div>
 
-                {/* Due date */}
                 <div className="atm-field">
                   <label className="atm-flabel"><Calendar size={12} /> Due Date</label>
                   <input type="date" className="atm-finput" value={deadline}
                     onChange={e => setDeadline(e.target.value)} disabled={submitting} />
                 </div>
+                <div className="atm-field">
+                  <label className="atm-flabel"><Clock size={12} /> Due Time <span className="atm-flabel-opt">(optional)</span></label>
+                  <input type="time" className="atm-finput" value={deadlineTime}
+                    onChange={e => setDeadlineTime(e.target.value)} disabled={submitting} />
+                </div>
 
-                {/* Description */}
                 <div className="atm-field atm-field-full">
                   <label className="atm-flabel"><AlignLeft size={12} /> Description</label>
                   <textarea className="atm-finput atm-ftextarea" rows={2} value={description}
@@ -222,7 +219,6 @@ export default function AdminTasksPage() {
                     placeholder="Brief overview of what this task is about…" disabled={submitting} />
                 </div>
 
-                {/* Instructions */}
                 <div className="atm-field atm-field-full">
                   <label className="atm-flabel"><BookOpen size={12} /> Instructions / Details</label>
                   <textarea className="atm-finput atm-ftextarea" rows={3} value={instructions}
@@ -230,13 +226,13 @@ export default function AdminTasksPage() {
                     placeholder="Step-by-step instructions for the assignee…" disabled={submitting} />
                 </div>
 
-                {/* Staff assignment */}
                 <div className="atm-field atm-field-full">
-                  <label className="atm-flabel"><UserPlus size={12} /> Assign To
-                    <span className="atm-flabel-opt">(optional)</span>
+                  <label className="atm-flabel">
+                    <UserPlus size={12} /> Assign to Manager
+                    <span className="atm-flabel-opt"> (manager will then assign to their team)</span>
                   </label>
                   <div className="atm-staff-grid">
-                    {staff.map(s => {
+                    {managerStaff.map(s => {
                       const uid = s.users_id;
                       const sel = selectedUsers.includes(uid);
                       return (
@@ -250,17 +246,17 @@ export default function AdminTasksPage() {
                         </button>
                       );
                     })}
-                    {staff.length === 0 && <p style={{ fontSize: '0.8rem', color: '#9ab09a', margin: 0 }}>Loading staff…</p>}
+                    {staff.length === 0 && <p style={{ fontSize: '0.8rem', color: '#9ab09a', margin: 0 }}>Loading managers…</p>}
+                    {staff.length > 0 && managerStaff.length === 0 && <p style={{ fontSize: '0.8rem', color: '#9ab09a', margin: 0 }}>No managers registered yet.</p>}
                   </div>
                   {selectedUsers.length > 0 && (
                     <p className="atm-assign-count">
-                      <Users size={13} /> {selectedUsers.length} person{selectedUsers.length !== 1 ? 's' : ''} selected
+                      <Users size={13} /> {selectedUsers.length} manager{selectedUsers.length !== 1 ? 's' : ''} selected
                     </p>
                   )}
                 </div>
               </div>
 
-              {/* Footer */}
               <div className="atm-panel-footer">
                 <button type="submit" className="atm-submit-btn" disabled={submitting}>
                   {submitting ? <><Loader2 size={15} className="spin" /> Creating…</> : <><CheckCircle size={15} /> Create Task</>}
@@ -274,38 +270,28 @@ export default function AdminTasksPage() {
         </div>
       )}
 
-      {/* ── Error / Loading ── */}
       {error && <div className="alert alert-error" style={{ margin: '1rem 0' }}><AlertCircle size={15} />{error}</div>}
       {loading ? <LoadingSpinner message="Loading tasks…" /> : (
         <>
-          {/* ── Task Table ── */}
           <div className="table-card">
             <table className="saic-table">
               <thead>
                 <tr>
-                  <th>#</th>
-                  <th>Title</th>
-                  <th>Priority</th>
-                  <th>Status</th>
-                  <th>Assignees</th>
-                  <th>Due Date</th>
-                  <th>Created</th>
-                  <th>Actions</th>
+                  <th>#</th><th>Title</th><th>Priority</th><th>Stage</th>
+                  <th>Assignees</th><th>Due Date</th><th>Created</th><th>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {tasks.length === 0 && (
-                  <tr>
-                    <td colSpan={8}>
-                      <div className="empty-state">
-                        <ClipboardList size={38} />
-                        <p>No tasks found. Create one to get started.</p>
-                      </div>
-                    </td>
-                  </tr>
+                  <tr><td colSpan={8}>
+                    <div className="empty-state"><ClipboardList size={38} /><p>No tasks found. Create one to get started.</p></div>
+                  </td></tr>
                 )}
                 {tasks.map((t, i) => {
-                  const overdue = isOverdue(t.deadline, t.status);
+                  const stage   = t.workflow_stage;
+                  const overdue = isOverdue(t.deadline, stage);
+                  const stageBadge = stage ? WORKFLOW_BADGE[stage] : 'badge-draft';
+                  const stageLabel = stage ? WORKFLOW_LABELS[stage] : t.status.replace('_', ' ');
                   return (
                     <tr key={t.id} className={overdue ? 'row-overdue' : ''}>
                       <td className="col-num">{(page - 1) * LIMIT + i + 1}</td>
@@ -317,9 +303,10 @@ export default function AdminTasksPage() {
                       </td>
                       <td><span className={`badge ${PRIORITY_COLORS[t.priority]}`}>{t.priority}</span></td>
                       <td>
-                        <span className={`badge ${STATUS_COLORS[t.status]}`}>
-                          {t.status.replace('_', ' ')}
-                        </span>
+                        <span className={`badge ${stageBadge}`}>{stageLabel}</span>
+                        {t.scope === 'team_only' && (
+                          <span style={{ marginLeft: 4, fontSize: '0.7rem', fontWeight: 700, color: '#7b5ea7', background: '#f3eeff', padding: '1px 6px', borderRadius: 8, border: '1px solid #d4bbff' }}>Team</span>
+                        )}
                       </td>
                       <td>
                         <div className="atm-assignee-cell">
@@ -328,9 +315,7 @@ export default function AdminTasksPage() {
                                 <span key={idx} className="atm-name-pill">{name}</span>
                               ))
                             : null}
-                          {(t.assignee_count ?? 0) === 0 && (
-                            <span className="atm-no-assignee">Unassigned</span>
-                          )}
+                          {(t.assignee_count ?? 0) === 0 && <span className="atm-no-assignee">Unassigned</span>}
                           {(t.assignee_count ?? 0) > 2 && (
                             <span className="atm-assignee-more">+{(t.assignee_count ?? 0) - 2} more</span>
                           )}
@@ -338,8 +323,7 @@ export default function AdminTasksPage() {
                       </td>
                       <td>
                         <span className={overdue ? 'overdue-text' : ''}>
-                          {t.deadline ? fmtDate(t.deadline) : '—'}
-                          {overdue && ' ⚠'}
+                          {t.deadline ? fmtDate(t.deadline) : '—'}{overdue && ' ⚠'}
                         </span>
                       </td>
                       <td>{fmtDate(t.created_at)}</td>
@@ -360,7 +344,6 @@ export default function AdminTasksPage() {
             </table>
           </div>
 
-          {/* ── Pagination ── */}
           {totalPages > 1 && (
             <div className="atm-pagination">
               <button className="atm-pg-btn" disabled={page <= 1} onClick={() => setPage(p => p - 1)}>

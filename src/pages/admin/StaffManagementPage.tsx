@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   getCellsBySector, getDistrictsByProvince, getProvinces,
   getSectorsByDistrict, getVillagesByCell,
@@ -6,9 +6,13 @@ import {
 import {
   Pencil, Trash2, CheckCircle, X, User, Mail,
   Phone, MapPin, Loader2, AlertCircle, UserPlus,
-  ChevronLeft, ChevronRight,
+  ChevronLeft, ChevronRight, UserCog, Camera, Upload,
+  Building2, CreditCard, Calendar, FileText, Paperclip, ExternalLink,
 } from 'lucide-react';
-import { adminGetStaff, adminCreateStaff, adminUpdateStaff, adminDeleteStaff } from '../../api/role';
+import {
+  adminGetStaff, adminCreateStaff, adminUpdateStaff,
+  adminDeleteStaff, adminUploadStaffPhoto, adminUploadStaffContract,
+} from '../../api/role';
 import type { StaffMember } from '../../types';
 import PageHeader from '../../components/Common/PageHeader';
 import LoadingSpinner from '../../components/Common/LoadingSpinner';
@@ -26,21 +30,42 @@ type StaffFormData = {
   last_name: string;
   telephone: string;
   gender: string;
+  manager_id: string;
   province: string;
   district: string;
   sector: string;
   cell: string;
   village: string;
+  bank_name: string;
+  bank_account_no: string;
+  contract_start: string;
+  contract_end: string;
+  contract_status: string;
 };
 
 const EMPTY_FORM: StaffFormData = {
   email: '', first_name: '', last_name: '',
-  telephone: '', gender: '',
+  telephone: '', gender: '', manager_id: '',
   province: '', district: '', sector: '', cell: '', village: '',
+  bank_name: '', bank_account_no: '',
+  contract_start: '', contract_end: '', contract_status: 'active',
+};
+
+const CONTRACT_STATUS_LABELS: Record<string, string> = {
+  active: 'Active',
+  probation: 'Probation',
+  expired: 'Expired',
+  terminated: 'Terminated',
 };
 
 function initials(first: string, last: string) {
   return `${first?.[0] ?? ''}${last?.[0] ?? ''}`.toUpperCase() || '?';
+}
+
+function ContractBadge({ status }: { status?: string | null }) {
+  if (!status) return <span className="sm-dash">—</span>;
+  const cls = `sm-contract-badge sm-contract-${status}`;
+  return <span className={cls}>{CONTRACT_STATUS_LABELS[status] ?? status}</span>;
 }
 
 export default function StaffManagementPage({ roleId, label }: StaffManagementPageProps) {
@@ -56,6 +81,26 @@ export default function StaffManagementPage({ roleId, label }: StaffManagementPa
   const [error,      setError]      = useState('');
   const [deleteTarget, setDeleteTarget] = useState<StaffMember | null>(null);
   const [deleting,     setDeleting]    = useState(false);
+
+  // Profile photo upload
+  const [currentPhoto,   setCurrentPhoto]   = useState<string | null>(null);
+  const [photoFile,      setPhotoFile]      = useState<File | null>(null);
+  const [photoPreview,   setPhotoPreview]   = useState<string | null>(null);
+  const [photoUploading, setPhotoUploading] = useState(false);
+  const photoInputRef = useRef<HTMLInputElement>(null);
+
+  // Contract file upload
+  const [contractFile,       setContractFile]       = useState<File | null>(null);
+  const [currentContractFile, setCurrentContractFile] = useState<string | null>(null);
+  const [currentContractOrig, setCurrentContractOrig] = useState<string | null>(null);
+  const [contractUploading,  setContractUploading]  = useState(false);
+  const contractInputRef = useRef<HTMLInputElement>(null);
+
+  // All staff — used to populate the Manager dropdown
+  const [allManagers, setAllManagers] = useState<StaffMember[]>([]);
+  useEffect(() => {
+    adminGetStaff().then(setAllManagers).catch(() => {});
+  }, []);
 
   // Geo-structure cascading options
   const [provinces,  setProvinces_]  = useState<string[]>([]);
@@ -111,21 +156,34 @@ export default function StaffManagementPage({ roleId, label }: StaffManagementPa
   const resetForm = () => {
     setForm(EMPTY_FORM); setEditId(null); setShowForm(false);
     setError(''); setSuccess('');
+    setCurrentPhoto(null); setPhotoFile(null); setPhotoPreview(null);
+    setContractFile(null); setCurrentContractFile(null); setCurrentContractOrig(null);
   };
 
   const openEdit = (m: StaffMember) => {
     setEditId(m.staff_id);
+    setCurrentPhoto(m.profile_photo ?? null);
+    setPhotoFile(null); setPhotoPreview(null);
+    setCurrentContractFile(m.contract_file ?? null);
+    setCurrentContractOrig(m.contract_original ?? null);
+    setContractFile(null);
     setForm({
-      email:      m.email,
-      first_name: m.first_name,
-      last_name:  m.last_name,
-      telephone:  m.telephone ?? '',
-      gender:     m.gender ?? '',
-      province:   m.province ?? '',
-      district:   m.district ?? '',
-      sector:     m.sector ?? '',
-      cell:       m.cell ?? '',
-      village:    m.village ?? '',
+      email:           m.email,
+      first_name:      m.first_name,
+      last_name:       m.last_name,
+      telephone:       m.telephone ?? '',
+      gender:          m.gender ?? '',
+      manager_id:      m.manager_id != null ? String(m.manager_id) : '',
+      province:        m.province ?? '',
+      district:        m.district ?? '',
+      sector:          m.sector ?? '',
+      cell:            m.cell ?? '',
+      village:         m.village ?? '',
+      bank_name:       m.bank_name ?? '',
+      bank_account_no: m.bank_account_no ?? '',
+      contract_start:  m.contract_start ?? '',
+      contract_end:    m.contract_end ?? '',
+      contract_status: m.contract_status ?? 'active',
     });
     hydrateGeo(m);
     setError(''); setSuccess(''); setShowForm(true);
@@ -135,32 +193,80 @@ export default function StaffManagementPage({ roleId, label }: StaffManagementPa
     (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
       setForm(prev => ({ ...prev, [field]: e.target.value }));
 
+  const handlePhotoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    setPhotoFile(f);
+    setPhotoPreview(URL.createObjectURL(f));
+  };
+
+  const handlePhotoUpload = async () => {
+    if (!editId || !photoFile) return;
+    setPhotoUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append('photo', photoFile);
+      await adminUploadStaffPhoto(editId, fd);
+      setSuccess('Profile photo updated.');
+      setPhotoFile(null); setPhotoPreview(null);
+      if (photoInputRef.current) photoInputRef.current.value = '';
+      setLoading(true); load();
+    } catch {
+      setError('Failed to upload photo.');
+    } finally { setPhotoUploading(false); }
+  };
+
+  const handleContractUpload = async (staffId: number) => {
+    if (!contractFile) return;
+    setContractUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append('contract', contractFile);
+      const result = await adminUploadStaffContract(staffId, fd);
+      setCurrentContractFile(result.file_name);
+      setCurrentContractOrig(result.original_name);
+      setContractFile(null);
+      if (contractInputRef.current) contractInputRef.current.value = '';
+    } catch {
+      setError('Failed to upload contract file.');
+    } finally { setContractUploading(false); }
+  };
+
   const handleSubmit = async (e: { preventDefault(): void }) => {
     e.preventDefault();
     if (!form.email.trim() || !form.first_name.trim() || !form.last_name.trim()) {
       setError('Email, first name, and last name are required.'); return;
     }
     const payload: Record<string, unknown> = {
-      role_id:    roleId,
-      email:      form.email.trim(),
-      first_name: form.first_name.trim(),
-      last_name:  form.last_name.trim(),
-      telephone:  form.telephone.trim() || undefined,
-      gender:     form.gender || undefined,
-      province:   form.province || undefined,
-      district:   form.district || undefined,
-      sector:     form.sector || undefined,
-      cell:       form.cell || undefined,
-      village:    form.village || undefined,
+      role_id:         roleId,
+      email:           form.email.trim(),
+      first_name:      form.first_name.trim(),
+      last_name:       form.last_name.trim(),
+      telephone:       form.telephone.trim() || undefined,
+      gender:          form.gender || undefined,
+      manager_id:      form.manager_id ? Number(form.manager_id) : undefined,
+      province:        form.province || undefined,
+      district:        form.district || undefined,
+      sector:          form.sector || undefined,
+      cell:            form.cell || undefined,
+      village:         form.village || undefined,
+      bank_name:       form.bank_name.trim() || undefined,
+      bank_account_no: form.bank_account_no.trim() || undefined,
+      contract_start:  form.contract_start || undefined,
+      contract_end:    form.contract_end || undefined,
+      contract_status: form.contract_status || undefined,
     };
 
     setSubmitting(true); setError(''); setSuccess('');
     try {
       if (editId) {
         await adminUpdateStaff(editId, payload);
+        if (contractFile) await handleContractUpload(editId);
         setSuccess('Staff member updated successfully.');
       } else {
-        await adminCreateStaff(payload);
+        const res = await adminCreateStaff(payload);
+        const newStaffId: number = res.staff?.id;
+        if (contractFile && newStaffId) await handleContractUpload(newStaffId);
         setSuccess('Staff member created successfully.');
       }
       resetForm(); setLoading(true); load();
@@ -207,7 +313,6 @@ export default function StaffManagementPage({ roleId, label }: StaffManagementPa
       {/* ── Add / Edit form panel ── */}
       {showForm && (
         <div className="sm-form-panel">
-          {/* Green header */}
           <div className="sm-form-header">
             <div className="sm-form-header-left">
               <div className="sm-form-avatar-icon">
@@ -215,17 +320,62 @@ export default function StaffManagementPage({ roleId, label }: StaffManagementPa
               </div>
               <div>
                 <h3 className="sm-form-title">{editId ? 'Edit Staff Member' : 'New Staff Member'}</h3>
-                <p className="sm-form-subtitle">{editId ? 'Update the staff member\'s information' : 'Fill in the details to create a new account'}</p>
+                <p className="sm-form-subtitle">{editId ? "Update the staff member's information" : 'Fill in the details to create a new account'}</p>
               </div>
             </div>
             <button className="sm-close-btn" onClick={resetForm} type="button"><X size={18} /></button>
           </div>
 
-          {/* Form body */}
           <div className="sm-form-body">
             {error && <div className="alert alert-error" style={{ marginBottom: '1rem' }}><AlertCircle size={13} />{error}</div>}
 
+            {/* Profile photo upload — only when editing */}
+            {editId && (
+              <div className="sm-photo-section">
+                <span className="sm-label"><Camera size={12} /> Profile Photo</span>
+                <div className="sm-photo-row">
+                  <div className="sm-photo-thumb">
+                    {(photoPreview ?? (currentPhoto ? `/uploads/${currentPhoto}` : null))
+                      ? <img src={photoPreview ?? `/uploads/${currentPhoto}`} alt="profile" className="sm-photo-img" />
+                      : <div className="sm-photo-initials">{initials(form.first_name, form.last_name)}</div>
+                    }
+                  </div>
+                  <div className="sm-photo-controls">
+                    <input
+                      ref={photoInputRef}
+                      type="file"
+                      accept="image/*"
+                      id="sm-photo-file"
+                      className="sm-photo-file-input"
+                      onChange={handlePhotoFileChange}
+                    />
+                    <label htmlFor="sm-photo-file" className="sm-photo-pick-btn">
+                      <Camera size={13} /> Choose Photo
+                    </label>
+                    {photoFile && (
+                      <button
+                        type="button"
+                        className="sm-photo-upload-btn"
+                        onClick={handlePhotoUpload}
+                        disabled={photoUploading}
+                      >
+                        {photoUploading
+                          ? <><Loader2 size={13} className="spin" /> Uploading…</>
+                          : <><Upload size={13} /> Upload Photo</>
+                        }
+                      </button>
+                    )}
+                    {photoFile && (
+                      <span className="sm-photo-name">{photoFile.name}</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
             <form onSubmit={handleSubmit}>
+              {/* ── Personal info ── */}
+              <p className="sm-section-label">Personal Information</p>
               <div className="sm-field-grid">
                 <div className="sm-field">
                   <label className="sm-label"><User size={12} /> First Name *</label>
@@ -240,8 +390,11 @@ export default function StaffManagementPage({ roleId, label }: StaffManagementPa
                 <div className="sm-field sm-field-full">
                   <label className="sm-label"><Mail size={12} /> Email Address *</label>
                   <input className="sm-input" type="email" value={form.email} onChange={handleChange('email')}
-                    placeholder="email@example.com" disabled={submitting || !!editId} />
-                  {!editId && <p className="sm-field-hint">The email address will be used as the default password.</p>}
+                    placeholder="email@example.com" disabled={submitting} />
+                  {editId
+                    ? <p className="sm-field-hint">Changing the email updates the login address but not the password.</p>
+                    : <p className="sm-field-hint">The email address will be used as the default password.</p>
+                  }
                 </div>
                 <div className="sm-field">
                   <label className="sm-label"><Phone size={12} /> Telephone</label>
@@ -257,6 +410,93 @@ export default function StaffManagementPage({ roleId, label }: StaffManagementPa
                     <option value="other">Other</option>
                   </select>
                 </div>
+                <div className="sm-field">
+                  <label className="sm-label"><UserCog size={12} /> Manager</label>
+                  <select className="sm-input sm-select" value={form.manager_id} onChange={handleChange('manager_id')} disabled={submitting}>
+                    <option value="">— No manager —</option>
+                    {allManagers
+                      .filter(mgr => {
+                        if (mgr.staff_id === editId) return false;
+                        const role = mgr.role_name ?? '';
+                        if (roleId === 6) return role === 'Admin';
+                        return role.endsWith('Manager');
+                      })
+                      .map(mgr => (
+                        <option key={mgr.staff_id} value={mgr.staff_id}>
+                          {mgr.first_name} {mgr.last_name} ({mgr.role_name ?? mgr.email})
+                        </option>
+                      ))
+                    }
+                  </select>
+                </div>
+              </div>
+
+              {/* ── Bank information ── */}
+              <p className="sm-section-label" style={{ marginTop: '1.5rem' }}>Bank Information</p>
+              <div className="sm-field-grid">
+                <div className="sm-field">
+                  <label className="sm-label"><Building2 size={12} /> Bank Name</label>
+                  <input className="sm-input" value={form.bank_name} onChange={handleChange('bank_name')}
+                    placeholder="e.g. Bank of Kigali" disabled={submitting} />
+                </div>
+                <div className="sm-field">
+                  <label className="sm-label"><CreditCard size={12} /> Bank Account No.</label>
+                  <input className="sm-input" value={form.bank_account_no} onChange={handleChange('bank_account_no')}
+                    placeholder="Account number" disabled={submitting} />
+                </div>
+              </div>
+
+              {/* ── Contract information ── */}
+              <p className="sm-section-label" style={{ marginTop: '1.5rem' }}>Contract Information</p>
+              <div className="sm-field-grid">
+                <div className="sm-field">
+                  <label className="sm-label"><Calendar size={12} /> Contract Start</label>
+                  <input className="sm-input" type="date" value={form.contract_start} onChange={handleChange('contract_start')}
+                    disabled={submitting} />
+                </div>
+                <div className="sm-field">
+                  <label className="sm-label"><Calendar size={12} /> Contract End</label>
+                  <input className="sm-input" type="date" value={form.contract_end} onChange={handleChange('contract_end')}
+                    disabled={submitting} />
+                </div>
+                <div className="sm-field">
+                  <label className="sm-label">Contract Status</label>
+                  <select className="sm-input sm-select" value={form.contract_status} onChange={handleChange('contract_status')} disabled={submitting}>
+                    <option value="active">Active</option>
+                    <option value="probation">Probation</option>
+                    <option value="expired">Expired</option>
+                    <option value="terminated">Terminated</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* ── Contract file upload ── */}
+              <div className="sm-contract-upload" style={{ marginTop: '0.85rem' }}>
+                <label className="sm-label"><FileText size={12} /> Contract Document</label>
+                {currentContractFile && (
+                  <a href={`/uploads/${currentContractFile}`} target="_blank" rel="noopener noreferrer"
+                     className="sm-contract-link">
+                    <ExternalLink size={12} /> {currentContractOrig ?? 'View current contract'}
+                  </a>
+                )}
+                <div className="sm-photo-row" style={{ marginTop: '0.4rem' }}>
+                  <input ref={contractInputRef} type="file" id="sm-contract-file"
+                    accept=".pdf,.doc,.docx,image/*" className="sm-photo-file-input"
+                    onChange={e => setContractFile(e.target.files?.[0] ?? null)}
+                    disabled={submitting || contractUploading} />
+                  <label htmlFor="sm-contract-file" className="sm-photo-pick-btn">
+                    <Paperclip size={13} /> {contractFile ? 'Change file' : (currentContractFile ? 'Replace' : 'Choose file')}
+                  </label>
+                  {contractFile && (
+                    <span className="sm-photo-name">{contractFile.name}</span>
+                  )}
+                </div>
+                <p className="sm-field-hint">Accepted: PDF, Word, or image. Will be uploaded when you save.</p>
+              </div>
+
+              {/* ── Location ── */}
+              <p className="sm-section-label" style={{ marginTop: '1.5rem' }}>Location</p>
+              <div className="sm-field-grid">
                 <div className="sm-field">
                   <label className="sm-label"><MapPin size={12} /> Province</label>
                   <select className="sm-input sm-select" value={form.province}
@@ -317,56 +557,87 @@ export default function StaffManagementPage({ roleId, label }: StaffManagementPa
 
       {/* ── Table ── */}
       <div className="table-card">
-        <table className="saic-table">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Member</th>
-              <th>Email</th>
-              <th>Phone</th>
-              <th>Gender</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {staff.length === 0 && (
-              <tr><td colSpan={6}>
-                <div className="empty-state"><User size={38} /><p>No {label} registered yet.</p></div>
-              </td></tr>
-            )}
-            {staffPaged.map((m, i) => (
-              <tr key={m.staff_id}>
-                <td className="col-num">{(staffPage - 1) * STAFF_PAGE_SIZE + i + 1}</td>
-                <td>
-                  <div className="sm-staff-cell">
-                    <div className="sm-staff-avatar">{initials(m.first_name, m.last_name)}</div>
-                    <div>
-                      <p className="sm-staff-name">{m.first_name} {m.last_name}</p>
-                    </div>
-                  </div>
-                </td>
-                <td className="sm-email-cell">{m.email}</td>
-                <td className="sm-phone-cell">{m.telephone ?? '—'}</td>
-                <td>
-                  {m.gender
-                    ? <span className={`sm-gender-badge sm-gender-${m.gender}`}>{m.gender}</span>
-                    : <span className="sm-dash">—</span>
-                  }
-                </td>
-                <td>
-                  <div className="table-actions">
-                    <button className="sm-btn-edit" onClick={() => openEdit(m)} title="Edit">
-                      <Pencil size={13} /> Edit
-                    </button>
-                    <button className="sm-btn-delete" onClick={() => setDeleteTarget(m)} title="Delete">
-                      <Trash2 size={13} /> Delete
-                    </button>
-                  </div>
-                </td>
+        <div style={{ overflowX: 'auto' }}>
+          <table className="saic-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Member</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Gender</th>
+                <th>Bank</th>
+                <th>Contract</th>
+                <th>Manager</th>
+                <th>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {staff.length === 0 && (
+                <tr><td colSpan={9}>
+                  <div className="empty-state"><User size={38} /><p>No {label} registered yet.</p></div>
+                </td></tr>
+              )}
+              {staffPaged.map((m, i) => (
+                <tr key={m.staff_id}>
+                  <td className="col-num">{(staffPage - 1) * STAFF_PAGE_SIZE + i + 1}</td>
+                  <td>
+                    <div className="sm-staff-cell">
+                      <div className="sm-staff-avatar">
+                        {m.profile_photo
+                          ? <img src={`/uploads/${m.profile_photo}`} alt="photo" className="sm-avatar-img" />
+                          : initials(m.first_name, m.last_name)
+                        }
+                      </div>
+                      <div>
+                        <p className="sm-staff-name">{m.first_name} {m.last_name}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="sm-email-cell">{m.email}</td>
+                  <td className="sm-phone-cell">{m.telephone ?? '—'}</td>
+                  <td>
+                    {m.gender
+                      ? <span className={`sm-gender-badge sm-gender-${m.gender}`}>{m.gender}</span>
+                      : <span className="sm-dash">—</span>
+                    }
+                  </td>
+                  <td style={{ fontSize: '0.8rem', color: '#4a6c4a' }}>
+                    {m.bank_name
+                      ? <div>
+                          <div style={{ fontWeight: 600 }}>{m.bank_name}</div>
+                          {m.bank_account_no && <div style={{ color: '#8aaa8a', fontSize: '0.75rem' }}>{m.bank_account_no}</div>}
+                        </div>
+                      : <span className="sm-dash">—</span>
+                    }
+                  </td>
+                  <td>
+                    <ContractBadge status={m.contract_status} />
+                  </td>
+                  <td style={{ fontSize: '0.82rem', color: '#4a6c4a' }}>
+                    {m.manager_id
+                      ? (() => {
+                          const mgr = allManagers.find(a => a.staff_id === m.manager_id);
+                          return mgr ? `${mgr.first_name} ${mgr.last_name}` : `#${m.manager_id}`;
+                        })()
+                      : <span className="sm-dash">—</span>
+                    }
+                  </td>
+                  <td>
+                    <div className="table-actions">
+                      <button className="sm-btn-edit" onClick={() => openEdit(m)} title="Edit">
+                        <Pencil size={13} /> Edit
+                      </button>
+                      <button className="sm-btn-delete" onClick={() => setDeleteTarget(m)} title="Delete">
+                        <Trash2 size={13} /> Delete
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {staffTotalPages > 1 && (
@@ -385,7 +656,6 @@ export default function StaffManagementPage({ roleId, label }: StaffManagementPa
       {deleteTarget && (
         <div className="sm-delete-overlay" onClick={e => e.target === e.currentTarget && setDeleteTarget(null)}>
           <div className="sm-delete-modal">
-            {/* Red gradient header */}
             <div className="sm-delete-modal-header">
               <div className="sm-delete-modal-icon">
                 <Trash2 size={30} />
@@ -393,8 +663,6 @@ export default function StaffManagementPage({ roleId, label }: StaffManagementPa
               <h3 className="sm-delete-modal-title">Delete Staff Member?</h3>
               <p className="sm-delete-modal-sub">This action is permanent and cannot be reversed</p>
             </div>
-
-            {/* Body */}
             <div className="sm-delete-modal-body">
               <p className="sm-delete-body-text">
                 You are about to permanently remove{' '}

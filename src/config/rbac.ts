@@ -5,6 +5,7 @@ const commonMenuItems = [
   { id: 'tasks',         label: 'My Tasks',       icon: 'ClipboardList', path: 'tasks' },
   { id: 'leave-request', label: 'Request Leave',  icon: 'CalendarOff',   path: 'leave-request' },
   { id: 'leave-status',  label: 'Leave Status',   icon: 'CalendarCheck', path: 'leave-status' },
+  { id: 'my-documents',  label: 'My Documents',   icon: 'FolderOpen',    path: 'my-documents' },
 ];
 
 export const ROLE_CONFIG: Record<string, RoleConfig> = {
@@ -36,6 +37,9 @@ export const ROLE_CONFIG: Record<string, RoleConfig> = {
       { id: 'cashier',           label: 'Cashiers',             icon: 'Receipt',         path: 'staff/19' },
       { id: 'driver',            label: 'Drivers',              icon: 'Car',             path: 'staff/20' },
       { id: 'messenger',         label: 'Messengers',           icon: 'Mail',            path: 'staff/21' },
+      { id: 'hr-manager-staff',  label: 'HR Managers',          icon: 'Award',           path: 'staff/22' },
+      { id: 'staff-directory',   label: 'Staff Directory',      icon: 'BookOpen',        path: 'staff-directory' },
+      { id: 'documents',         label: 'Documents',            icon: 'FolderOpen',      path: 'documents' },
     ],
   },
 
@@ -43,7 +47,11 @@ export const ROLE_CONFIG: Record<string, RoleConfig> = {
     apiBase: '/admin_manager',
     dashboardPath: '/dashboard/admin_manager',
     canManageStaff: false,
-    menuItems: [{ id: 'overview', label: 'Overview', icon: 'LayoutDashboard', path: 'overview' }, ...commonMenuItems],
+    menuItems: [
+      { id: 'overview',  label: 'Overview',  icon: 'LayoutDashboard', path: 'overview' },
+      { id: 'my-team',   label: 'My Team',   icon: 'Users',           path: 'my-team' },
+      ...commonMenuItems,
+    ],
   },
 
   'IT Officer': {
@@ -87,7 +95,11 @@ export const ROLE_CONFIG: Record<string, RoleConfig> = {
     apiBase: '/finance_manager',
     dashboardPath: '/dashboard/finance_manager',
     canManageStaff: false,
-    menuItems: [{ id: 'overview', label: 'Overview', icon: 'LayoutDashboard', path: 'overview' }, ...commonMenuItems],
+    menuItems: [
+      { id: 'overview',  label: 'Overview',  icon: 'LayoutDashboard', path: 'overview' },
+      { id: 'my-team',   label: 'My Team',   icon: 'Users',           path: 'my-team' },
+      ...commonMenuItems,
+    ],
   },
 
   Accountant: {
@@ -105,7 +117,11 @@ export const ROLE_CONFIG: Record<string, RoleConfig> = {
     apiBase: '/training_department_manager',
     dashboardPath: '/dashboard/training_department_manager',
     canManageStaff: false,
-    menuItems: [{ id: 'overview', label: 'Overview', icon: 'LayoutDashboard', path: 'overview' }, ...commonMenuItems],
+    menuItems: [
+      { id: 'overview',  label: 'Overview',  icon: 'LayoutDashboard', path: 'overview' },
+      { id: 'my-team',   label: 'My Team',   icon: 'Users',           path: 'my-team' },
+      ...commonMenuItems,
+    ],
   },
 
   'Training And Curriculum Development Officer': {
@@ -120,7 +136,11 @@ export const ROLE_CONFIG: Record<string, RoleConfig> = {
     apiBase: '/farm_and_carbon_credit_department_manager',
     dashboardPath: '/dashboard/farm_and_carbon_credit_department_manager',
     canManageStaff: false,
-    menuItems: [{ id: 'overview', label: 'Overview', icon: 'LayoutDashboard', path: 'overview' }, ...commonMenuItems],
+    menuItems: [
+      { id: 'overview',  label: 'Overview',  icon: 'LayoutDashboard', path: 'overview' },
+      { id: 'my-team',   label: 'My Team',   icon: 'Users',           path: 'my-team' },
+      ...commonMenuItems,
+    ],
   },
 
   'Crop Production Officer': {
@@ -141,7 +161,11 @@ export const ROLE_CONFIG: Record<string, RoleConfig> = {
     apiBase: '/transaction_advisory_department_manager',
     dashboardPath: '/dashboard/transaction_advisory_department_manager',
     canManageStaff: false,
-    menuItems: [{ id: 'overview', label: 'Overview', icon: 'LayoutDashboard', path: 'overview' }, ...commonMenuItems],
+    menuItems: [
+      { id: 'overview',  label: 'Overview',  icon: 'LayoutDashboard', path: 'overview' },
+      { id: 'my-team',   label: 'My Team',   icon: 'Users',           path: 'my-team' },
+      ...commonMenuItems,
+    ],
   },
 
   'Business Development Officer': {
@@ -171,6 +195,18 @@ export const ROLE_CONFIG: Record<string, RoleConfig> = {
     canManageStaff: false,
     menuItems: [{ id: 'overview', label: 'Overview', icon: 'LayoutDashboard', path: 'overview' }, ...commonMenuItems],
   },
+
+  'HR Manager': {
+    apiBase: '/hr_manager',
+    dashboardPath: '/dashboard/hr_manager',
+    canManageStaff: false,
+    menuItems: [
+      { id: 'overview',        label: 'Overview',       icon: 'LayoutDashboard', path: 'overview' },
+      { id: 'hr-manager',      label: 'Staff & KPIs',   icon: 'Users',           path: 'hr-manager' },
+      { id: 'staff-directory', label: 'Staff Directory', icon: 'BookOpen',        path: 'staff-directory' },
+      ...commonMenuItems,
+    ],
+  },
 };
 
 /**
@@ -196,6 +232,7 @@ export const ADMIN_STAFF_ROLES: Record<number, string> = {
   19: 'Cashier',
   20: 'Driver',
   21: 'Messenger',
+  22: 'HR Manager',
 };
 
 export function getRoleConfig(role: string): RoleConfig | null {
