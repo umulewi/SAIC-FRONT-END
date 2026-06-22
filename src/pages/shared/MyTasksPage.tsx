@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import {
   ClipboardList, Calendar, AlertCircle, Eye, ArrowRight, Search, Filter,
   UserPlus, CheckCircle, XCircle, Users, Loader2, X, Inbox, Send as SendIcon,
+  Plus, Clock, User,
 } from 'lucide-react';
-import { getTasks, assignToTeam, managerReviewTask } from '../../api/tasks';
+import { getTasks, assignToTeam, managerReviewTask, createTask, getTask, removeAssignee } from '../../api/tasks';
 import { getMyTeam } from '../../api/role';
 import { useAuth } from '../../context/AuthContext';
 import type { EnhancedTask, TaskPriority, TeamMember } from '../../types';
@@ -75,11 +76,24 @@ function TaskCard({
             {task.comment_count ?? 0} comment{task.comment_count !== 1 ? 's' : ''}
           </span>
         </div>
+        {task.assignee_names && (
+          <div className="mt-task-meta" style={{ marginTop: '0.3rem', flexWrap: 'wrap', gap: '0.35rem' }}>
+            <User size={12} style={{ color: '#6a8c6a', flexShrink: 0 }} />
+            {task.assignee_names.split('|').map((name, i) => (
+              <span key={i} style={{ fontSize: '0.74rem', background: '#f0f7ee', border: '1px solid #c4ddc4', borderRadius: 6, padding: '1px 7px', color: '#2D5016', fontWeight: 500 }}>
+                {name.trim()}
+              </span>
+            ))}
+            {(task.assignee_count ?? 0) > task.assignee_names.split('|').length && (
+              <span style={{ fontSize: '0.72rem', color: '#9ab09a' }}>+{(task.assignee_count ?? 0) - task.assignee_names.split('|').length} more</span>
+            )}
+          </div>
+        )}
       </div>
       <div className="mt-task-actions">
-        {onAssignToTeam && stage === 'pending_manager' && (
+        {onAssignToTeam && ['pending_manager', 'pending_team', 'rejected_to_manager'].includes(stage ?? '') && (
           <button className="mt-action-btn mt-action-assign" onClick={() => onAssignToTeam(task)}>
-            <UserPlus size={13} /> Assign to Team
+            <UserPlus size={13} /> {stage === 'pending_manager' ? 'Assign to Team' : 'Manage Team'}
           </button>
         )}
         {onReview && stage === 'pending_manager_review' && (
@@ -111,12 +125,13 @@ export default function MyTasksPage({ apiBase }: MyTasksPageProps) {
   const [filterStage,  setFilterStage]  = useState('');
 
   // ── Assign to Team modal ──────────────────────────────────────────────────
-  const [assignTask,   setAssignTask]   = useState<EnhancedTask | null>(null);
-  const [teamMembers,  setTeamMembers]  = useState<TeamMember[]>([]);
-  const [teamLoading,  setTeamLoading]  = useState(false);
-  const [selectedTeam, setSelectedTeam] = useState<number[]>([]);
-  const [assigning,    setAssigning]    = useState(false);
-  const [assignError,  setAssignError]  = useState('');
+  const [assignTask,          setAssignTask]          = useState<EnhancedTask | null>(null);
+  const [teamMembers,         setTeamMembers]         = useState<TeamMember[]>([]);
+  const [teamLoading,         setTeamLoading]         = useState(false);
+  const [selectedTeam,        setSelectedTeam]        = useState<number[]>([]);
+  const [assigning,           setAssigning]           = useState(false);
+  const [assignError,         setAssignError]         = useState('');
+  const [existingAssigneeIds, setExistingAssigneeIds] = useState<number[]>([]);
 
   // ── Manager Review modal ──────────────────────────────────────────────────
   const [reviewTask,   setReviewTask]   = useState<EnhancedTask | null>(null);
@@ -124,6 +139,18 @@ export default function MyTasksPage({ apiBase }: MyTasksPageProps) {
   const [feedback,     setFeedback]     = useState('');
   const [reviewing,    setReviewing]    = useState(false);
   const [reviewError,  setReviewError]  = useState('');
+
+  // ── Create Task modal (managers only) ─────────────────────────────────────
+  const [showCreate,    setShowCreate]    = useState(false);
+  const [cTitle,        setCTitle]        = useState('');
+  const [cDescription,  setCDescription]  = useState('');
+  const [cPriority,     setCPriority]     = useState<TaskPriority>('medium');
+  const [cInstructions, setCInstructions] = useState('');
+  const [cDeadline,     setCDeadline]     = useState('');
+  const [cDeadlineTime, setCDeadlineTime] = useState('');
+  const [cAssignees,    setCAssignees]    = useState<number[]>([]);
+  const [createLoading, setCreateLoading] = useState(false);
+  const [createError,   setCreateError]   = useState('');
 
   const load = async () => {
     setLoading(true); setError('');
@@ -147,26 +174,38 @@ export default function MyTasksPage({ apiBase }: MyTasksPageProps) {
 
   // ── Assign-to-team handlers ───────────────────────────────────────────────
   const openAssignModal = async (task: EnhancedTask) => {
-    setAssignTask(task); setSelectedTeam([]); setAssignError('');
-    if (teamMembers.length === 0) {
-      setTeamLoading(true);
-      try { setTeamMembers(await getMyTeam(apiBase)); }
-      catch { setAssignError('Failed to load team members.'); }
-      finally { setTeamLoading(false); }
-    }
+    setAssignTask(task); setSelectedTeam([]); setAssignError(''); setExistingAssigneeIds([]);
+    setTeamLoading(true);
+    try {
+      const [teamData, taskDetail] = await Promise.all([
+        teamMembers.length > 0 ? Promise.resolve(teamMembers) : getMyTeam(apiBase),
+        getTask(task.id),
+      ]);
+      if (teamMembers.length === 0) setTeamMembers(teamData);
+      const alreadyAssigned = (taskDetail.assignees ?? [])
+        .filter(a => a.assigned_by_role === 'manager')
+        .map(a => a.users_id);
+      setExistingAssigneeIds(alreadyAssigned);
+      setSelectedTeam(alreadyAssigned); // pre-select existing assignees
+    } catch { setAssignError('Failed to load team members.'); }
+    finally { setTeamLoading(false); }
   };
 
   const toggleTeamMember = (uid: number) =>
     setSelectedTeam(prev => prev.includes(uid) ? prev.filter(x => x !== uid) : [...prev, uid]);
 
   const handleAssignToTeam = async () => {
-    if (!assignTask || selectedTeam.length === 0) return;
+    if (!assignTask) return;
+    const toAdd    = selectedTeam.filter(uid => !existingAssigneeIds.includes(uid));
+    const toRemove = existingAssigneeIds.filter(uid => !selectedTeam.includes(uid));
+    if (toAdd.length === 0 && toRemove.length === 0) { setAssignTask(null); return; }
     setAssigning(true); setAssignError('');
     try {
-      await assignToTeam(assignTask.id, selectedTeam);
+      if (toAdd.length > 0) await assignToTeam(assignTask.id, toAdd);
+      for (const uid of toRemove) await removeAssignee(assignTask.id, uid);
       setAssignTask(null); setSelectedTeam([]); load();
     } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Failed to assign.';
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Failed to update assignment.';
       setAssignError(msg);
     } finally { setAssigning(false); }
   };
@@ -188,6 +227,46 @@ export default function MyTasksPage({ apiBase }: MyTasksPageProps) {
     } finally { setReviewing(false); }
   };
 
+  // ── Create task handlers (managers only) ─────────────────────────────────
+  const resetCreate = () => {
+    setCTitle(''); setCDescription(''); setCPriority('medium');
+    setCInstructions(''); setCDeadline(''); setCDeadlineTime('');
+    setCAssignees([]); setCreateError('');
+  };
+
+  const openCreate = async () => {
+    resetCreate(); setShowCreate(true);
+    if (teamMembers.length === 0) {
+      setTeamLoading(true);
+      try { setTeamMembers(await getMyTeam(apiBase)); }
+      catch { /* ignore */ }
+      finally { setTeamLoading(false); }
+    }
+  };
+
+  const handleCreate = async () => {
+    if (!cTitle.trim()) { setCreateError('Title is required.'); return; }
+    setCreateLoading(true); setCreateError('');
+    try {
+      await createTask({
+        title: cTitle.trim(),
+        description: cDescription.trim() || undefined,
+        priority: cPriority,
+        instructions: cInstructions.trim() || undefined,
+        deadline: cDeadline || undefined,
+        deadline_time: cDeadlineTime || undefined,
+        assign_to: cAssignees,
+      });
+      setShowCreate(false);
+      resetCreate();
+      if (tab !== 'given') setTab('given');
+      else load();
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Failed to create task.';
+      setCreateError(msg);
+    } finally { setCreateLoading(false); }
+  };
+
   // ── Stats ─────────────────────────────────────────────────────────────────
   const activeCount    = tasks.filter(t => ['pending_team','pending_manager'].includes(t.workflow_stage ?? '')).length;
   const reviewCount    = tasks.filter(t => ['pending_manager_review','pending_admin_review'].includes(t.workflow_stage ?? '')).length;
@@ -199,6 +278,11 @@ export default function MyTasksPage({ apiBase }: MyTasksPageProps) {
       <PageHeader
         title={isManager ? 'Tasks' : 'My Tasks'}
         subtitle={`${total} task${total !== 1 ? 's' : ''}`}
+        actions={isManager ? (
+          <button className="btn-primary" onClick={openCreate}>
+            <Plus size={15} /> New Task
+          </button>
+        ) : undefined}
       />
 
       {/* Stats row */}
@@ -322,13 +406,18 @@ export default function MyTasksPage({ apiBase }: MyTasksPageProps) {
         <div className="atd-modal-overlay" onClick={e => e.target === e.currentTarget && setAssignTask(null)}>
           <div className="atd-modal" role="dialog" style={{ maxWidth: 520 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-              <h3 className="atd-modal-title"><UserPlus size={18} className="icon-green" /> Assign to Team</h3>
+              <h3 className="atd-modal-title"><UserPlus size={18} className="icon-green" /> {existingAssigneeIds.length > 0 ? 'Manage Team Assignment' : 'Assign to Team'}</h3>
               <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ab09a' }} onClick={() => setAssignTask(null)}><X size={18} /></button>
             </div>
             <p className="atd-modal-sub" style={{ marginBottom: '0.75rem' }}>
               Task: <strong>{assignTask.title}</strong>
             </p>
             {assignError && <div className="alert alert-error" style={{ marginBottom: '0.75rem' }}>{assignError}</div>}
+            {existingAssigneeIds.length > 0 && (
+              <p style={{ fontSize: '0.78rem', color: '#6a8c6a', margin: '0 0 0.6rem', background: '#f0f7ee', padding: '5px 10px', borderRadius: 6, border: '1px solid #c4ddc4' }}>
+                Tick to keep assigned · Untick to remove · Add new members below
+              </p>
+            )}
             {teamLoading ? (
               <div style={{ display: 'flex', justifyContent: 'center', padding: '1.5rem' }}>
                 <Loader2 size={22} className="spin" style={{ color: '#2D5016' }} />
@@ -338,7 +427,7 @@ export default function MyTasksPage({ apiBase }: MyTasksPageProps) {
                 No team members found.
               </p>
             ) : (
-              <div className="atm-staff-grid" style={{ maxHeight: 240 }}>
+              <div className="atm-staff-grid" style={{ maxHeight: 260 }}>
                 {teamMembers.map(m => {
                   const sel = selectedTeam.includes(m.users_id);
                   return (
@@ -354,18 +443,116 @@ export default function MyTasksPage({ apiBase }: MyTasksPageProps) {
                 })}
               </div>
             )}
-            {selectedTeam.length > 0 && (
-              <p style={{ fontSize: '0.78rem', color: '#2D5016', fontWeight: 600, margin: '0.5rem 0 0', display: 'flex', alignItems: 'center', gap: 4 }}>
-                <Users size={13} /> {selectedTeam.length} member{selectedTeam.length !== 1 ? 's' : ''} selected
-              </p>
-            )}
+            {(() => {
+              const toAdd    = selectedTeam.filter(uid => !existingAssigneeIds.includes(uid));
+              const toRemove = existingAssigneeIds.filter(uid => !selectedTeam.includes(uid));
+              return (toAdd.length > 0 || toRemove.length > 0) ? (
+                <p style={{ fontSize: '0.78rem', color: '#2D5016', fontWeight: 600, margin: '0.5rem 0 0', display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                  {toAdd.length > 0 && <span style={{ color: '#2D5016' }}>+{toAdd.length} to add</span>}
+                  {toRemove.length > 0 && <span style={{ color: '#c0392b' }}>−{toRemove.length} to remove</span>}
+                </p>
+              ) : null;
+            })()}
             <div className="atd-modal-actions" style={{ marginTop: '1rem' }}>
-              <button className="btn-approve" onClick={handleAssignToTeam}
-                disabled={assigning || selectedTeam.length === 0}>
-                {assigning ? <Loader2 size={14} className="spin" /> : <SendIcon size={14} />}
-                Assign {selectedTeam.length > 0 ? `(${selectedTeam.length})` : ''}
-              </button>
+              {(() => {
+                const toAdd    = selectedTeam.filter(uid => !existingAssigneeIds.includes(uid));
+                const toRemove = existingAssigneeIds.filter(uid => !selectedTeam.includes(uid));
+                const hasChanges = toAdd.length > 0 || toRemove.length > 0;
+                return (
+                  <button className="btn-approve" onClick={handleAssignToTeam} disabled={assigning || !hasChanges}>
+                    {assigning ? <Loader2 size={14} className="spin" /> : <SendIcon size={14} />}
+                    {existingAssigneeIds.length > 0 ? 'Save Changes' : `Assign${selectedTeam.length > 0 ? ` (${selectedTeam.length})` : ''}`}
+                  </button>
+                );
+              })()}
               <button className="btn-secondary" onClick={() => setAssignTask(null)}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Create Task Modal (managers only) ── */}
+      {showCreate && (
+        <div className="atd-modal-overlay" onClick={e => e.target === e.currentTarget && setShowCreate(false)}>
+          <div className="atd-modal" role="dialog" style={{ maxWidth: 580, maxHeight: '90vh', overflowY: 'auto' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+              <h3 className="atd-modal-title"><Plus size={18} className="icon-green" /> Create New Task</h3>
+              <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ab09a' }} onClick={() => setShowCreate(false)}><X size={18} /></button>
+            </div>
+            <p style={{ fontSize: '0.82rem', color: '#9ab09a', margin: '0 0 1rem' }}>This task will be assigned to your team. You are the final approver.</p>
+            {createError && <div className="alert alert-error" style={{ marginBottom: '0.75rem' }}><AlertCircle size={14} /> {createError}</div>}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+              <div className="form-group">
+                <label>Title *</label>
+                <input value={cTitle} onChange={e => { setCTitle(e.target.value); setCreateError(''); }}
+                  placeholder="e.g. Prepare quarterly report" disabled={createLoading} />
+              </div>
+              <div className="form-group">
+                <label>Priority</label>
+                <select value={cPriority} onChange={e => setCPriority(e.target.value as TaskPriority)} disabled={createLoading}>
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                  <option value="urgent">Urgent</option>
+                </select>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                <div className="form-group">
+                  <label><Calendar size={12} /> Due Date</label>
+                  <input type="date" value={cDeadline} onChange={e => setCDeadline(e.target.value)} disabled={createLoading} />
+                </div>
+                <div className="form-group">
+                  <label><Clock size={12} /> Due Time</label>
+                  <input type="time" value={cDeadlineTime} onChange={e => setCDeadlineTime(e.target.value)} disabled={createLoading} />
+                </div>
+              </div>
+              <div className="form-group">
+                <label>Description</label>
+                <textarea rows={2} value={cDescription} onChange={e => setCDescription(e.target.value)}
+                  placeholder="Brief overview of what this task is about…" disabled={createLoading} />
+              </div>
+              <div className="form-group">
+                <label>Instructions / Details</label>
+                <textarea rows={3} value={cInstructions} onChange={e => setCInstructions(e.target.value)}
+                  placeholder="Step-by-step instructions for the assignee…" disabled={createLoading} />
+              </div>
+              <div className="form-group">
+                <label><Users size={12} /> Assign to Team Member</label>
+                {teamLoading ? (
+                  <p style={{ fontSize: '0.82rem', color: '#9ab09a' }}>Loading team…</p>
+                ) : teamMembers.length === 0 ? (
+                  <p style={{ fontSize: '0.82rem', color: '#9ab09a' }}>No team members found.</p>
+                ) : (
+                  <div className="atm-staff-grid">
+                    {teamMembers.map(m => {
+                      const sel = cAssignees.includes(m.users_id);
+                      return (
+                        <button key={m.users_id} type="button"
+                          className={`atm-staff-chip ${sel ? 'selected' : ''}`}
+                          onClick={() => setCAssignees(prev => prev.includes(m.users_id) ? prev.filter(x => x !== m.users_id) : [...prev, m.users_id])}
+                          disabled={createLoading}>
+                          <span className="chip-avatar">{m.first_name[0]}{m.last_name[0]}</span>
+                          <span className="chip-name">{m.first_name} {m.last_name}</span>
+                          {m.role_name && <span className="chip-role">{m.role_name}</span>}
+                          {sel && <CheckCircle size={12} className="chip-check" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+                {cAssignees.length > 0 && (
+                  <p style={{ fontSize: '0.78rem', color: '#2D5016', fontWeight: 600, margin: '0.35rem 0 0', display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <Users size={13} /> {cAssignees.length} member{cAssignees.length !== 1 ? 's' : ''} selected
+                  </p>
+                )}
+              </div>
+            </div>
+            <div className="atd-modal-actions" style={{ marginTop: '1.25rem' }}>
+              <button className="btn-approve" onClick={handleCreate} disabled={createLoading || !cTitle.trim()}>
+                {createLoading ? <Loader2 size={14} className="spin" /> : <CheckCircle size={14} />}
+                Create Task
+              </button>
+              <button className="btn-secondary" onClick={() => setShowCreate(false)} disabled={createLoading}>Cancel</button>
             </div>
           </div>
         </div>

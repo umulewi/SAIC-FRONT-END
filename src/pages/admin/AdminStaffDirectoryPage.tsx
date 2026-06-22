@@ -97,7 +97,7 @@ interface ModalProps {
   onClose: () => void;
 }
 
-function StaffDetailModal({ staff, isAdmin, dateFrom, dateTo, onClose }: ModalProps) {
+export function StaffDetailModal({ staff, isAdmin, dateFrom, dateTo, onClose }: ModalProps) {
   const [perf,        setPerf]        = useState<StaffPerformanceDetail | null>(null);
   const [perfLoading, setPerfLoading] = useState(isAdmin);
   const [perfError,   setPerfError]   = useState('');
@@ -473,7 +473,7 @@ export default function AdminStaffDirectoryPage({ role = 'admin' }: Props) {
                   Department <SortIcon field="dept" />
                 </th>
                 <th>Role</th>
-                <th>Contract</th>
+                <th className="no-print">Contract</th>
                 {isAdmin && (
                   <th className="asd-th-sort" onClick={() => toggleSort('perf')}>
                     Performance <SortIcon field="perf" />
@@ -506,13 +506,13 @@ export default function AdminStaffDirectoryPage({ role = 'admin' }: Props) {
                         </div>
                         <div>
                           <span className="asd-full-name">{s.first_name} {s.last_name}</span>
-                          <span className="asd-sub-email">{s.email}</span>
+                          <span className="asd-sub-email no-print">{s.email}</span>
                         </div>
                       </div>
                     </td>
                     <td style={{ fontSize: '0.82rem' }}>{s.department_name ?? '—'}</td>
                     <td style={{ fontSize: '0.78rem', color: '#5a7a5a' }}>{s.role_name ?? '—'}</td>
-                    <td><ContractBadge status={s.contract_status} /></td>
+                    <td className="no-print"><ContractBadge status={s.contract_status} /></td>
                     {isAdmin && (
                       <td>
                         <PerfBadge pct={pct} evalCount={s.eval_count} taskTotal={s.task_total} />

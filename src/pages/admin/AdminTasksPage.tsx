@@ -53,6 +53,9 @@ export default function AdminTasksPage() {
   const [submitting,   setSubmitting]   = useState(false);
   const [createError,  setCreateError]  = useState('');
 
+  const [deleteTarget, setDeleteTarget] = useState<{ id: number; title: string } | null>(null);
+  const [deleting,     setDeleting]     = useState(false);
+
   // Only show Department Managers in the assignee list (admin tasks go to managers first)
   const managerStaff = staff.filter(s => (s.role_name ?? '').endsWith('Manager'));
 
@@ -109,10 +112,12 @@ export default function AdminTasksPage() {
     }
   };
 
-  const handleDelete = async (id: number, t: string) => {
-    if (!confirm(`Delete task "${t}"? This cannot be undone.`)) return;
-    try { await deleteTask(id); load(page); }
-    catch { setError('Failed to delete task.'); }
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try { await deleteTask(deleteTarget.id); setDeleteTarget(null); load(page); }
+    catch { setError('Failed to delete task.'); setDeleteTarget(null); }
+    finally { setDeleting(false); }
   };
 
   const totalPages = Math.ceil(total / LIMIT);
@@ -332,7 +337,7 @@ export default function AdminTasksPage() {
                           <button className="btn-secondary" onClick={() => nav(`/dashboard/admin/tasks/${t.id}`)}>
                             <Eye size={13} /> View
                           </button>
-                          <button className="btn-danger" onClick={() => handleDelete(t.id, t.title)}>
+                          <button className="btn-danger" onClick={() => setDeleteTarget({ id: t.id, title: t.title })}>
                             <Trash2 size={13} />
                           </button>
                         </div>
@@ -356,6 +361,42 @@ export default function AdminTasksPage() {
             </div>
           )}
         </>
+      )}
+
+      {/* ── Delete Confirm Modal ── */}
+      {deleteTarget && (
+        <div className="atd-modal-overlay" onClick={e => e.target === e.currentTarget && setDeleteTarget(null)}>
+          <div className="atd-modal" role="dialog" style={{ maxWidth: 420, textAlign: 'center' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+              <div style={{ width: 52, height: 52, borderRadius: '50%', background: '#fff0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '0.25rem' }}>
+                <Trash2 size={26} style={{ color: '#c0392b' }} />
+              </div>
+              <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: '#1a1a1a' }}>Delete Task?</h3>
+              <p style={{ margin: 0, fontSize: '0.82rem', color: '#9ab09a' }}>This action is permanent and cannot be reversed</p>
+            </div>
+            <div style={{ background: '#f9f9f9', border: '1px solid #e8e8e8', borderRadius: 8, padding: '0.75rem 1rem', marginBottom: '1rem', textAlign: 'left' }}>
+              <p style={{ margin: 0, fontSize: '0.88rem', color: '#4a5568' }}>
+                You are about to permanently delete{' '}
+                <strong style={{ color: '#1a1a1a' }}>"{deleteTarget.title}"</strong>.
+                All comments, files, and assignments will be lost.
+              </p>
+            </div>
+            <div style={{ background: '#fff5f5', border: '1px solid #fecaca', borderRadius: 7, padding: '0.5rem 0.85rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <AlertCircle size={14} style={{ color: '#c0392b', flexShrink: 0 }} />
+              <span style={{ fontSize: '0.8rem', color: '#c0392b' }}>This cannot be undone. Please confirm carefully.</span>
+            </div>
+            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
+              <button className="btn-secondary" onClick={() => setDeleteTarget(null)} disabled={deleting}
+                style={{ flex: 1 }}>
+                <X size={14} /> Cancel
+              </button>
+              <button onClick={handleDelete} disabled={deleting}
+                style={{ flex: 1, background: 'linear-gradient(135deg,#c0392b,#96281b)', color: '#fff', border: 'none', borderRadius: 9, padding: '0.6rem 1rem', fontWeight: 700, fontSize: '0.875rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}>
+                {deleting ? <><Loader2 size={14} className="spin" /> Deleting…</> : <><Trash2 size={14} /> Yes, Delete</>}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

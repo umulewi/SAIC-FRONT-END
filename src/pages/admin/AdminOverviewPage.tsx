@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import {
   ClipboardList, ClipboardCheck, Users, CalendarDays,
   BarChart3, TrendingUp, CheckCircle, XCircle, Clock,
-  AlertTriangle, RefreshCw, Download,
+  AlertTriangle, RefreshCw, Download, ChevronLeft, ChevronRight,
 } from 'lucide-react';
 import { adminGetTasks, adminGetAssignedTasks, adminGetStaff, adminGetLeaveRequests } from '../../api/role';
 import { getAnalytics } from '../../api/tasks';
@@ -38,6 +38,10 @@ export default function AdminOverviewPage() {
   const [analytics,    setAnalytics]    = useState<AnalyticsData | null>(null);
   const [anLoading,    setAnLoading]    = useState(true);
   const [anError,      setAnError]      = useState('');
+
+  const PAGE_SIZE = 5;
+  const [perfPage,  setPerfPage]  = useState(1);
+  const [tasksPage, setTasksPage] = useState(1);
   const loadAnalytics = async () => {
     setAnLoading(true); setAnError('');
     try   { setAnalytics(await getAnalytics()); }
@@ -181,77 +185,116 @@ export default function AdminOverviewPage() {
           </div>
 
           {/* ── Staff Performance ── */}
-          <div className="an-table-card">
-            <h3 className="an-card-title"><Users size={16} /> Staff Performance</h3>
-            <div style={{ overflowX: 'auto' }}>
-              <table className="saic-table">
-                <thead>
-                  <tr>
-                    <th>#</th><th>Name</th><th>Email</th>
-                    <th>Assigned</th><th>In Progress</th><th>Submitted</th>
-                    <th>Approved</th><th>Rejected</th><th>Rate</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {analytics.user_performance.length === 0 && (
-                    <tr><td colSpan={9} style={{ textAlign: 'center', color: '#a0b8a0', padding: '1.5rem' }}>No assignment data yet.</td></tr>
-                  )}
-                  {analytics.user_performance.map((u, i) => {
-                    const rate = u.total_assigned > 0 ? Math.round((u.approved / u.total_assigned) * 100) : 0;
-                    return (
-                      <tr key={u.users_id}>
-                        <td style={{ color: '#a0b8a0', fontSize: '0.78rem' }}>{i + 1}</td>
-                        <td><strong>{u.full_name}</strong></td>
-                        <td style={{ color: '#6a8c6a', fontSize: '0.82rem' }}>{u.email}</td>
-                        <td>{u.total_assigned}</td>
-                        <td><span style={{ color: '#283593', fontWeight: 600 }}>{u.in_progress}</span></td>
-                        <td><span style={{ color: '#f57f17', fontWeight: 600 }}>{u.submitted}</span></td>
-                        <td><span style={{ color: '#2e7d32', fontWeight: 600 }}>{u.approved}</span></td>
-                        <td><span style={{ color: '#c62828', fontWeight: 600 }}>{u.rejected}</span></td>
-                        <td>
-                          <div className="an-rate-bar-wrap">
-                            <div className="an-rate-bar" style={{ width: `${rate}%` }} />
-                            <span className="an-rate-text">{rate}%</span>
-                          </div>
-                        </td>
+          {(() => {
+            const perfTotal = analytics.user_performance.length;
+            const perfPages = Math.ceil(perfTotal / PAGE_SIZE);
+            const perfSlice = analytics.user_performance.slice((perfPage - 1) * PAGE_SIZE, perfPage * PAGE_SIZE);
+            return (
+              <div className="an-table-card">
+                <h3 className="an-card-title"><Users size={16} /> Staff Performance</h3>
+                <div style={{ overflowX: 'auto' }}>
+                  <table className="saic-table">
+                    <thead>
+                      <tr>
+                        <th>#</th><th>Name</th><th>Email</th>
+                        <th>Assigned</th><th>In Progress</th><th>Submitted</th>
+                        <th>Approved</th><th>Rejected</th><th>Rate</th>
                       </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
+                    </thead>
+                    <tbody>
+                      {perfTotal === 0 && (
+                        <tr><td colSpan={9} style={{ textAlign: 'center', color: '#a0b8a0', padding: '1.5rem' }}>No assignment data yet.</td></tr>
+                      )}
+                      {perfSlice.map((u, i) => {
+                        const rate = u.total_assigned > 0 ? Math.round((u.approved / u.total_assigned) * 100) : 0;
+                        return (
+                          <tr key={u.users_id}>
+                            <td style={{ color: '#a0b8a0', fontSize: '0.78rem' }}>{(perfPage - 1) * PAGE_SIZE + i + 1}</td>
+                            <td><strong>{u.full_name}</strong></td>
+                            <td style={{ color: '#6a8c6a', fontSize: '0.82rem' }}>{u.email}</td>
+                            <td>{u.total_assigned}</td>
+                            <td><span style={{ color: '#283593', fontWeight: 600 }}>{u.in_progress}</span></td>
+                            <td><span style={{ color: '#f57f17', fontWeight: 600 }}>{u.submitted}</span></td>
+                            <td><span style={{ color: '#2e7d32', fontWeight: 600 }}>{u.approved}</span></td>
+                            <td><span style={{ color: '#c62828', fontWeight: 600 }}>{u.rejected}</span></td>
+                            <td>
+                              <div className="an-rate-bar-wrap">
+                                <div className="an-rate-bar" style={{ width: `${rate}%` }} />
+                                <span className="an-rate-text">{rate}%</span>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+                {perfPages > 1 && (
+                  <div className="atm-pagination">
+                    <button className="atm-pg-btn" disabled={perfPage <= 1} onClick={() => setPerfPage(p => p - 1)}>
+                      <ChevronLeft size={15} />
+                    </button>
+                    <span className="atm-pg-info">Page {perfPage} of {perfPages} ({perfTotal} staff)</span>
+                    <button className="atm-pg-btn" disabled={perfPage >= perfPages} onClick={() => setPerfPage(p => p + 1)}>
+                      <ChevronRight size={15} />
+                    </button>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
 
           {/* ── Recent Tasks ── */}
-          <div className="an-table-card">
-            <h3 className="an-card-title"><ClipboardList size={16} /> Recent Tasks</h3>
-            <div style={{ overflowX: 'auto' }}>
-              <table className="saic-table">
-                <thead>
-                  <tr><th>Title</th><th>Priority</th><th>Status</th><th>Due</th><th>Created</th></tr>
-                </thead>
-                <tbody>
-                  {analytics.recent_tasks.map(t => (
-                    <tr key={t.id}>
-                      <td><strong>{t.title}</strong></td>
-                      <td><span className={`badge badge-${t.priority}`}>{t.priority}</span></td>
-                      <td>
-                        <span className={`badge badge-${t.status === 'in_progress' ? 'inprog' : t.status}`}>
-                          {t.status.replace('_', ' ')}
-                        </span>
-                      </td>
-                      <td style={{ fontSize: '0.8rem', color: '#6a8c6a' }}>
-                        {t.deadline ? new Date(t.deadline).toLocaleDateString('en-GB') : '—'}
-                      </td>
-                      <td style={{ fontSize: '0.8rem', color: '#6a8c6a' }}>
-                        {t.created_at ? new Date(t.created_at).toLocaleDateString('en-GB') : '—'}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          {(() => {
+            const tasksTotal = analytics.recent_tasks.length;
+            const tasksPages = Math.ceil(tasksTotal / PAGE_SIZE);
+            const tasksSlice = analytics.recent_tasks.slice((tasksPage - 1) * PAGE_SIZE, tasksPage * PAGE_SIZE);
+            return (
+              <div className="an-table-card">
+                <h3 className="an-card-title"><ClipboardList size={16} /> Recent Tasks</h3>
+                <div style={{ overflowX: 'auto' }}>
+                  <table className="saic-table">
+                    <thead>
+                      <tr><th>Title</th><th>Priority</th><th>Status</th><th>Due</th><th>Created</th></tr>
+                    </thead>
+                    <tbody>
+                      {tasksTotal === 0 && (
+                        <tr><td colSpan={5} style={{ textAlign: 'center', color: '#a0b8a0', padding: '1.5rem' }}>No tasks yet.</td></tr>
+                      )}
+                      {tasksSlice.map(t => (
+                        <tr key={t.id}>
+                          <td><strong>{t.title}</strong></td>
+                          <td><span className={`badge badge-${t.priority}`}>{t.priority}</span></td>
+                          <td>
+                            <span className={`badge badge-${t.status === 'in_progress' ? 'inprog' : t.status}`}>
+                              {t.status.replace('_', ' ')}
+                            </span>
+                          </td>
+                          <td style={{ fontSize: '0.8rem', color: '#6a8c6a' }}>
+                            {t.deadline ? new Date(t.deadline).toLocaleDateString('en-GB') : '—'}
+                          </td>
+                          <td style={{ fontSize: '0.8rem', color: '#6a8c6a' }}>
+                            {t.created_at ? new Date(t.created_at).toLocaleDateString('en-GB') : '—'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                {tasksPages > 1 && (
+                  <div className="atm-pagination">
+                    <button className="atm-pg-btn" disabled={tasksPage <= 1} onClick={() => setTasksPage(p => p - 1)}>
+                      <ChevronLeft size={15} />
+                    </button>
+                    <span className="atm-pg-info">Page {tasksPage} of {tasksPages} ({tasksTotal} tasks)</span>
+                    <button className="atm-pg-btn" disabled={tasksPage >= tasksPages} onClick={() => setTasksPage(p => p + 1)}>
+                      <ChevronRight size={15} />
+                    </button>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
         </>
       )}
     </div>

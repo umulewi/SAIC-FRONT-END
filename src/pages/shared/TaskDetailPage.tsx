@@ -4,9 +4,11 @@ import {
   ArrowLeft, Calendar, Clock, MessageSquare, Paperclip, Send,
   Loader2, CheckCircle, AlertCircle, Upload, Download, FileText,
   Image, FileSpreadsheet, Archive, PlayCircle, ThumbsUp, ThumbsDown,
+  Pencil, CalendarClock, X, Users,
 } from 'lucide-react';
-import { getTask, updateTaskStatus, submitTask, addComment, managerReviewTask } from '../../api/tasks';
-import type { EnhancedTask, TaskPriority, TaskStatus, TaskAssignment } from '../../types';
+import { getTask, updateTaskStatus, submitTask, addComment, managerReviewTask, updateTask, extendDeadline, assignTask, removeAssignee } from '../../api/tasks';
+import { getMyTeam } from '../../api/role';
+import type { EnhancedTask, TaskPriority, TaskStatus, TaskAssignment, TeamMember } from '../../types';
 import { useAuth } from '../../context/AuthContext';
 import LoadingSpinner from '../../components/Common/LoadingSpinner';
 import '../shared/SharedPages.css';
@@ -90,6 +92,27 @@ export default function TaskDetailPage({ apiBase }: TaskDetailPageProps) {
   const [reviewError,    setReviewError]    = useState('');
   const [reviewOk,       setReviewOk]       = useState(false);
 
+  // Edit task (manager's own team tasks)
+  const [editOpen,         setEditOpen]         = useState(false);
+  const [editTitle,        setEditTitle]        = useState('');
+  const [editDesc,         setEditDesc]         = useState('');
+  const [editPriority,     setEditPriority]     = useState<TaskPriority>('medium');
+  const [editInstructions, setEditInstructions] = useState('');
+  const [editDeadline,     setEditDeadline]     = useState('');
+  const [editDeadlineTime, setEditDeadlineTime] = useState('');
+  const [editTeamMembers,  setEditTeamMembers]  = useState<TeamMember[]>([]);
+  const [editAssignees,    setEditAssignees]    = useState<number[]>([]);
+  const [saving,           setSaving]           = useState(false);
+  const [editError,        setEditError]        = useState('');
+
+  // Extend deadline (manager's own team tasks)
+  const [extendOpen,      setExtendOpen]      = useState(false);
+  const [newDeadline,     setNewDeadline]     = useState('');
+  const [newDeadlineTime, setNewDeadlineTime] = useState('');
+  const [extendReason,    setExtendReason]    = useState('');
+  const [extending,       setExtending]       = useState(false);
+  const [extendError,     setExtendError]     = useState('');
+
   const reload = async () => {
     setLoading(true); setError('');
     try {
@@ -149,6 +172,76 @@ export default function TaskDetailPage({ apiBase }: TaskDetailPageProps) {
     } finally { setReviewing(false); }
   };
 
+  const openEdit = async () => {
+    if (!task) return;
+    setEditTitle(task.title);
+    setEditDesc(task.description ?? '');
+    setEditPriority(task.priority);
+    setEditInstructions(task.instructions ?? '');
+    setEditDeadline(task.deadline ? task.deadline.slice(0, 10) : '');
+    setEditDeadlineTime(task.deadline_time ?? '');
+    setEditAssignees(
+      (task.assignees ?? []).filter(a => a.assigned_by_role === 'manager').map(a => a.users_id)
+    );
+    setEditError('');
+    setEditOpen(true);
+    if (editTeamMembers.length === 0) {
+      try { setEditTeamMembers(await getMyTeam(apiBase)); } catch { /* ignore */ }
+    }
+  };
+
+  const handleEditSave = async () => {
+    if (!editTitle.trim()) { setEditError('Title is required.'); return; }
+    setSaving(true); setEditError('');
+    try {
+      await updateTask(taskId, {
+        title: editTitle.trim(),
+        description: editDesc.trim() || undefined,
+        priority: editPriority,
+        instructions: editInstructions.trim() || undefined,
+        deadline: editDeadline || undefined,
+        deadline_time: editDeadlineTime || undefined,
+      });
+
+      // Sync assignees: add new, remove dropped
+      const currentIds = new Set(
+        (task!.assignees ?? []).filter(a => a.assigned_by_role === 'manager').map(a => a.users_id)
+      );
+      const toAdd    = editAssignees.filter(uid => !currentIds.has(uid));
+      const toRemove = [...currentIds].filter(uid => !editAssignees.includes(uid));
+      if (toAdd.length > 0) await assignTask(taskId, toAdd);
+      for (const uid of toRemove) await removeAssignee(taskId, uid);
+
+      setEditOpen(false);
+      reload();
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Save failed.';
+      setEditError(msg);
+    } finally { setSaving(false); }
+  };
+
+  const openExtend = () => {
+    if (!task) return;
+    setNewDeadline(task.deadline ? task.deadline.slice(0, 10) : '');
+    setNewDeadlineTime(task.deadline_time ?? '');
+    setExtendReason('');
+    setExtendError('');
+    setExtendOpen(true);
+  };
+
+  const handleExtend = async () => {
+    if (!newDeadline) { setExtendError('New deadline date is required.'); return; }
+    setExtending(true); setExtendError('');
+    try {
+      await extendDeadline(taskId, newDeadline, extendReason || undefined, newDeadlineTime || undefined);
+      setExtendOpen(false);
+      reload();
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Failed to extend deadline.';
+      setExtendError(msg);
+    } finally { setExtending(false); }
+  };
+
   if (loading) return <LoadingSpinner message="Loading task…" />;
   if (error || !task) return (
     <div className="page-error">
@@ -158,6 +251,7 @@ export default function TaskDetailPage({ apiBase }: TaskDetailPageProps) {
 
   const isRejectedByAdmin = task.workflow_stage === 'rejected_to_manager';
   const isTeamOnly = task.scope === 'team_only';
+  const isMyTeamTask = isManager && isTeamOnly && task.created_by === user?.id;
 
   const canStart   = myAssignment?.assignment_status === 'assigned' && !isRejectedByAdmin;
   // Allow resubmit when admin rejected, even if assignment was previously approved
@@ -176,10 +270,104 @@ export default function TaskDetailPage({ apiBase }: TaskDetailPageProps) {
   return (
     <div className="tdp-root">
 
-      {/* ── Back ── */}
-      <button className="atd-back-btn" onClick={() => nav(`/dashboard/${roleSlug}/tasks`)}>
-        <ArrowLeft size={15} /> My Tasks
-      </button>
+      {/* ── Back + Manager actions ── */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+        <button className="atd-back-btn" style={{ margin: 0 }} onClick={() => nav(`/dashboard/${roleSlug}/tasks`)}>
+          <ArrowLeft size={15} /> My Tasks
+        </button>
+        {isMyTeamTask && (
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button className="btn-secondary" onClick={openEdit}>
+              <Pencil size={14} /> Edit Task
+            </button>
+            <button className="btn-secondary" onClick={openExtend}>
+              <CalendarClock size={14} /> Extend Deadline
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* ── Edit Task panel (manager's own team tasks) ── */}
+      {isMyTeamTask && editOpen && (
+        <div className="atd-card" style={{ marginBottom: '1rem', border: '1.5px solid #d4e4d4' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+            <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: '#2D5016', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <Pencil size={15} /> Edit Task
+            </h3>
+            <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ab09a' }} onClick={() => setEditOpen(false)}><X size={18} /></button>
+          </div>
+          {editError && <div className="alert alert-error" style={{ marginBottom: '0.75rem' }}><AlertCircle size={14} /> {editError}</div>}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                <label>Title *</label>
+                <input value={editTitle} onChange={e => setEditTitle(e.target.value)} disabled={saving} placeholder="Task title" />
+              </div>
+              <div className="form-group">
+                <label>Priority</label>
+                <select value={editPriority} onChange={e => setEditPriority(e.target.value as TaskPriority)} disabled={saving}>
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                  <option value="urgent">Urgent</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label><Calendar size={12} /> Due Date</label>
+                <input type="date" value={editDeadline} onChange={e => setEditDeadline(e.target.value)} disabled={saving} />
+              </div>
+              <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                <label><Clock size={12} /> Due Time</label>
+                <input type="time" value={editDeadlineTime} onChange={e => setEditDeadlineTime(e.target.value)} disabled={saving} />
+              </div>
+            </div>
+            <div className="form-group">
+              <label>Description</label>
+              <textarea rows={2} value={editDesc} onChange={e => setEditDesc(e.target.value)} disabled={saving} placeholder="Brief overview" />
+            </div>
+            <div className="form-group">
+              <label>Instructions / Details</label>
+              <textarea rows={3} value={editInstructions} onChange={e => setEditInstructions(e.target.value)} disabled={saving} />
+            </div>
+            <div className="form-group">
+              <label><Users size={12} /> Assign to Team Members</label>
+              {editTeamMembers.length === 0 ? (
+                <p style={{ fontSize: '0.82rem', color: '#9ab09a', margin: '0.25rem 0 0' }}>Loading team…</p>
+              ) : (
+                <div className="atm-staff-grid">
+                  {editTeamMembers.map(m => {
+                    const sel = editAssignees.includes(m.users_id);
+                    return (
+                      <button key={m.users_id} type="button"
+                        className={`atm-staff-chip ${sel ? 'selected' : ''}`}
+                        onClick={() => setEditAssignees(prev =>
+                          prev.includes(m.users_id) ? prev.filter(x => x !== m.users_id) : [...prev, m.users_id]
+                        )}
+                        disabled={saving}>
+                        <span className="chip-avatar">{m.first_name[0]}{m.last_name[0]}</span>
+                        <span className="chip-name">{m.first_name} {m.last_name}</span>
+                        {m.role_name && <span className="chip-role">{m.role_name}</span>}
+                        {sel && <CheckCircle size={12} className="chip-check" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+              {editAssignees.length > 0 && (
+                <p style={{ fontSize: '0.78rem', color: '#2D5016', fontWeight: 600, margin: '0.35rem 0 0', display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <Users size={13} /> {editAssignees.length} member{editAssignees.length !== 1 ? 's' : ''} selected
+                </p>
+              )}
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button className="btn-primary" onClick={handleEditSave} disabled={saving}>
+                {saving ? <><Loader2 size={14} className="spin" /> Saving…</> : <><CheckCircle size={14} /> Save Changes</>}
+              </button>
+              <button className="btn-secondary" onClick={() => setEditOpen(false)} disabled={saving}><X size={14} /> Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Header card ── */}
       <div className="tdp-header-card">
@@ -442,6 +630,36 @@ export default function TaskDetailPage({ apiBase }: TaskDetailPageProps) {
           </div>
         </div>
       </div>
+
+      {/* ── Extend Deadline Modal (manager's own team tasks) ── */}
+      {extendOpen && (
+        <div className="atd-modal-overlay" onClick={e => e.target === e.currentTarget && setExtendOpen(false)}>
+          <div className="atd-modal" role="dialog">
+            <h3 className="atd-modal-title"><CalendarClock size={18} className="icon-green" /> Extend Deadline</h3>
+            <p className="atd-modal-sub">Current: {fmtDate(task.deadline)}{task.deadline_time ? ` at ${task.deadline_time.slice(0, 5)}` : ''}</p>
+            {extendError && <div className="alert alert-error" style={{ marginBottom: '0.75rem' }}>{extendError}</div>}
+            <div className="form-group">
+              <label><Calendar size={13} /> New Deadline Date *</label>
+              <input type="date" value={newDeadline} onChange={e => setNewDeadline(e.target.value)} />
+            </div>
+            <div className="form-group">
+              <label><Clock size={13} /> New Deadline Time <span style={{ fontSize: '0.78rem', color: '#9ab09a' }}>(optional)</span></label>
+              <input type="time" value={newDeadlineTime} onChange={e => setNewDeadlineTime(e.target.value)} />
+            </div>
+            <div className="form-group">
+              <label>Reason <span style={{ fontSize: '0.78rem', color: '#9ab09a' }}>(optional)</span></label>
+              <textarea rows={2} value={extendReason} onChange={e => setExtendReason(e.target.value)} placeholder="Reason for extension…" />
+            </div>
+            <div className="atd-modal-actions">
+              <button className="btn-approve" onClick={handleExtend} disabled={extending || !newDeadline}>
+                {extending ? <Loader2 size={14} className="spin" /> : <CheckCircle size={14} />}
+                Extend Deadline
+              </button>
+              <button className="btn-secondary" onClick={() => setExtendOpen(false)}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

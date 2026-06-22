@@ -264,14 +264,16 @@ export default function AdminTaskDetailPage() {
         <button className="atd-back-btn" onClick={() => nav('/dashboard/admin/tasks')}>
           <ArrowLeft size={16} /> All Tasks
         </button>
-        <div className="atd-topbar-actions">
-          <button className="btn-secondary" onClick={openEdit}>
-            <Pencil size={14} /> Edit Task
-          </button>
-          <button className="btn-secondary" onClick={openExtend}>
-            <CalendarClock size={14} /> Extend Deadline
-          </button>
-        </div>
+        {!isTeamOnly && (
+          <div className="atd-topbar-actions">
+            <button className="btn-secondary" onClick={openEdit}>
+              <Pencil size={14} /> Edit Task
+            </button>
+            <button className="btn-secondary" onClick={openExtend}>
+              <CalendarClock size={14} /> Extend Deadline
+            </button>
+          </div>
+        )}
       </div>
 
       {/* ── Edit Task Inline Panel ── */}

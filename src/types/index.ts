@@ -212,6 +212,19 @@ export interface StaffProfile {
   gender?: string;
   address?: string;
   manager_id?: number | null;
+  profile_photo?: string | null;
+  province?: string | null;
+  district?: string | null;
+  sector?: string | null;
+  cell?: string | null;
+  village?: string | null;
+  bank_name?: string | null;
+  bank_account_no?: string | null;
+  contract_start?: string | null;
+  contract_end?: string | null;
+  contract_status?: string | null;
+  contract_file?: string | null;
+  contract_original?: string | null;
 }
 
 export type Task = EnhancedTask;

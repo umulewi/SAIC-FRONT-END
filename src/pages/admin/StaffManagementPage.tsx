@@ -7,13 +7,14 @@ import {
   Pencil, Trash2, CheckCircle, X, User, Mail,
   Phone, MapPin, Loader2, AlertCircle, UserPlus,
   ChevronLeft, ChevronRight, UserCog, Camera, Upload,
-  Building2, CreditCard, Calendar, FileText, Paperclip, ExternalLink,
+  Building2, CreditCard, Calendar, FileText, Paperclip, ExternalLink, Eye,
 } from 'lucide-react';
 import {
   adminGetStaff, adminCreateStaff, adminUpdateStaff,
   adminDeleteStaff, adminUploadStaffPhoto, adminUploadStaffContract,
 } from '../../api/role';
-import type { StaffMember } from '../../types';
+import type { StaffMember, DirectoryStaff } from '../../types';
+import { StaffDetailModal } from './AdminStaffDirectoryPage';
 import PageHeader from '../../components/Common/PageHeader';
 import LoadingSpinner from '../../components/Common/LoadingSpinner';
 import '../shared/SharedPages.css';
@@ -81,6 +82,7 @@ export default function StaffManagementPage({ roleId, label }: StaffManagementPa
   const [error,      setError]      = useState('');
   const [deleteTarget, setDeleteTarget] = useState<StaffMember | null>(null);
   const [deleting,     setDeleting]    = useState(false);
+  const [viewTarget,   setViewTarget]  = useState<DirectoryStaff | null>(null);
 
   // Profile photo upload
   const [currentPhoto,   setCurrentPhoto]   = useState<string | null>(null);
@@ -566,15 +568,12 @@ export default function StaffManagementPage({ roleId, label }: StaffManagementPa
                 <th>Email</th>
                 <th>Phone</th>
                 <th>Gender</th>
-                <th>Bank</th>
-                <th>Contract</th>
-                <th>Manager</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {staff.length === 0 && (
-                <tr><td colSpan={9}>
+                <tr><td colSpan={6}>
                   <div className="empty-state"><User size={38} /><p>No {label} registered yet.</p></div>
                 </td></tr>
               )}
@@ -602,29 +601,11 @@ export default function StaffManagementPage({ roleId, label }: StaffManagementPa
                       : <span className="sm-dash">—</span>
                     }
                   </td>
-                  <td style={{ fontSize: '0.8rem', color: '#4a6c4a' }}>
-                    {m.bank_name
-                      ? <div>
-                          <div style={{ fontWeight: 600 }}>{m.bank_name}</div>
-                          {m.bank_account_no && <div style={{ color: '#8aaa8a', fontSize: '0.75rem' }}>{m.bank_account_no}</div>}
-                        </div>
-                      : <span className="sm-dash">—</span>
-                    }
-                  </td>
-                  <td>
-                    <ContractBadge status={m.contract_status} />
-                  </td>
-                  <td style={{ fontSize: '0.82rem', color: '#4a6c4a' }}>
-                    {m.manager_id
-                      ? (() => {
-                          const mgr = allManagers.find(a => a.staff_id === m.manager_id);
-                          return mgr ? `${mgr.first_name} ${mgr.last_name}` : `#${m.manager_id}`;
-                        })()
-                      : <span className="sm-dash">—</span>
-                    }
-                  </td>
                   <td>
                     <div className="table-actions">
+                      <button className="asd-view-btn" onClick={() => setViewTarget({ ...m, total_points: 0, eval_count: 0, kpi_count: 0, task_total: 0, task_completed: 0 })} title="View Details">
+                        <Eye size={13} /> View
+                      </button>
                       <button className="sm-btn-edit" onClick={() => openEdit(m)} title="Edit">
                         <Pencil size={13} /> Edit
                       </button>
@@ -650,6 +631,15 @@ export default function StaffManagementPage({ roleId, label }: StaffManagementPa
             <ChevronRight size={15} />
           </button>
         </div>
+      )}
+
+      {/* ── Staff detail modal ── */}
+      {viewTarget && (
+        <StaffDetailModal
+          staff={viewTarget}
+          isAdmin={true}
+          onClose={() => setViewTarget(null)}
+        />
       )}
 
       {/* ── Delete confirm modal ── */}

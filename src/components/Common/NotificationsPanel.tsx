@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Bell, X, CheckCheck, Trash2, ClipboardList } from 'lucide-react';
 import { getNotifications, markAsRead, markAllAsRead, deleteNotification } from '../../api/notifications';
 import type { Notification, NotificationType } from '../../types';
@@ -28,6 +29,7 @@ interface Props {
 }
 
 export default function NotificationsPanel({ onCountChange }: Props) {
+  const navigate = useNavigate();
   const [open,    setOpen]    = useState(false);
   const [notifs,  setNotifs]  = useState<Notification[]>([]);
   const [unread,  setUnread]  = useState(0);
@@ -69,6 +71,14 @@ export default function NotificationsPanel({ onCountChange }: Props) {
       setNotifs(prev => prev.map(x => x.id === n.id ? { ...x, is_read: 1 } : x));
       setUnread(u => Math.max(0, u - 1));
       onCountChange?.(Math.max(0, unread - 1));
+    }
+    if (n.task_id) {
+      const parts   = window.location.pathname.split('/');
+      const dashIdx = parts.indexOf('dashboard');
+      if (dashIdx !== -1 && parts[dashIdx + 1]) {
+        setOpen(false);
+        navigate(`/dashboard/${parts[dashIdx + 1]}/tasks/${n.task_id}`);
+      }
     }
   };
 
