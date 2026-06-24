@@ -499,7 +499,9 @@ export default function MyTasksPage({ apiBase }: MyTasksPageProps) {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
                 <div className="form-group">
                   <label><Calendar size={12} /> Due Date</label>
-                  <input type="date" value={cDeadline} onChange={e => setCDeadline(e.target.value)} disabled={createLoading} />
+                  <input type="date" value={cDeadline}
+                    min={new Date().toISOString().split('T')[0]}
+                    onChange={e => setCDeadline(e.target.value)} disabled={createLoading} />
                 </div>
                 <div className="form-group">
                   <label><Clock size={12} /> Due Time</label>

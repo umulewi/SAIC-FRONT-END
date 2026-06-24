@@ -33,6 +33,9 @@ import AccountantPettyCashPage from './pages/accountant/AccountantPettyCashPage'
 // HR Manager page
 import HRManagerPage from './pages/hr/HRManagerPage';
 
+// Admin KPI cycles page
+import AdminKpiCyclesPage from './pages/admin/AdminKpiCyclesPage';
+
 const MANAGER_SLUGS = new Set([
   'admin_manager',
   'finance_manager',
@@ -90,6 +93,7 @@ function AppRoutes() {
           <Route path="petty-cash"        element={<AdminPettyCashPage />} />
           <Route path="documents"         element={<AdminDocumentsPage />} />
           <Route path="staff-directory"  element={<AdminStaffDirectoryPage role="admin" />} />
+          <Route path="kpi-cycles"       element={<AdminKpiCyclesPage />} />
 
           {/* Staff management — keyed by role ID, matching sidebar paths */}
           {Object.entries(ADMIN_STAFF_ROLES).map(([roleId, label]) => (

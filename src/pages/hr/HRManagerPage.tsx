@@ -2,13 +2,16 @@ import { useEffect, useState } from 'react';
 import {
   Users, Target, Star, ChevronDown, ChevronUp, Plus, Pencil, Trash2,
   CheckCircle, X, Loader2, AlertCircle, RefreshCw, Award, Calendar,
+  CalendarRange, Send, ChevronLeft, Clock,
 } from 'lucide-react';
 import {
   hrGetStaff, hrGetKpis, hrCreateKpi, hrUpdateKpi, hrDeleteKpi,
   hrGetStaffKpis, hrAssignKpi, hrDeleteStaffKpi,
-  hrGetStaffEvaluations, hrAddEvaluation, hrGetEvaluationsSummary,
+  hrAddEvaluation, hrGetEvaluationsSummary,
 } from '../../api/hr';
-import type { HRStaff, KPI, StaffKPI, PerformanceEvaluation, EvaluationSummary } from '../../api/hr';
+import type { HRStaff, KPI, StaffKPI, EvaluationSummary } from '../../api/hr';
+import { listKpiCycles, getCycleStaff, saveEvaluation } from '../../api/kpiCycles';
+import type { KpiCycle } from '../../api/kpiCycles';
 import PageHeader from '../../components/Common/PageHeader';
 import LoadingSpinner from '../../components/Common/LoadingSpinner';
 import '../shared/SharedPages.css';
@@ -39,9 +42,24 @@ function RatingBadge({ rating }: { rating?: string | null }) {
 }
 
 function calcPerf(evalCount: number, totalPoints: number, taskTotal: number, taskCompleted: number) {
-  const kpi  = evalCount  > 0 ? (totalPoints / (evalCount * 100)) * 50 : 0;
-  const task = taskTotal  > 0 ? (taskCompleted / taskTotal) * 50        : 0;
+  const kpi  = evalCount > 0 ? (totalPoints / (evalCount * 100)) * 50 : 0;
+  const task = taskTotal > 0 ? (taskCompleted / taskTotal) * 50        : 50;
   return Math.round(kpi + task);
+}
+
+function defaultDueDate() {
+  const d = new Date(); d.setDate(d.getDate() + 14);
+  return d.toISOString().split('T')[0];
+}
+
+function kpiStatus(sk: StaffKPI): { label: string; color: string; bg: string } {
+  if (sk.rating) return { label: 'Completed', color: '#16a34a', bg: '#f0fdf4' };
+  if (!sk.due_date) return { label: 'Pending', color: '#6b7280', bg: '#f3f4f6' };
+  const diff = Math.ceil((new Date(sk.due_date).getTime() - Date.now()) / 86400000);
+  if (diff < 0)  return { label: 'Overdue',       color: '#dc2626', bg: '#fef2f2' };
+  if (diff === 0) return { label: 'Due today',    color: '#ea580c', bg: '#fff7ed' };
+  if (diff <= 3) return { label: `Due in ${diff}d`, color: '#d97706', bg: '#fffbeb' };
+  return { label: `${diff}d left`, color: '#2563eb', bg: '#eff6ff' };
 }
 
 function PerfBadge({ pct }: { pct: number }) {
@@ -64,6 +82,37 @@ function PointsBadge({ points }: { points: number }) {
   return <span className={`hr-points-badge hr-points-${level}`}>{points} pts</span>;
 }
 
+function ScoreBar({ score }: { score?: number | null }) {
+  if (score == null) return <span style={{ color: '#b0c8b0', fontSize: '0.78rem' }}>Not evaluated</span>;
+  const color = score >= 80 ? '#16a34a' : score >= 60 ? '#d97706' : score >= 40 ? '#2563eb' : '#dc2626';
+  const label = score >= 80 ? 'Excellent' : score >= 60 ? 'Good' : score >= 40 ? 'Fair' : 'Poor';
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', minWidth: 120 }}>
+      <div style={{ flex: 1, height: 6, borderRadius: 3, background: '#e2e8f0', overflow: 'hidden' }}>
+        <div style={{ height: '100%', width: `${score}%`, background: color, borderRadius: 3 }} />
+      </div>
+      <span style={{ fontSize: '0.75rem', fontWeight: 800, color }}>{score}%</span>
+      <span style={{ fontSize: '0.68rem', color }}>{label}</span>
+    </div>
+  );
+}
+
+function CycleStatusChip({ status }: { status?: string | null }) {
+  if (!status) return <span style={{ color: '#b0c8b0', fontSize: '0.78rem' }}>—</span>;
+  const map: Record<string, { label: string; color: string; bg: string }> = {
+    draft:     { label: 'Draft',     color: '#6b7280', bg: '#f3f4f6' },
+    submitted: { label: 'Submitted', color: '#2563eb', bg: '#eff6ff' },
+    approved:  { label: 'Approved',  color: '#16a34a', bg: '#f0fdf4' },
+    returned:  { label: 'Returned',  color: '#dc2626', bg: '#fef2f2' },
+  };
+  const m = map[status] ?? map.draft;
+  return (
+    <span style={{ padding: '2px 9px', borderRadius: 12, fontSize: '0.73rem', fontWeight: 700, color: m.color, background: m.bg }}>
+      {m.label}
+    </span>
+  );
+}
+
 export default function HRManagerPage() {
   const [tab,     setTab]     = useState<Tab>('staff');
   const [loading, setLoading] = useState(true);
@@ -74,7 +123,6 @@ export default function HRManagerPage() {
   const [staff,      setStaff]      = useState<HRStaff[]>([]);
   const [expanded,   setExpanded]   = useState<number | null>(null);
   const [staffKpis,  setStaffKpis]  = useState<Record<number, StaffKPI[]>>({});
-  const [staffEvals, setStaffEvals] = useState<Record<number, PerformanceEvaluation[]>>({});
   const [loadingMember, setLoadingMember] = useState(false);
 
   // KPI assign sub-form per staff
@@ -83,12 +131,6 @@ export default function HRManagerPage() {
   const [assignDue,    setAssignDue]    = useState('');
   const [assigningKpi, setAssigningKpi] = useState(false);
 
-  // Eval sub-form per staff
-  const [evalFor,     setEvalFor]    = useState<number | null>(null);
-  const [evalRating,  setEvalRating] = useState('');
-  const [evalKpiId,   setEvalKpiId]  = useState('');
-  const [evalNotes,   setEvalNotes]  = useState('');
-  const [addingEval,  setAddingEval] = useState(false);
 
   // KPI Library tab
   const [kpis,       setKpis]       = useState<KPI[]>([]);
@@ -101,7 +143,22 @@ export default function HRManagerPage() {
   const [deletingKpi, setDeletingKpi] = useState<number | null>(null);
 
   // Leaderboard
-  const [summary, setSummary] = useState<EvaluationSummary[]>([]);
+  const [summary, setSummary]       = useState<EvaluationSummary[]>([]);
+  const [lbFrom, setLbFrom]         = useState('');
+  const [lbTo, setLbTo]             = useState('');
+
+  // Evaluation cycle selection
+  const [openCycles, setOpenCycles]   = useState<KpiCycle[]>([]);
+  const [openCycle, setOpenCycle]     = useState<KpiCycle | null>(null);
+  const [cycleStatus, setCycleStatus] = useState<Record<number, string | null>>({});
+  const [submittingAll, setSubmittingAll] = useState(false);
+
+  // Eval session mode
+  const [evalMode, setEvalMode]             = useState(false);
+  const [evalStaffKpis, setEvalStaffKpis]   = useState<Record<number, StaffKPI[]>>({});
+  const [kpiEdits, setKpiEdits]             = useState<Record<number, { rating: string; notes: string }>>({});
+  const [loadingEvalMode, setLoadingEvalMode] = useState(false);
+  const [savingStaff, setSavingStaff]       = useState<number | null>(null);
 
   const loadStaff = () =>
     hrGetStaff().then(setStaff).catch(() => setError('Failed to load staff.'));
@@ -109,38 +166,50 @@ export default function HRManagerPage() {
   const loadKpis = () =>
     hrGetKpis().then(setKpis).catch(() => {});
 
-  const loadSummary = () =>
-    hrGetEvaluationsSummary().then(setSummary).catch(() => {});
+  const loadSummary = (from?: string, to?: string) =>
+    hrGetEvaluationsSummary(from, to).then(setSummary).catch(() => {});
+
+  const loadOpenCycles = async () => {
+    try {
+      const cycles = await listKpiCycles();
+      setOpenCycles(cycles.filter(c => c.status === 'open' || c.status === 'scheduled'));
+    } catch { /* non-fatal */ }
+  };
+
+  const refreshCycleStatus = async (cycleId: number) => {
+    try {
+      const staffInCycle = await getCycleStaff(cycleId);
+      const map: Record<number, string | null> = {};
+      staffInCycle.forEach(s => { map[s.users_id] = s.eval_status ?? null; });
+      setCycleStatus(map);
+    } catch { /* non-fatal */ }
+  };
 
   useEffect(() => {
     setLoading(true);
-    Promise.all([loadStaff(), loadKpis(), loadSummary()])
+    Promise.all([loadStaff(), loadKpis(), loadSummary(), loadOpenCycles()])
       .finally(() => setLoading(false));
+
+    // Re-fetch cycles every 60 s so scheduled→open transitions appear without a manual refresh
+    const cycleTimer = setInterval(loadOpenCycles, 60_000);
+    return () => clearInterval(cycleTimer);
   }, []);
 
   const toggleExpand = async (userId: number) => {
     if (expanded === userId) { setExpanded(null); return; }
     setExpanded(userId);
-    setAssignKpiFor(null); setEvalFor(null);
+    setAssignKpiFor(null);
     if (!staffKpis[userId]) {
       setLoadingMember(true);
-      const [kpiRows, evalRows] = await Promise.all([
-        hrGetStaffKpis(userId).catch(() => []),
-        hrGetStaffEvaluations(userId).catch(() => []),
-      ]);
+      const kpiRows = await hrGetStaffKpis(userId).catch(() => []);
       setStaffKpis(prev => ({ ...prev, [userId]: kpiRows }));
-      setStaffEvals(prev => ({ ...prev, [userId]: evalRows }));
       setLoadingMember(false);
     }
   };
 
   const reloadMember = async (userId: number) => {
-    const [kpiRows, evalRows] = await Promise.all([
-      hrGetStaffKpis(userId).catch(() => []),
-      hrGetStaffEvaluations(userId).catch(() => []),
-    ]);
+    const kpiRows = await hrGetStaffKpis(userId).catch(() => []);
     setStaffKpis(prev => ({ ...prev, [userId]: kpiRows }));
-    setStaffEvals(prev => ({ ...prev, [userId]: evalRows }));
     loadStaff(); loadSummary();
   };
 
@@ -162,20 +231,102 @@ export default function HRManagerPage() {
     } catch { setError('Failed to remove KPI.'); }
   };
 
-  const handleAddEval = async (userId: number) => {
-    if (!evalRating) return;
-    setAddingEval(true); setError('');
+  const handleSubmitToCycle = async (userId: number) => {
+    if (!openCycle) return;
+    await saveEvaluation(openCycle.id, userId, { action: 'submit' }).catch(() => {});
+  };
+
+  const handleSaveAll = async () => {
+    if (!openCycle) return;
+    setSavingStaff(-1); setError('');
     try {
-      await hrAddEvaluation(userId, {
-        rating: evalRating,
-        notes: evalNotes.trim() || undefined,
-        staff_kpi_id: evalKpiId ? Number(evalKpiId) : undefined,
-      });
-      setSuccess('Evaluation recorded.'); setEvalFor(null);
-      setEvalRating(''); setEvalKpiId(''); setEvalNotes('');
-      await reloadMember(userId);
-    } catch { setError('Failed to record evaluation.'); }
-    finally { setAddingEval(false); }
+      await Promise.all(staff.map(async m => {
+        const st = cycleStatus[m.users_id];
+        // Skip already evaluated (draft/submitted/approved) — only save new or returned
+        if (st === 'draft' || st === 'submitted' || st === 'approved') return;
+        const kpis   = evalStaffKpis[m.users_id] ?? [];
+        const toSave = kpis.filter(k => kpiEdits[k.staff_kpi_id]?.rating);
+        if (toSave.length === 0) return;
+        await Promise.all(toSave.map(k =>
+          hrAddEvaluation(m.users_id, {
+            rating: kpiEdits[k.staff_kpi_id].rating,
+            notes:  kpiEdits[k.staff_kpi_id].notes.trim() || undefined,
+            staff_kpi_id: k.staff_kpi_id,
+          })
+        ));
+        const avgScore = Math.round(
+          toSave.reduce((sum, k) => {
+            const opt = RATING_OPTIONS.find(o => o.value === kpiEdits[k.staff_kpi_id].rating);
+            return sum + (opt?.points ?? 0);
+          }, 0) / toSave.length
+        );
+        await saveEvaluation(openCycle.id, m.users_id, { action: 'save', kpi_score: avgScore });
+      }));
+      await refreshCycleStatus(openCycle.id);
+      setSuccess('All evaluations saved.');
+    } catch { setError('Failed to save evaluations.'); }
+    finally { setSavingStaff(null); }
+  };
+
+  const handleSubmitAll = async () => {
+    if (!openCycle) return;
+    const toSubmit = staff.filter(m => {
+      const st = cycleStatus[m.users_id];
+      return st === 'draft' || st === 'returned';
+    });
+    if (toSubmit.length === 0) { setError('No evaluated staff to submit. Save evaluations first.'); return; }
+    setSubmittingAll(true); setError('');
+    try {
+      await Promise.all(toSubmit.map(m =>
+        saveEvaluation(openCycle.id, m.users_id, { action: 'submit' }).catch(() => {})
+      ));
+      await refreshCycleStatus(openCycle.id);
+      setSuccess(`${toSubmit.length} evaluation${toSubmit.length !== 1 ? 's' : ''} submitted for admin review.`);
+    } catch { setError('Failed to submit evaluations.'); }
+    finally { setSubmittingAll(false); }
+  };
+
+  const enterEvalMode = async (cycle: KpiCycle) => {
+    setOpenCycle(cycle);
+    setLoadingEvalMode(true);
+    try {
+      const kpiMap: Record<number, StaffKPI[]> = {};
+      const edits: Record<number, { rating: string; notes: string }> = {};
+      await Promise.all([
+        ...staff.map(async m => {
+          const skpis = await hrGetStaffKpis(m.users_id);
+          kpiMap[m.users_id] = skpis;
+          // Always start blank — each cycle is a fresh evaluation
+          skpis.forEach(k => {
+            edits[k.staff_kpi_id] = { rating: '', notes: '' };
+          });
+        }),
+        refreshCycleStatus(cycle.id),
+      ]);
+      setEvalStaffKpis(kpiMap);
+      setKpiEdits(edits);
+      setEvalMode(true);
+    } catch {
+      setError('Failed to load staff KPIs for evaluation.');
+      setOpenCycle(null);
+    } finally {
+      setLoadingEvalMode(false);
+    }
+  };
+
+  const exitEvalMode = () => {
+    setEvalMode(false);
+    setOpenCycle(null);
+    setEvalStaffKpis({});
+    setKpiEdits({});
+    setCycleStatus({});
+  };
+
+  const updateKpiEdit = (staffKpiId: number, field: 'rating' | 'notes', value: string) => {
+    setKpiEdits(prev => ({
+      ...prev,
+      [staffKpiId]: { ...(prev[staffKpiId] ?? { rating: '', notes: '' }), [field]: value },
+    }));
   };
 
   // KPI CRUD
@@ -230,6 +381,131 @@ export default function HRManagerPage() {
       {success && <div className="alert alert-success"><CheckCircle size={14} />{success}</div>}
       {error   && <div className="alert alert-error"><AlertCircle size={14} />{error}</div>}
 
+      {/* ── Eval session ── */}
+      {evalMode && openCycle && (
+        <div className="hrm-eval-session">
+          <div className="hrm-eval-session-hdr">
+            <button className="hrm-eval-back-btn" onClick={exitEvalMode}>
+              <ChevronLeft size={16} /> Back
+            </button>
+            <div style={{ flex: 1 }}>
+              <span className="hrm-eval-session-title">{openCycle.name}</span>
+              <span className="hrm-eval-session-close">
+                Portal closes: {new Date(openCycle.end_date).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+              </span>
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
+              <button
+                className="btn-secondary"
+                style={{ fontSize: '0.82rem', padding: '0.42rem 1rem', whiteSpace: 'nowrap' }}
+                onClick={handleSaveAll}
+                disabled={savingStaff !== null}
+                title="Save all ratings"
+              >
+                {savingStaff !== null
+                  ? <><Loader2 size={13} className="spin" /> Saving…</>
+                  : <><CheckCircle size={13} /> Save All</>
+                }
+              </button>
+              <button
+                className="btn-primary"
+                style={{ fontSize: '0.82rem', padding: '0.42rem 1rem', whiteSpace: 'nowrap' }}
+                onClick={handleSubmitAll}
+                disabled={submittingAll}
+                title="Submit all saved evaluations for admin review"
+              >
+                {submittingAll
+                  ? <><Loader2 size={13} className="spin" /> Submitting…</>
+                  : <><Send size={13} /> Submit All for Review</>
+                }
+              </button>
+            </div>
+          </div>
+
+          {loadingEvalMode ? (
+            <LoadingSpinner message="Loading staff KPIs…" />
+          ) : staff.length === 0 ? (
+            <div className="empty-state"><Users size={38} /><p>No staff members found.</p></div>
+          ) : (
+            staff.map(m => {
+              const kpis = evalStaffKpis[m.users_id] ?? [];
+              const st   = cycleStatus[m.users_id];
+              return (
+                <div key={m.users_id} className={`hrm-eval-card${st ? ` hrm-eval-${st}` : ''}`}>
+                  <div className="hrm-eval-card-hdr">
+                    <div className="hrm-staff-avatar">
+                      {m.profile_photo
+                        ? <img src={`/uploads/${m.profile_photo}`} alt="photo" className="hrm-avatar-img" />
+                        : `${m.first_name?.[0] ?? ''}${m.last_name?.[0] ?? ''}`.toUpperCase()
+                      }
+                    </div>
+                    <div className="hrm-eval-card-info">
+                      <strong>{m.first_name} {m.last_name}</strong>
+                      <span>{m.role_name ?? m.email}</span>
+                    </div>
+                    <div className="hrm-eval-card-status">
+                      {st === 'approved'  && <span className="hrm-cycle-badge hrm-cycle-approved"><CheckCircle size={11} /> Approved</span>}
+                      {st === 'submitted' && <span className="hrm-cycle-badge hrm-cycle-submitted"><Send size={11} /> Submitted</span>}
+                      {st === 'returned'  && <span className="hrm-cycle-badge" style={{ background:'#fef2f2', color:'#dc2626', border:'1px solid #fecaca' }}>Returned</span>}
+                      {st === 'draft'     && <span className="hrm-cycle-badge" style={{ background:'#f3f4f6', color:'#6b7280', border:'1px solid #e5e7eb' }}>Draft</span>}
+                    </div>
+                  </div>
+
+                  {kpis.length === 0 ? (
+                    <p className="hrm-eval-no-kpi">No KPIs assigned to this staff member.</p>
+                  ) : (
+                    <div className="hrm-eval-kpi-list">
+                      {kpis.map(k => {
+                        const edit   = kpiEdits[k.staff_kpi_id] ?? { rating: '', notes: '' };
+                        const locked = st === 'draft' || st === 'submitted' || st === 'approved';
+                        return (
+                          <div key={k.staff_kpi_id} className="hrm-eval-kpi-row">
+                            <div className="hrm-eval-kpi-meta">
+                              <span className="hrm-eval-kpi-name">{k.title}</span>
+                              {k.target && <span className="hrm-eval-kpi-target">Target: {k.target}</span>}
+                            </div>
+                            <div className="hrm-eval-kpi-inputs">
+                              <select
+                                className={`sm-input hrm-select${edit.rating ? ' hrm-sel-rated' : ''}`}
+                                value={edit.rating}
+                                onChange={e => updateKpiEdit(k.staff_kpi_id, 'rating', e.target.value)}
+                                disabled={locked}
+                              >
+                                <option value="">— Rating —</option>
+                                {RATING_OPTIONS.map(o => (
+                                  <option key={o.value} value={o.value}>{o.label} ({o.points} pts)</option>
+                                ))}
+                              </select>
+                              <input
+                                type="text"
+                                className="sm-input hrm-eval-notes-inp"
+                                placeholder="Notes (optional)"
+                                value={edit.notes}
+                                onChange={e => updateKpiEdit(k.staff_kpi_id, 'notes', e.target.value)}
+                                disabled={locked}
+                              />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {(st === 'submitted' || st === 'approved') && (
+                    <div className="hrm-eval-card-footer">
+                      {st === 'submitted' && <span className="hrm-submitted-note"><CheckCircle size={13} /> Awaiting admin review</span>}
+                      {st === 'approved'  && <span className="hrm-submitted-note" style={{ color: '#16a34a' }}><CheckCircle size={13} /> Approved</span>}
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          )}
+        </div>
+      )}
+
+      {!evalMode && <>
+
       {/* Tabs */}
       <div className="hrm-tabs">
         <button className={`hrm-tab${tab === 'staff' ? ' active' : ''}`} onClick={() => setTab('staff')}>
@@ -242,6 +518,61 @@ export default function HRManagerPage() {
           <Award size={15} /> Leaderboard
         </button>
       </div>
+
+      {/* ── Cycle picker (staff tab only) ── */}
+      {tab === 'staff' && openCycles.length > 0 && (
+        <div className="hrm-cycle-picker">
+          <div className="hrm-cycle-picker-hdr">
+            <CalendarRange size={15} />
+            <strong>Evaluation Cycles</strong>
+            <span className="hrm-cycle-picker-hint">Select an open cycle to begin evaluating staff</span>
+          </div>
+          <div className="hrm-cycle-picker-list">
+            {openCycles.map(c => {
+              const notStartedYet = new Date(c.start_date) > new Date();
+              const opensAt = new Date(c.start_date).toLocaleString('en-GB', {
+                day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
+              });
+              return (
+                <div key={c.id} className={`hrm-cycle-picker-item${notStartedYet ? ' hrm-cycle-picker-item--scheduled' : ''}`}>
+                  <div className="hrm-cycle-picker-info">
+                    <strong>{c.name}</strong>
+                    {notStartedYet
+                      ? <span className="hrm-cycle-scheduled-note"><Clock size={11} /> Opens at {opensAt}</span>
+                      : <>
+                          <span>Portal opens: {opensAt}</span>
+                          <span>Portal closes: {new Date(c.end_date).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                        </>
+                    }
+                  </div>
+                  {notStartedYet
+                    ? <span className="hrm-cycle-scheduled-badge">Scheduled</span>
+                    : (
+                      <button
+                        className="btn-primary"
+                        style={{ fontSize: '0.8rem', padding: '0.38rem 0.9rem', whiteSpace: 'nowrap' }}
+                        onClick={() => enterEvalMode(c)}
+                        disabled={loadingEvalMode}
+                      >
+                        {loadingEvalMode
+                          ? <><Loader2 size={13} className="spin" /> Loading…</>
+                          : <><Target size={13} /> Start Evaluation</>
+                        }
+                      </button>
+                    )
+                  }
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+      {tab === 'staff' && openCycles.length === 0 && (
+        <div className="hrm-no-cycles">
+          <CalendarRange size={15} />
+          No open evaluation cycles. Admin must create and open a cycle before evaluations can begin.
+        </div>
+      )}
 
       {/* ── Staff & KPIs tab ── */}
       {tab === 'staff' && (
@@ -266,6 +597,7 @@ export default function HRManagerPage() {
                   <div className="hrm-stat"><Target size={12} /> {m.kpi_count} KPI{m.kpi_count !== 1 ? 's' : ''}</div>
                   <div className="hrm-stat"><Star size={12} /> {m.eval_count} eval{m.eval_count !== 1 ? 's' : ''}</div>
                   <PointsBadge points={m.total_points} />
+                  <PerfBadge pct={m.eval_count > 0 ? Math.round((m.total_points / (m.eval_count * 100)) * 100) : 0} />
                 </div>
                 <div className="hrm-expand-btn">
                   {expanded === m.users_id ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
@@ -284,7 +616,10 @@ export default function HRManagerPage() {
                           <p className="hrm-detail-label">Assigned KPIs</p>
                           <button
                             className="hrm-mini-btn"
-                            onClick={() => setAssignKpiFor(assignKpiFor === m.users_id ? null : m.users_id)}
+                            onClick={() => {
+                              if (assignKpiFor === m.users_id) { setAssignKpiFor(null); }
+                              else { setAssignKpiFor(m.users_id); setAssignDue(defaultDueDate()); }
+                            }}
                           >
                             <Plus size={12} /> Assign KPI
                           </button>
@@ -292,12 +627,25 @@ export default function HRManagerPage() {
 
                         {assignKpiFor === m.users_id && (
                           <div className="hrm-inline-form">
-                            <select className="sm-input hrm-select" value={assignKpiId} onChange={e => setAssignKpiId(e.target.value)}>
-                              <option value="">— Select KPI —</option>
-                              {kpis.map(k => <option key={k.id} value={k.id}>{k.title}</option>)}
-                            </select>
-                            <input className="sm-input" type="date" value={assignDue} onChange={e => setAssignDue(e.target.value)}
-                              placeholder="Due date (optional)" />
+                            {(() => {
+                              const assignedKpiIds = new Set((staffKpis[m.users_id] ?? []).map(sk => sk.kpi_id));
+                              const available = kpis.filter(k => !assignedKpiIds.has(k.id));
+                              return (
+                                <select className="sm-input hrm-select" value={assignKpiId} onChange={e => setAssignKpiId(e.target.value)}>
+                                  <option value="">— Select KPI —</option>
+                                  {available.length === 0
+                                    ? <option disabled>All KPIs already assigned</option>
+                                    : available.map(k => <option key={k.id} value={k.id}>{k.title}</option>)
+                                  }
+                                </select>
+                              );
+                            })()}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                              <input className="sm-input" type="date" value={assignDue}
+                                min={new Date().toISOString().split('T')[0]}
+                                onChange={e => setAssignDue(e.target.value)} />
+                              <span style={{ fontSize: '0.68rem', color: '#9ab09a' }}>Due date · defaults to 2 weeks from today</span>
+                            </div>
                             <div style={{ display: 'flex', gap: '0.5rem' }}>
                               <button className="btn-primary" style={{ fontSize: '0.78rem', padding: '0.4rem 0.85rem' }}
                                 onClick={() => handleAssignKpi(m.users_id)} disabled={assigningKpi || !assignKpiId}>
@@ -313,76 +661,43 @@ export default function HRManagerPage() {
 
                         {(staffKpis[m.users_id] ?? []).length === 0
                           ? <p className="hrm-empty">No KPIs assigned.</p>
-                          : (staffKpis[m.users_id] ?? []).map(sk => (
-                              <div key={sk.staff_kpi_id} className="hrm-kpi-item">
-                                <div className="hrm-kpi-info">
-                                  <span className="hrm-kpi-title">{sk.title}</span>
-                                  {sk.due_date && <span className="hrm-kpi-due"><Calendar size={10} /> Due {fmtDate(sk.due_date)}</span>}
+                          : (staffKpis[m.users_id] ?? []).map(sk => {
+                              const pct    = sk.points ?? 0;
+                              const status = kpiStatus(sk);
+                              const barColor = pct >= 100 ? '#16a34a' : pct >= 75 ? '#2563eb' : pct >= 50 ? '#d97706' : pct > 0 ? '#ef4444' : '#cbd5e1';
+                              return (
+                                <div key={sk.staff_kpi_id} className="hrm-kpi-item" style={{ flexDirection: 'column', alignItems: 'stretch', gap: '0.35rem' }}>
+                                  {/* Title row */}
+                                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.5rem' }}>
+                                    <div>
+                                      <span className="hrm-kpi-title">{sk.title}</span>
+                                      {sk.due_date && (
+                                        <span className="hrm-kpi-due"><Calendar size={10} /> Due {fmtDate(sk.due_date)}</span>
+                                      )}
+                                    </div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexShrink: 0 }}>
+                                      <span style={{ fontSize: '0.68rem', fontWeight: 700, padding: '2px 8px', borderRadius: 8, background: status.bg, color: status.color, border: `1px solid ${status.color}30`, whiteSpace: 'nowrap' }}>
+                                        {status.label}
+                                      </span>
+                                      <button className="hrm-remove-btn" onClick={() => handleRemoveStaffKpi(m.users_id, sk.staff_kpi_id)}>
+                                        <Trash2 size={11} />
+                                      </button>
+                                    </div>
+                                  </div>
+                                  {/* Progress bar */}
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <div style={{ flex: 1, height: 6, borderRadius: 3, background: '#e2e8f0', overflow: 'hidden' }}>
+                                      <div style={{ height: '100%', width: `${pct}%`, background: barColor, borderRadius: 3, transition: 'width 0.4s ease' }} />
+                                    </div>
+                                    <span style={{ fontSize: '0.72rem', fontWeight: 800, color: pct > 0 ? '#374151' : '#9ab09a', minWidth: 32, textAlign: 'right' }}>{pct}%</span>
+                                    {sk.rating && <RatingBadge rating={sk.rating} />}
+                                  </div>
                                 </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                  <RatingBadge rating={sk.rating} />
-                                  <button className="hrm-remove-btn" onClick={() => handleRemoveStaffKpi(m.users_id, sk.staff_kpi_id)}>
-                                    <Trash2 size={11} />
-                                  </button>
-                                </div>
-                              </div>
-                            ))
+                              );
+                            })
                         }
                       </div>
 
-                      {/* Evaluations section */}
-                      <div className="hrm-detail-section">
-                        <div className="hrm-detail-header">
-                          <p className="hrm-detail-label">Performance Evaluations</p>
-                          <button
-                            className="hrm-mini-btn"
-                            onClick={() => setEvalFor(evalFor === m.users_id ? null : m.users_id)}
-                          >
-                            <Plus size={12} /> Add Evaluation
-                          </button>
-                        </div>
-
-                        {evalFor === m.users_id && (
-                          <div className="hrm-inline-form">
-                            <select className="sm-input hrm-select" value={evalRating} onChange={e => setEvalRating(e.target.value)}>
-                              <option value="">— Select Rating —</option>
-                              {RATING_OPTIONS.map(o => (
-                                <option key={o.value} value={o.value}>{o.label} ({o.points} pts)</option>
-                              ))}
-                            </select>
-                            <select className="sm-input hrm-select" value={evalKpiId} onChange={e => setEvalKpiId(e.target.value)}>
-                              <option value="">— Link to KPI (optional) —</option>
-                              {(staffKpis[m.users_id] ?? []).map(sk => (
-                                <option key={sk.staff_kpi_id} value={sk.staff_kpi_id}>{sk.title}</option>
-                              ))}
-                            </select>
-                            <textarea className="sm-input hrm-notes" value={evalNotes} onChange={e => setEvalNotes(e.target.value)}
-                              placeholder="Notes (optional)" rows={2} />
-                            <div style={{ display: 'flex', gap: '0.5rem' }}>
-                              <button className="btn-primary" style={{ fontSize: '0.78rem', padding: '0.4rem 0.85rem' }}
-                                onClick={() => handleAddEval(m.users_id)} disabled={addingEval || !evalRating}>
-                                {addingEval ? <Loader2 size={12} className="spin" /> : <Star size={12} />} Record
-                              </button>
-                              <button className="btn-secondary" style={{ fontSize: '0.78rem', padding: '0.4rem 0.7rem' }}
-                                onClick={() => setEvalFor(null)}>
-                                <X size={12} />
-                              </button>
-                            </div>
-                          </div>
-                        )}
-
-                        {(staffEvals[m.users_id] ?? []).length === 0
-                          ? <p className="hrm-empty">No evaluations yet.</p>
-                          : (staffEvals[m.users_id] ?? []).map(ev => (
-                              <div key={ev.id} className="hrm-eval-item">
-                                <RatingBadge rating={ev.rating} />
-                                {ev.kpi_title && <span className="hrm-eval-kpi">{ev.kpi_title}</span>}
-                                {ev.notes && <span className="hrm-eval-notes">{ev.notes}</span>}
-                                <span className="hrm-eval-date">{fmtDate(ev.evaluated_at)}</span>
-                              </div>
-                            ))
-                        }
-                      </div>
                     </>
                   )}
                 </div>
@@ -482,6 +797,29 @@ export default function HRManagerPage() {
 
       {/* ── Leaderboard tab ── */}
       {tab === 'leaderboard' && (
+        <>
+        <div className="hrm-lb-filter">
+          <div className="hrm-lb-filter-row">
+            <div className="hrm-lb-filter-field">
+              <label>Cycle Start From</label>
+              <input type="date" value={lbFrom} max={lbTo || undefined} onChange={e => setLbFrom(e.target.value)} />
+            </div>
+            <div className="hrm-lb-filter-field">
+              <label>Cycle Start To</label>
+              <input type="date" value={lbTo} min={lbFrom || undefined} onChange={e => setLbTo(e.target.value)} />
+            </div>
+            <button className="btn-primary" style={{ alignSelf: 'flex-end' }}
+              onClick={() => loadSummary(lbFrom || undefined, lbTo || undefined)}>
+              <RefreshCw size={13} /> Apply Filter
+            </button>
+            {(lbFrom || lbTo) && (
+              <button className="btn-secondary" style={{ alignSelf: 'flex-end' }}
+                onClick={() => { setLbFrom(''); setLbTo(''); loadSummary(); }}>
+                <X size={13} /> Clear
+              </button>
+            )}
+          </div>
+        </div>
         <div className="table-card">
           <table className="saic-table">
             <thead>
@@ -490,43 +828,45 @@ export default function HRManagerPage() {
                 <th>Staff Member</th>
                 <th>Role</th>
                 <th>Performance</th>
-                <th>KPI Points</th>
+                <th>KPI Score / Cycle</th>
+                <th>Status</th>
                 <th>Tasks Done</th>
-                <th>Last Evaluated</th>
               </tr>
             </thead>
             <tbody>
               {summary.length === 0 && (
                 <tr><td colSpan={7}>
-                  <div className="empty-state"><Award size={36} /><p>No evaluations recorded yet.</p></div>
+                  <div className="empty-state"><Award size={36} /><p>No staff members found.</p></div>
                 </td></tr>
               )}
-              {summary.map((row, i) => {
-                const pct = calcPerf(row.eval_count, row.total_points, row.task_total ?? 0, row.task_completed ?? 0);
-                return (
-                  <tr key={row.users_id} className={i < 3 ? `hrm-rank-${i + 1}` : ''}>
-                    <td className="col-num">
-                      {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1}
-                    </td>
-                    <td>
-                      <p style={{ fontWeight: 700, color: '#1e3a1e', fontSize: '0.85rem', margin: 0 }}>
-                        {row.first_name ? `${row.first_name} ${row.last_name}` : row.email}
-                      </p>
-                    </td>
-                    <td style={{ fontSize: '0.8rem', color: '#7a9a7a' }}>{row.role_name ?? '—'}</td>
-                    <td><PerfBadge pct={pct} /></td>
-                    <td><PointsBadge points={row.total_points} /></td>
-                    <td style={{ fontSize: '0.82rem', color: '#4a6c4a', fontWeight: 600 }}>
-                      {row.task_completed ?? 0}/{row.task_total ?? 0}
-                    </td>
-                    <td style={{ fontSize: '0.78rem', color: '#9ab09a', whiteSpace: 'nowrap' }}>{fmtDate(row.last_evaluated)}</td>
-                  </tr>
-                );
-              })}
+              {summary.map((row, i) => (
+                <tr key={row.users_id} className={i < 3 ? `hrm-rank-${i + 1}` : ''}>
+                  <td className="col-num">
+                    {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1}
+                  </td>
+                  <td>
+                    <p style={{ fontWeight: 700, color: '#1e3a1e', fontSize: '0.85rem', margin: 0 }}>
+                      {row.first_name ? `${row.first_name} ${row.last_name}` : row.email}
+                    </p>
+                  </td>
+                  <td style={{ fontSize: '0.8rem', color: '#7a9a7a' }}>{row.role_name ?? '—'}</td>
+                  <td><PerfBadge pct={row.performance_pct} /></td>
+                  <td>
+                    <ScoreBar score={row.kpi_score} />
+                    {row.cycle_name && <div style={{ fontSize: '0.7rem', color: '#9ab09a', marginTop: 2 }}>{row.cycle_name}</div>}
+                  </td>
+                  <td><CycleStatusChip status={row.eval_status} /></td>
+                  <td style={{ fontSize: '0.82rem', color: '#4a6c4a', fontWeight: 600 }}>
+                    {row.task_completed ?? 0}/{row.task_total ?? 0}
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
+        </>
       )}
+      </>}
     </div>
   );
 }

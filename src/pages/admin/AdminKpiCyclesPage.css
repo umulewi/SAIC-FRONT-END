@@ -1,0 +1,554 @@
+.akc-root { display: block; }
+
+/* ── Form panel ── */
+.akc-form-panel {
+  background: #fff;
+  border: 1px solid #cde0cd;
+  border-radius: 10px;
+  margin-bottom: 1.25rem;
+  overflow: hidden;
+}
+
+.akc-form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.7rem 1.25rem;
+  background: #f5faf5;
+  border-bottom: 1px solid #cde0cd;
+}
+
+.akc-form-header h3 {
+  margin: 0;
+  font-size: 0.93rem;
+  font-weight: 700;
+  color: #2D5016;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.akc-form-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #6a8c6a;
+  display: flex;
+  padding: 0.2rem;
+  border-radius: 4px;
+}
+
+.akc-form-close:hover { background: #e8f5e9; color: #2D5016; }
+
+.akc-form-body { padding: 1.1rem 1.25rem; }
+
+.akc-form-row {
+  display: flex;
+  gap: 0.85rem;
+  margin-bottom: 0.7rem;
+  flex-wrap: wrap;
+}
+
+.akc-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.28rem;
+  flex: 1;
+  min-width: 150px;
+}
+
+.akc-field-full { flex-basis: 100%; min-width: 100%; }
+
+.akc-form-field label {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #4a6a4a;
+}
+
+.akc-form-field input[type="text"],
+.akc-form-field input[type="date"],
+.akc-form-field input[type="time"],
+.akc-form-field select,
+.akc-form-field textarea {
+  padding: 0.42rem 0.6rem;
+  border: 1px solid #cde0cd;
+  border-radius: 6px;
+  font-size: 0.84rem;
+  font-family: inherit;
+  color: #2D5016;
+  background: #fff;
+  transition: border-color 0.15s;
+}
+
+.akc-form-field input:focus,
+.akc-form-field select:focus,
+.akc-form-field textarea:focus {
+  outline: none;
+  border-color: #4a7a4a;
+  box-shadow: 0 0 0 2px rgba(74, 122, 74, 0.12);
+}
+
+.akc-form-field textarea { resize: vertical; }
+
+.akc-dept-checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid #cde0cd;
+  border-radius: 6px;
+  background: #f8fbf8;
+}
+
+.akc-dept-check {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.82rem;
+  color: #4a6a4a;
+  cursor: pointer;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  user-select: none;
+}
+
+.akc-dept-check:hover { background: #e8f5e9; }
+.akc-dept-check input { margin: 0; cursor: pointer; }
+
+.akc-check-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  color: #4a6a4a;
+  cursor: pointer;
+  user-select: none;
+  margin-top: 0.2rem;
+}
+
+.akc-check-label input { margin: 0; }
+
+.akc-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  margin-top: 0.85rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #e8f5e9;
+}
+
+/* ── Status badges ── */
+.akc-status-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.akc-status-draft     { background: #f3f4f6; color: #6b7280; }
+.akc-status-scheduled { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
+.akc-status-open      { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+.akc-status-closed    { background: #f1f5f9; color: #475569; }
+
+/* ── Action buttons ── */
+.akc-actions { display: flex; gap: 0.3rem; flex-wrap: wrap; }
+
+.akc-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.22rem;
+  padding: 3px 7px;
+  border-radius: 5px;
+  font-size: 0.71rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.13s;
+  white-space: nowrap;
+}
+
+.akc-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.akc-btn-view    { background: #eff6ff; color: #2563eb; border-color: #bfdbfe; }
+.akc-btn-view:hover { background: #dbeafe; }
+
+.akc-btn-open    { background: #f0fdf4; color: #16a34a; border-color: #bbf7d0; }
+.akc-btn-open:hover { background: #dcfce7; }
+
+.akc-btn-close   { background: #fff7ed; color: #ea580c; border-color: #fed7aa; }
+.akc-btn-close:hover { background: #ffedd5; }
+
+.akc-btn-reopen  { background: #f8fafc; color: #475569; border-color: #cbd5e1; }
+.akc-btn-reopen:hover { background: #f1f5f9; }
+
+.akc-btn-edit    { background: #f9fafb; color: #6b7280; border-color: #e5e7eb; }
+.akc-btn-edit:hover { background: #f3f4f6; }
+
+.akc-btn-delete  { background: #fef2f2; color: #dc2626; border-color: #fecaca; }
+.akc-btn-delete:hover { background: #fee2e2; }
+
+.akc-btn-approve    { background: #f0fdf4; color: #16a34a; border-color: #bbf7d0; }
+.akc-btn-approve:hover { background: #dcfce7; }
+
+.akc-btn-return-ev  { background: #fef2f2; color: #dc2626; border-color: #fecaca; }
+.akc-btn-return-ev:hover { background: #fee2e2; }
+
+/* ── Active row ── */
+.akc-row-active { background: #f0f7f0 !important; }
+
+/* ── Pagination ── */
+.akc-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.85rem 1rem 0.5rem;
+}
+
+.akc-page-btn {
+  min-width: 2rem;
+  height: 2rem;
+  padding: 0 0.55rem;
+  border: 1px solid #c8e6c9;
+  border-radius: 6px;
+  background: #fff;
+  color: #2D5016;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.akc-page-btn:hover:not(:disabled) {
+  background: #e8f5e9;
+}
+
+.akc-page-btn:disabled {
+  opacity: 0.38;
+  cursor: default;
+}
+
+.akc-page-btn--active {
+  background: #2D5016;
+  color: #fff;
+  border-color: #2D5016;
+}
+
+/* ── Detail panel ── */
+.akc-detail-panel {
+  background: #fff;
+  border: 1px solid #cde0cd;
+  border-radius: 10px;
+  margin-top: 1.25rem;
+  overflow: hidden;
+}
+
+.akc-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1.25rem;
+  background: #f5faf5;
+  border-bottom: 1px solid #cde0cd;
+}
+
+.akc-back-btn {
+  background: #e8f5e9;
+  border: 1px solid #cde0cd;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #2D5016;
+  padding: 0.33rem;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.akc-back-btn:hover { background: #c8e6c9; }
+
+/* ── Stat cards ── */
+.akc-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(115px, 1fr));
+  gap: 0.65rem;
+  padding: 1rem 1.25rem 0.5rem;
+}
+
+.akc-stat-card {
+  background: #f8fbf8;
+  border: 1px solid #e0ede0;
+  border-radius: 8px;
+  padding: 0.8rem 0.9rem;
+  text-align: center;
+}
+
+.akc-stat-icon { display: flex; justify-content: center; margin-bottom: 0.35rem; color: #4a7a4a; }
+.akc-stat-value { font-size: 1.35rem; font-weight: 800; color: #2D5016; line-height: 1; }
+.akc-stat-label { font-size: 0.7rem; color: #6a8c6a; margin-top: 0.18rem; font-weight: 600; }
+
+.akc-stat-pending .akc-stat-icon    { color: #9ca3af; }
+.akc-stat-pending .akc-stat-value   { color: #6b7280; }
+.akc-stat-submitted .akc-stat-icon  { color: #2563eb; }
+.akc-stat-submitted .akc-stat-value { color: #1d4ed8; }
+.akc-stat-approved .akc-stat-icon   { color: #16a34a; }
+.akc-stat-approved .akc-stat-value  { color: #15803d; }
+.akc-stat-returned .akc-stat-icon   { color: #dc2626; }
+.akc-stat-returned .akc-stat-value  { color: #b91c1c; }
+.akc-stat-completion .akc-stat-icon { color: #d97706; }
+.akc-stat-completion .akc-stat-value { color: #b45309; }
+
+/* ── Danger button ── */
+.akc-btn-danger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.42rem 1rem;
+  background: #dc2626;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.13s;
+}
+
+.akc-btn-danger:hover    { background: #b91c1c; }
+.akc-btn-danger:disabled { opacity: 0.55; cursor: not-allowed; }
+
+/* ── Modal ── */
+.akc-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.akc-modal {
+  background: #fff;
+  border-radius: 10px;
+  width: 100%;
+  max-width: 460px;
+  overflow: hidden;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+}
+
+.akc-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.85rem 1.25rem;
+  background: #fef2f2;
+  border-bottom: 1px solid #fecaca;
+}
+
+.akc-modal-header h3 { margin: 0; font-size: 0.93rem; color: #991b1b; }
+.akc-modal-header button { background: none; border: none; cursor: pointer; color: #991b1b; display: flex; }
+
+.akc-modal-body { padding: 1.1rem 1.25rem; }
+
+.akc-return-textarea {
+  width: 100%;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid #cde0cd;
+  border-radius: 6px;
+  font-size: 0.84rem;
+  font-family: inherit;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.akc-return-textarea:focus {
+  outline: none;
+  border-color: #4a7a4a;
+  box-shadow: 0 0 0 2px rgba(74, 122, 74, 0.12);
+}
+
+.akc-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  padding: 0.85rem 1.25rem;
+  border-top: 1px solid #fecaca;
+  background: #fff5f5;
+}
+
+/* ── Spin animation ── */
+@keyframes akc-spin { to { transform: rotate(360deg); } }
+.akc-spin { animation: akc-spin 0.8s linear infinite; }
+
+/* ── Evaluation Schedule section ── */
+.akc-sched-section {
+  background: #fff;
+  border: 1px solid #cde0cd;
+  border-radius: 10px;
+  margin-bottom: 1.25rem;
+  overflow: hidden;
+}
+
+.akc-sched-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.7rem 1.25rem;
+  background: #f5faf5;
+  border-bottom: 1px solid #cde0cd;
+}
+
+.akc-sched-title {
+  font-size: 0.93rem;
+  font-weight: 700;
+  color: #2D5016;
+}
+
+.akc-sched-hint {
+  font-size: 0.74rem;
+  color: #6a8c6a;
+}
+
+.akc-sched-form {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #e8f5e9;
+  background: #fafcfa;
+}
+
+.akc-sched-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid #f0f7f0;
+}
+
+.akc-sched-card:last-child { border-bottom: none; }
+
+.akc-sched-card-info { flex: 1; min-width: 0; }
+
+.akc-sched-card-name {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #2D5016;
+  margin-bottom: 0.3rem;
+}
+
+.akc-sched-days {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.akc-day-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.71rem;
+  font-weight: 700;
+  background: #e8f5e9;
+  color: #2D5016;
+  border: 1px solid #cde0cd;
+}
+
+.akc-sched-time {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.22rem;
+  font-size: 0.77rem;
+  color: #4a6a4a;
+  font-weight: 600;
+}
+
+/* Day picker chips */
+.akc-day-checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 0.4rem 0;
+}
+
+.akc-day-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+  border: 1.5px solid #cde0cd;
+  color: #6a8c6a;
+  background: #f5faf5;
+  transition: all 0.13s;
+}
+
+.akc-day-chip:hover { background: #e8f5e9; border-color: #9ab89a; color: #2D5016; }
+
+.akc-day-chip-active {
+  background: #2D5016;
+  color: #fff;
+  border-color: #2D5016;
+}
+
+.akc-day-chip-active:hover { background: #3d6a20; border-color: #3d6a20; }
+
+/* ── KPI Breakdown expandable rows ── */
+.akc-kpi-breakdown-row td { padding: 0 !important; }
+
+.akc-kpi-breakdown {
+  background: #f5faf5;
+  border-top: 1px solid #cde0cd;
+  border-bottom: 1px solid #cde0cd;
+  padding: 0.75rem 1.5rem;
+}
+
+.akc-kpi-breakdown-loading,
+.akc-kpi-breakdown-empty {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #9ab89a;
+  font-size: 0.82rem;
+  padding: 0.5rem 0;
+}
+
+.akc-kpi-inner-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.akc-kpi-inner-table th {
+  text-align: left;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #4a6a4a;
+  background: #eaf4ea;
+  border-bottom: 1px solid #cde0cd;
+  white-space: nowrap;
+}
+
+.akc-kpi-inner-table td {
+  padding: 0.38rem 0.6rem;
+  border-bottom: 1px solid #e8f5e9;
+  vertical-align: middle;
+}
+
+.akc-kpi-inner-table tr:last-child td { border-bottom: none; }
+
+.akc-kpi-inner-table tr:hover td { background: #edf7ed; }
+
+.akc-kpi-points {
+  font-weight: 800;
+  color: #2D5016;
+  font-size: 0.85rem;
+}

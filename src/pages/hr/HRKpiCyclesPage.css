@@ -1,0 +1,271 @@
+.hkc-root {}
+
+/* ── Section titles ── */
+.hkc-section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #2D5016;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 2px solid #e8f5e9;
+}
+
+/* ── Empty state ── */
+.hkc-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  color: #a0b8a0;
+  gap: 0.45rem;
+}
+
+.hkc-empty p { margin: 0; font-size: 0.88rem; }
+
+/* ── Cycle grid ── */
+.hkc-cycle-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(255px, 1fr));
+  gap: 0.7rem;
+}
+
+.hkc-cycle-card {
+  background: #fff;
+  border: 1px solid #cde0cd;
+  border-radius: 10px;
+  padding: 0.95rem 1.15rem;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.14s;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.hkc-cycle-card:hover { box-shadow: 0 4px 16px rgba(45, 80, 22, 0.1); transform: translateY(-1px); }
+
+.hkc-open   { border-left: 4px solid #16a34a; }
+.hkc-closed { border-left: 4px solid #94a3b8; opacity: 0.75; }
+
+.hkc-cycle-badge  { font-size: 0.71rem; font-weight: 700; }
+.hkc-badge-open   { color: #16a34a; }
+.hkc-badge-closed { color: #94a3b8; }
+
+.hkc-cycle-name { font-size: 0.9rem; font-weight: 700; color: #2D5016; }
+
+.hkc-cycle-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.28rem;
+  font-size: 0.74rem;
+  color: #6a8c6a;
+}
+
+/* ── Detail header ── */
+.hkc-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding-bottom: 0.85rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #e8f5e9;
+}
+
+.hkc-back-btn {
+  background: #e8f5e9;
+  border: 1px solid #cde0cd;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #2D5016;
+  padding: 0.33rem;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.hkc-back-btn:hover { background: #c8e6c9; }
+
+.hkc-detail-title { font-size: 1rem; font-weight: 700; color: #2D5016; }
+.hkc-detail-sub   { font-size: 0.78rem; color: #6a8c6a; margin-top: 2px; }
+.hkc-closed-note  { color: #ef4444; font-weight: 600; }
+
+/* ── Staff list ── */
+.hkc-staff-list { display: flex; flex-direction: column; gap: 0.7rem; }
+
+.hkc-card {
+  background: #fff;
+  border: 1px solid #cde0cd;
+  border-radius: 10px;
+  padding: 1rem 1.15rem;
+  transition: box-shadow 0.14s;
+}
+
+.hkc-card:hover { box-shadow: 0 2px 12px rgba(45, 80, 22, 0.07); }
+.hkc-card-approved { border-left: 4px solid #16a34a; background: #fafffe; }
+.hkc-card-returned { border-left: 4px solid #dc2626; background: #fffafa; }
+
+.hkc-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin-bottom: 0.7rem;
+}
+
+.hkc-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #e8f5e9;
+  color: #2D5016;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.77rem;
+  font-weight: 800;
+  flex-shrink: 0;
+  border: 2px solid #cde0cd;
+}
+
+.hkc-card-info { flex: 1; min-width: 0; }
+.hkc-card-name { font-size: 0.88rem; font-weight: 700; color: #2D5016; }
+.hkc-card-role { font-size: 0.74rem; color: #6a8c6a; margin-top: 1px; }
+
+.hkc-card-status {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.22rem;
+  flex-shrink: 0;
+}
+
+.hkc-submitted-at { font-size: 0.7rem; color: #9ab89a; }
+
+/* ── Return note ── */
+.hkc-return-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: #dc2626;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  padding: 0.45rem 0.7rem;
+  margin-bottom: 0.7rem;
+}
+
+/* ── Approved view ── */
+.hkc-approved-view {
+  border-top: 1px solid #e8f5e9;
+  padding-top: 0.7rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.hkc-approved-score {
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: #16a34a;
+  line-height: 1;
+}
+
+.hkc-approved-label { font-size: 0.78rem; color: #16a34a; }
+.hkc-approved-comment { font-size: 0.82rem; color: #4a5568; margin: 0.5rem 0 0; flex-basis: 100%; }
+
+/* ── Eval form ── */
+.hkc-eval-form {
+  border-top: 1px solid #e8f5e9;
+  padding-top: 0.7rem;
+}
+
+.hkc-field-row {
+  display: flex;
+  gap: 0.7rem;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.hkc-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 120px;
+}
+
+.hkc-field-wide { flex: 2; min-width: 200px; }
+
+.hkc-field label { font-size: 0.74rem; font-weight: 600; color: #4a6a4a; }
+
+.hkc-field input[type="number"],
+.hkc-field textarea {
+  padding: 0.4rem 0.55rem;
+  border: 1px solid #cde0cd;
+  border-radius: 6px;
+  font-size: 0.84rem;
+  font-family: inherit;
+  color: #2D5016;
+  background: #fff;
+}
+
+.hkc-field input:focus,
+.hkc-field textarea:focus {
+  outline: none;
+  border-color: #4a7a4a;
+  box-shadow: 0 0 0 2px rgba(74, 122, 74, 0.12);
+}
+
+.hkc-field input:disabled,
+.hkc-field textarea:disabled { opacity: 0.6; background: #f9fbf9; }
+
+.hkc-field textarea { resize: vertical; }
+
+/* ── Messages ── */
+.hkc-err-msg {
+  font-size: 0.78rem;
+  color: #dc2626;
+  margin-bottom: 0.4rem;
+}
+
+.hkc-ok-msg {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.78rem;
+  color: #16a34a;
+  margin-bottom: 0.4rem;
+}
+
+/* ── Eval action buttons ── */
+.hkc-eval-actions { display: flex; gap: 0.45rem; margin-top: 0.4rem; }
+
+.hkc-btn-save,
+.hkc-btn-submit {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  padding: 0.38rem 0.85rem;
+  border-radius: 6px;
+  font-size: 0.79rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.13s;
+}
+
+.hkc-btn-save   { background: #f3f4f6; color: #374151; }
+.hkc-btn-save:hover { background: #e5e7eb; }
+.hkc-btn-save:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.hkc-btn-submit { background: #2D5016; color: #fff; }
+.hkc-btn-submit:hover { background: #1a3009; }
+.hkc-btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Spin ── */
+@keyframes hkc-spin { to { transform: rotate(360deg); } }
+.hkc-spin { animation: hkc-spin 0.8s linear infinite; }

@@ -458,8 +458,9 @@ export default function StaffManagementPage({ roleId, label }: StaffManagementPa
                 </div>
                 <div className="sm-field">
                   <label className="sm-label"><Calendar size={12} /> Contract End</label>
-                  <input className="sm-input" type="date" value={form.contract_end} onChange={handleChange('contract_end')}
-                    disabled={submitting} />
+                  <input className="sm-input" type="date" value={form.contract_end}
+                    min={form.contract_start || undefined}
+                    onChange={handleChange('contract_end')} disabled={submitting} />
                 </div>
                 <div className="sm-field">
                   <label className="sm-label">Contract Status</label>

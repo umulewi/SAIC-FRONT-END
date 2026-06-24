@@ -40,6 +40,7 @@ export const ROLE_CONFIG: Record<string, RoleConfig> = {
       { id: 'hr-manager-staff',  label: 'HR Managers',          icon: 'Award',           path: 'staff/22' },
       { id: 'staff-directory',   label: 'Staff Directory',      icon: 'BookOpen',        path: 'staff-directory' },
       { id: 'documents',         label: 'Documents',            icon: 'FolderOpen',      path: 'documents' },
+      { id: 'kpi-cycles',        label: 'KPI Cycles',           icon: 'CalendarRange',   path: 'kpi-cycles' },
     ],
   },
 

@@ -111,6 +111,85 @@
   max-width: 100px; display: inline-block;
 }
 
+/* ─── Batch create form ──────────────────── */
+.pcp-drawer--batch { padding-bottom: 1rem; }
+
+.pcp-batch-table-wrap {
+  overflow-x: auto; border: 1px solid #d4e4d4; border-radius: 10px;
+  margin-bottom: 0.85rem;
+}
+.pcp-batch-table {
+  width: 100%; border-collapse: collapse; font-size: 0.82rem;
+  background: #fff;
+}
+.pcp-batch-table thead th {
+  background: #f0f7f0; color: #3a5c1a; font-weight: 700;
+  padding: 0.55rem 0.6rem; text-align: left; border-bottom: 1px solid #d4e4d4;
+  white-space: nowrap;
+}
+.pcp-batch-table th:first-child { width: 32px; }
+.pcp-batch-table th:last-child  { width: 36px; }
+.pcp-batch-table tfoot td {
+  background: #f0f7f0; border-top: 2px solid #c8dfc8;
+}
+
+.pcp-batch-row td {
+  padding: 0.4rem 0.5rem; border-bottom: 1px solid #eff5ef; vertical-align: middle;
+}
+.pcp-batch-row:last-child td { border-bottom: none; }
+
+.pcp-batch-num {
+  text-align: center; color: #9aab9a; font-size: 0.75rem; font-weight: 700;
+}
+.pcp-batch-input {
+  width: 100%; box-sizing: border-box;
+  border: 1px solid #c8dfc8; border-radius: 7px;
+  padding: 0.4rem 0.6rem; font-size: 0.82rem; color: #1e3a1e;
+  background: #fafff8; outline: none; min-width: 100px;
+}
+.pcp-batch-input:focus { border-color: #2D5016; background: #fff; }
+.pcp-batch-cash { min-width: 90px; max-width: 130px; }
+
+.pcp-batch-file-cell { display: flex; align-items: center; }
+.pcp-batch-file-btn {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  padding: 0.38rem 0.65rem; font-size: 0.78rem; font-weight: 600;
+  border: 1.5px dashed #b5d5b5; border-radius: 7px;
+  background: #fafff8; color: #3a6320; cursor: pointer;
+  white-space: nowrap; transition: background 0.15s, border-color 0.15s;
+  max-width: 180px; overflow: hidden;
+}
+.pcp-batch-file-btn:hover { background: #eaf4ea; border-color: #9fca7f; }
+.pcp-batch-file-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.pcp-batch-remove {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 26px; height: 26px; border: none; border-radius: 6px;
+  background: #fff0f0; color: #c53030; cursor: pointer;
+  transition: background 0.15s;
+}
+.pcp-batch-remove:hover { background: #fed7d7; }
+.pcp-batch-remove:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Shared receipt row */
+.pcp-batch-receipt-row {
+  display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;
+  background: #f6fbf6; border: 1.5px dashed #b5d5b5; border-radius: 10px;
+  padding: 0.65rem 0.9rem;
+}
+.pcp-batch-receipt-label {
+  display: flex; align-items: center; gap: 0.35rem;
+  font-size: 0.8rem; font-weight: 600; color: #3a5c1a; white-space: nowrap;
+}
+.pcp-batch-file-btn--set {
+  background: #e6f4e6 !important; border-color: #7dba5a !important; color: #2a5010 !important;
+}
+
+.pcp-batch-footer {
+  display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;
+  padding-top: 0.5rem;
+}
+
 /* ─── Shared helpers used here ───────────── */
 .col-num { width: 42px; color: #a0b8a0; font-size: 0.78rem; }
 .atm-close-btn {

@@ -207,14 +207,17 @@
   padding: 1rem;
   background: #f6fbf4; border-radius: 12px; border: 1px solid #e4ede4;
 }
-.asd-gauge-wrap { position: relative; width: 110px; flex-shrink: 0; }
-.asd-gauge-svg  { width: 110px; }
-.asd-gauge-label {
-  position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
-  text-align: center;
+.asd-gauge-wrap {
+  display: flex; flex-direction: column; align-items: center;
+  width: 120px; flex-shrink: 0;
 }
-.asd-gauge-pct  { display: block; font-size: 1.3rem; font-weight: 900; line-height: 1; }
-.asd-gauge-text { display: block; font-size: 0.68rem; color: #9ab09a; font-weight: 600; }
+.asd-gauge-svg  { width: 120px; display: block; }
+.asd-gauge-label {
+  text-align: center;
+  margin-top: 0.25rem;
+}
+.asd-gauge-pct  { display: block; font-size: 1.4rem; font-weight: 900; line-height: 1; }
+.asd-gauge-text { display: block; font-size: 0.68rem; color: #9ab09a; font-weight: 600; margin-top: 2px; }
 .asd-summary-stats { display: flex; flex-direction: column; gap: 0.5rem; }
 .asd-stat-chip {
   display: inline-flex; align-items: center; gap: 0.4rem;

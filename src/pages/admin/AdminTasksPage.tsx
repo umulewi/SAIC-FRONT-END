@@ -209,6 +209,7 @@ export default function AdminTasksPage() {
                 <div className="atm-field">
                   <label className="atm-flabel"><Calendar size={12} /> Due Date</label>
                   <input type="date" className="atm-finput" value={deadline}
+                    min={new Date().toISOString().split('T')[0]}
                     onChange={e => setDeadline(e.target.value)} disabled={submitting} />
                 </div>
                 <div className="atm-field">

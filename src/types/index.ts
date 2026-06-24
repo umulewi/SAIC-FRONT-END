@@ -263,6 +263,7 @@ export interface PettyCash {
   email?: string;
   first_name?: string;
   last_name?: string;
+  profile_photo?: string | null;
   grand_total?: number;
   receipt_file?: string | null;
   receipt_original?: string | null;
@@ -279,6 +280,7 @@ export interface LeaveRequest {
   department_name?: string;
   first_name?: string;
   last_name?: string;
+  profile_photo?: string | null;
   leave_type?: LeaveType;
   reason: string;
   start_date: string;

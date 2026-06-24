@@ -185,9 +185,11 @@ export default function AdminPettyCashPage() {
           <div className="apc-date-group">
             <span className="apc-date-label">From</span>
             <input type="date" className="atm-select" value={fromDate}
+              max={toDate || undefined}
               onChange={e => { setFromDate(e.target.value); setPreset('custom'); }} />
             <span className="apc-date-label">To</span>
             <input type="date" className="atm-select" value={toDate}
+              min={fromDate || undefined}
               onChange={e => { setToDate(e.target.value); setPreset('custom'); }} />
             <button className="btn-primary" style={{ padding: '0.45rem 0.9rem', fontSize: '0.8rem' }} onClick={handleSearch}>
               <Search size={13} /> Apply
@@ -233,7 +235,12 @@ export default function AdminPettyCashPage() {
                     <td className="col-num">{(apcPage - 1) * APC_PAGE_SIZE + i + 1}</td>
                     <td>
                       <div className="apc-staff-cell">
-                        <div className="apc-avatar">{initials(r.first_name, r.last_name, r.email)}</div>
+                        <div className="apc-avatar">
+                          {r.profile_photo
+                            ? <img src={`/uploads/${r.profile_photo}`} alt="" className="apc-avatar-img" />
+                            : initials(r.first_name, r.last_name, r.email)
+                          }
+                        </div>
                         <div>
                           <p className="apc-staff-name">{fullName ?? r.email}</p>
                           {fullName && <p className="apc-staff-email">{r.email}</p>}

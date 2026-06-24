@@ -67,12 +67,12 @@ export interface EvaluationSummary {
   last_name?: string | null;
   email: string;
   role_name?: string | null;
-  eval_count: number;
-  total_points: number;
-  best_score: number;
-  last_evaluated: string;
+  kpi_score?: number | null;
+  eval_status?: string | null;
+  cycle_name?: string | null;
   task_total: number;
   task_completed: number;
+  performance_pct: number;
 }
 
 export async function hrGetStaff(): Promise<HRStaff[]> {
@@ -125,8 +125,11 @@ export async function hrAddEvaluation(userId: number, payload: { rating: string;
   return data;
 }
 
-export async function hrGetEvaluationsSummary(): Promise<EvaluationSummary[]> {
-  const { data } = await client.get('/hr/evaluations/summary');
+export async function hrGetEvaluationsSummary(from?: string, to?: string): Promise<EvaluationSummary[]> {
+  const params: Record<string, string> = {};
+  if (from) params.from = from;
+  if (to)   params.to   = to;
+  const { data } = await client.get('/hr/evaluations/summary', { params });
   return data.summary ?? [];
 }
 

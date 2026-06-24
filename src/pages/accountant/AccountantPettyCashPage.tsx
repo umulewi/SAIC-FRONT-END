@@ -38,6 +38,17 @@ function fmtCash(v: number) {
   return new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(v);
 }
 
+interface BatchRow {
+  _id:  string;
+  item: string;
+  cash: string;
+  date: string;
+}
+
+function emptyRow(): BatchRow {
+  return { _id: crypto.randomUUID(), item: '', cash: '', date: TODAY };
+}
+
 export default function AccountantPettyCashPage({ apiBase }: Props) {
   const [records,  setRecords]  = useState<PettyCash[]>([]);
   const [loading,  setLoading]  = useState(true);
@@ -52,17 +63,23 @@ export default function AccountantPettyCashPage({ apiBase }: Props) {
   const [toDate,   setToDate]   = useState('');
   const [exporting, setExporting] = useState(false);
 
-  // Form state
+  // Form state — single row for edit, multi-row for create
   const [formOpen, setFormOpen] = useState(false);
   const [editing,  setEditing]  = useState<PettyCash | null>(null);
-  const [fItem,    setFItem]    = useState('');
-  const [fCash,    setFCash]    = useState('');
-  const [fDate,    setFDate]    = useState(TODAY);
-  const [fReceipt, setFReceipt] = useState<File | null>(null);
-  const [saving,   setSaving]   = useState(false);
-  const [formErr,  setFormErr]  = useState('');
-  const [success,  setSuccess]  = useState('');
-  const receiptInputRef = useRef<HTMLInputElement>(null);
+
+  // Edit-mode single fields
+  const [fItem, setFItem] = useState('');
+  const [fCash, setFCash] = useState('');
+  const [fDate, setFDate] = useState(TODAY);
+
+  // Create-mode batch
+  const [batchRows,    setBatchRows]    = useState<BatchRow[]>([emptyRow()]);
+  const [batchReceipt, setBatchReceipt] = useState<File | null>(null); // one shared receipt
+  const batchFileRef = useRef<HTMLInputElement>(null);
+
+  const [saving,  setSaving]  = useState(false);
+  const [formErr, setFormErr] = useState('');
+  const [success, setSuccess] = useState('');
 
   // Delete confirm
   const [deleteTarget, setDeleteTarget] = useState<PettyCash | null>(null);
@@ -110,7 +127,9 @@ export default function AccountantPettyCashPage({ apiBase }: Props) {
   };
 
   const openCreate = () => {
-    setEditing(null); setFItem(''); setFCash(''); setFDate(TODAY); setFReceipt(null);
+    setEditing(null);
+    setBatchRows([emptyRow()]);
+    setBatchReceipt(null);
     setFormErr(''); setSuccess(''); setFormOpen(true);
   };
 
@@ -119,41 +138,83 @@ export default function AccountantPettyCashPage({ apiBase }: Props) {
     setFItem(r.item);
     setFCash(String(r.cash));
     setFDate(r.date?.slice(0, 10) ?? TODAY);
-    setFReceipt(null);
     setFormErr(''); setSuccess(''); setFormOpen(true);
   };
 
   const closeForm = () => {
-    setFormOpen(false); setEditing(null); setFReceipt(null);
-    if (receiptInputRef.current) receiptInputRef.current.value = '';
+    setFormOpen(false); setEditing(null);
+    setBatchRows([emptyRow()]); setBatchReceipt(null);
   };
 
-  const handleSave = async (e: { preventDefault(): void }) => {
+  // ── Batch row helpers ──────────────────────────────────────────────
+  const updateRow = (id: string, field: keyof BatchRow, value: string) =>
+    setBatchRows(prev => prev.map(r => r._id === id ? { ...r, [field]: value } : r));
+
+  const addRow = () => setBatchRows(prev => [...prev, emptyRow()]);
+
+  const removeRow = (id: string) =>
+    setBatchRows(prev => prev.length > 1 ? prev.filter(r => r._id !== id) : prev);
+
+  // ── Save (edit single) ─────────────────────────────────────────────
+  const handleSaveEdit = async (e: { preventDefault(): void }) => {
     e.preventDefault();
     if (!fItem.trim())                                           { setFormErr('Item description is required.'); return; }
     if (!fCash || isNaN(Number(fCash)) || Number(fCash) === 0) { setFormErr('Enter a valid cash amount.'); return; }
     if (!fDate)                                                  { setFormErr('Date is required.'); return; }
-    // Receipt is mandatory only for new entries
-    if (!editing && !fReceipt)                                  { setFormErr('A receipt (PDF or image) is required.'); return; }
-
-    setSaving(true); setFormErr(''); setSuccess('');
+    setSaving(true); setFormErr('');
     try {
-      if (editing?.id) {
-        await updatePettyCash(apiBase, editing.id, { item: fItem.trim(), cash: Number(fCash), date: fDate });
-        setSuccess('Record updated.');
-      } else {
-        const fd = new FormData();
-        fd.append('item', fItem.trim());
-        fd.append('cash', String(Number(fCash)));
-        fd.append('date', fDate);
-        fd.append('receipt', fReceipt!);
-        await createPettyCash(apiBase, fd);
-        setSuccess('Record added.');
-      }
+      await updatePettyCash(apiBase, editing!.id, { item: fItem.trim(), cash: Number(fCash), date: fDate });
       closeForm();
       load({ search: search || undefined, from_date: fromDate || undefined, to_date: toDate || undefined });
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Failed to save.';
+      setFormErr(msg);
+    } finally { setSaving(false); }
+  };
+
+  // ── Save All (batch create) ± export PDF ──────────────────────────
+  const doSaveBatch = async (exportAfter: boolean) => {
+    for (let i = 0; i < batchRows.length; i++) {
+      const r = batchRows[i];
+      const n = i + 1;
+      if (!r.item.trim())                                            { setFormErr(`Row ${n}: Item description is required.`); return; }
+      if (!r.cash || isNaN(Number(r.cash)) || Number(r.cash) === 0) { setFormErr(`Row ${n}: Enter a valid cash amount.`); return; }
+      if (!r.date)                                                   { setFormErr(`Row ${n}: Date is required.`); return; }
+    }
+    if (!batchReceipt) { setFormErr('Please attach a receipt file for this batch.'); return; }
+
+    setSaving(true); setFormErr('');
+    try {
+      const snapshot = batchRows.map(r => ({ ...r }));
+      for (const r of snapshot) {
+        const fd = new FormData();
+        fd.append('item',    r.item.trim());
+        fd.append('cash',    String(Number(r.cash)));
+        fd.append('date',    r.date);
+        fd.append('receipt', batchReceipt); // same file for all entries
+        await createPettyCash(apiBase, fd);
+      }
+      closeForm();
+      const fresh = await getPettyCash(apiBase, {
+        search: search || undefined, from_date: fromDate || undefined, to_date: toDate || undefined,
+      });
+      setRecords(fresh); setPcPage(1);
+      if (exportAfter) {
+        const batchAsPc: PettyCash[] = snapshot.map((r, i) => ({
+          id: -(i + 1), item: r.item.trim(), cash: Number(r.cash), date: r.date,
+        }));
+        exportPettyCashPdf(batchAsPc, {
+          title: 'Petty Cash Entry',
+          period: formatPeriodLabel(
+            snapshot.reduce((mn, r) => (!mn || r.date < mn ? r.date : mn), ''),
+            snapshot.reduce((mx, r) => (!mx || r.date > mx ? r.date : mx), ''),
+          ),
+          showAccountant: false,
+        });
+      }
+      setSuccess(`${snapshot.length} entr${snapshot.length !== 1 ? 'ies' : 'y'} added.${exportAfter ? ' PDF exported.' : ''}`);
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Failed to save entries.';
       setFormErr(msg);
     } finally { setSaving(false); }
   };
@@ -175,6 +236,7 @@ export default function AccountantPettyCashPage({ apiBase }: Props) {
   const hasFilter = !!(search || fromDate || toDate);
   const pcTotalPages = Math.ceil(records.length / PC_PAGE_SIZE);
   const pcPaged = records.slice((pcPage - 1) * PC_PAGE_SIZE, pcPage * PC_PAGE_SIZE);
+  const batchTotal = batchRows.reduce((s, r) => s + (Number(r.cash) || 0), 0);
 
   return (
     <div className="pcp-root">
@@ -189,7 +251,7 @@ export default function AccountantPettyCashPage({ apiBase }: Props) {
             <button className="apc-export-btn" onClick={handleExport} disabled={exporting || records.length === 0}>
               <FileDown size={14} /> {exporting ? 'Exporting…' : 'Export PDF'}
             </button>
-            <button className="btn-primary" onClick={openCreate}><Plus size={14} /> Add Entry</button>
+            <button className="btn-primary" onClick={openCreate}><Plus size={14} /> New Entries</button>
           </div>
         }
       />
@@ -208,19 +270,19 @@ export default function AccountantPettyCashPage({ apiBase }: Props) {
         </div>
       </div>
 
-      {/* Add / Edit drawer */}
-      {formOpen && (
+      {/* ── Edit drawer (single entry) ── */}
+      {formOpen && editing && (
         <div className="pcp-drawer">
           <div className="pcp-drawer-head">
-            <h3 className="pcp-drawer-title">{editing ? 'Edit Entry' : 'New Petty Cash Entry'}</h3>
+            <h3 className="pcp-drawer-title">Edit Entry</h3>
             <button className="atm-close-btn" onClick={closeForm}><X size={16} /></button>
           </div>
           {formErr && <div className="alert alert-error" style={{ marginBottom: '0.75rem' }}><AlertCircle size={13} />{formErr}</div>}
-          <form onSubmit={handleSave} className="saic-form">
+          <form onSubmit={handleSaveEdit} className="saic-form">
             <div className="form-row">
               <div className="form-group" style={{ gridColumn: '1 / -1' }}>
                 <label>Item / Description *</label>
-                <input type="text" value={fItem} placeholder="e.g. Office supplies, Transport…"
+                <input type="text" value={fItem} placeholder="e.g. Office supplies"
                   onChange={e => { setFItem(e.target.value); setFormErr(''); }} disabled={saving} />
               </div>
               <div className="form-group">
@@ -231,38 +293,132 @@ export default function AccountantPettyCashPage({ apiBase }: Props) {
               <div className="form-group">
                 <label>Date *</label>
                 <input type="date" value={fDate}
+                  max={TODAY}
                   onChange={e => { setFDate(e.target.value); setFormErr(''); }} disabled={saving} />
               </div>
-
-              {/* Receipt upload — mandatory for new entries */}
-              {!editing && (
-                <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-                  <label>
-                    <Paperclip size={12} style={{ display: 'inline', marginRight: 4 }} />
-                    Receipt (PDF or Image) *
-                  </label>
-                  <input
-                    ref={receiptInputRef}
-                    type="file"
-                    accept="image/*,.pdf"
-                    onChange={e => { setFReceipt(e.target.files?.[0] ?? null); setFormErr(''); }}
-                    disabled={saving}
-                    className="pcp-file-input"
-                  />
-                  {fReceipt && (
-                    <p className="pcp-file-name"><Paperclip size={11} /> {fReceipt.name}</p>
-                  )}
-                  <p className="sm-field-hint">Upload the original receipt. Accepted formats: PDF, JPG, PNG, WEBP.</p>
-                </div>
-              )}
             </div>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <button type="submit" className="btn-primary" disabled={saving}>
-                {saving ? <><Loader2 size={14} className="spin" /> Saving…</> : <><CheckCircle size={14} /> {editing ? 'Update' : 'Add Entry'}</>}
+                {saving ? <><Loader2 size={14} className="spin" /> Saving…</> : <><CheckCircle size={14} /> Update</>}
               </button>
               <button type="button" className="btn-secondary" onClick={closeForm} disabled={saving}>
                 <X size={14} /> Cancel
               </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* ── Batch create drawer ── */}
+      {formOpen && !editing && (
+        <div className="pcp-drawer pcp-drawer--batch">
+          <div className="pcp-drawer-head">
+            <div>
+              <h3 className="pcp-drawer-title">New Petty Cash Entries</h3>
+              <p style={{ fontSize: '0.78rem', color: '#7a9a7a', margin: '2px 0 0' }}>
+                Add multiple entries — attach one receipt file for the whole batch
+              </p>
+            </div>
+            <button className="atm-close-btn" onClick={closeForm}><X size={16} /></button>
+          </div>
+
+          {formErr && <div className="alert alert-error" style={{ marginBottom: '0.75rem' }}><AlertCircle size={13} />{formErr}</div>}
+
+          <form onSubmit={e => { e.preventDefault(); doSaveBatch(false); }}>
+            {/* Entry rows table */}
+            <div className="pcp-batch-table-wrap">
+              <table className="pcp-batch-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Item / Description *</th>
+                    <th>Amount (RWF) *</th>
+                    <th>Date *</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {batchRows.map((row, i) => (
+                    <BatchRowInput
+                      key={row._id}
+                      row={row}
+                      index={i}
+                      onChange={updateRow}
+                      onRemove={removeRow}
+                      canRemove={batchRows.length > 1}
+                      disabled={saving}
+                      maxDate={TODAY}
+                    />
+                  ))}
+                </tbody>
+                {batchRows.length > 1 && (
+                  <tfoot>
+                    <tr>
+                      <td colSpan={2} style={{ fontWeight: 700, color: '#2D5016', padding: '0.5rem 0.6rem' }}>
+                        Total ({batchRows.length} entries)
+                      </td>
+                      <td style={{ fontWeight: 700, color: '#2D5016', padding: '0.5rem 0.6rem' }}>
+                        RWF {fmtCash(batchTotal)}
+                      </td>
+                      <td colSpan={2} />
+                    </tr>
+                  </tfoot>
+                )}
+              </table>
+            </div>
+
+            {/* Add row button */}
+            <div style={{ margin: '0.5rem 0 0.9rem' }}>
+              <button type="button" className="btn-secondary" onClick={addRow} disabled={saving}>
+                <Plus size={13} /> Add Another Row
+              </button>
+            </div>
+
+            {/* Shared receipt upload */}
+            <div className="pcp-batch-receipt-row">
+              <span className="pcp-batch-receipt-label">
+                <Paperclip size={14} />
+                Receipt file (shared for all entries) *
+              </span>
+              <input
+                ref={batchFileRef}
+                type="file"
+                accept="image/*,.pdf"
+                style={{ display: 'none' }}
+                onChange={e => { setBatchReceipt(e.target.files?.[0] ?? null); setFormErr(''); }}
+                disabled={saving}
+              />
+              <button
+                type="button"
+                className={`pcp-batch-file-btn${batchReceipt ? ' pcp-batch-file-btn--set' : ''}`}
+                onClick={() => batchFileRef.current?.click()}
+                disabled={saving}
+              >
+                {batchReceipt
+                  ? <><CheckCircle size={13} />{batchReceipt.name.length > 30 ? batchReceipt.name.slice(0, 28) + '…' : batchReceipt.name}</>
+                  : <><Paperclip size={13} />Choose file (PDF / image)</>
+                }
+              </button>
+              {batchReceipt && (
+                <button type="button" className="pcp-batch-remove" onClick={() => setBatchReceipt(null)} disabled={saving} title="Remove">
+                  <X size={12} />
+                </button>
+              )}
+            </div>
+
+            {/* Action buttons */}
+            <div className="pcp-batch-footer" style={{ marginTop: '0.85rem' }}>
+              <div style={{ display: 'flex', gap: '0.5rem', marginLeft: 'auto' }}>
+                <button type="button" className="btn-secondary" onClick={closeForm} disabled={saving}>
+                  <X size={13} /> Cancel
+                </button>
+                <button type="submit" className="btn-secondary" disabled={saving}>
+                  {saving ? <><Loader2 size={13} className="spin" /> Saving…</> : <><CheckCircle size={13} /> Save All</>}
+                </button>
+                <button type="button" className="btn-primary" disabled={saving} onClick={() => doSaveBatch(true)}>
+                  {saving ? <><Loader2 size={13} className="spin" /> Saving…</> : <><FileDown size={13} /> Save All &amp; Export PDF</>}
+                </button>
+              </div>
             </div>
           </form>
         </div>
@@ -290,9 +446,11 @@ export default function AccountantPettyCashPage({ apiBase }: Props) {
           <div className="apc-date-group">
             <span className="apc-date-label">From</span>
             <input type="date" className="atm-select" value={fromDate}
+              max={toDate || undefined}
               onChange={e => { setFromDate(e.target.value); setPreset('custom'); }} />
             <span className="apc-date-label">To</span>
             <input type="date" className="atm-select" value={toDate}
+              min={fromDate || undefined}
               onChange={e => { setToDate(e.target.value); setPreset('custom'); }} />
             <button className="btn-primary" style={{ padding: '0.45rem 0.9rem', fontSize: '0.8rem' }} onClick={handleSearch}>
               <Search size={13} /> Apply
@@ -409,5 +567,68 @@ export default function AccountantPettyCashPage({ apiBase }: Props) {
         </div>
       )}
     </div>
+  );
+}
+
+// ── Batch row sub-component ────────────────────────────────────────────────────
+interface BatchRowProps {
+  row:      BatchRow;
+  index:    number;
+  onChange: (id: string, field: keyof BatchRow, value: string) => void;
+  onRemove: (id: string) => void;
+  canRemove: boolean;
+  disabled:  boolean;
+  maxDate?:  string;
+}
+
+function BatchRowInput({ row, index, onChange, onRemove, canRemove, disabled, maxDate }: BatchRowProps) {
+  return (
+    <tr className="pcp-batch-row">
+      <td className="pcp-batch-num">{index + 1}</td>
+      <td>
+        <input
+          className="pcp-batch-input"
+          type="text"
+          placeholder="Item / description"
+          value={row.item}
+          onChange={e => onChange(row._id, 'item', e.target.value)}
+          disabled={disabled}
+        />
+      </td>
+      <td>
+        <input
+          className="pcp-batch-input pcp-batch-cash"
+          type="number"
+          step="0.01"
+          placeholder="0.00"
+          value={row.cash}
+          onChange={e => onChange(row._id, 'cash', e.target.value)}
+          disabled={disabled}
+        />
+      </td>
+      <td>
+        <input
+          className="pcp-batch-input"
+          type="date"
+          value={row.date}
+          max={maxDate}
+          onChange={e => onChange(row._id, 'date', e.target.value)}
+          disabled={disabled}
+        />
+      </td>
+      <td>
+        {canRemove && (
+          <button
+            type="button"
+            className="pcp-batch-remove"
+            onClick={() => onRemove(row._id)}
+            disabled={disabled}
+            title="Remove row"
+          >
+            <X size={13} />
+          </button>
+        )}
+      </td>
+    </tr>
   );
 }

@@ -232,6 +232,246 @@
 .hrm-rank-2 td { background: #f8fafc; }
 .hrm-rank-3 td { background: #fdf4f0; }
 
+/* ─── Evaluation cycle picker ────────────── */
+.hrm-cycle-picker {
+  background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%);
+  border: 1.5px solid #a5d6a7;
+  border-radius: 9px;
+  margin-bottom: 1rem;
+  overflow: hidden;
+}
+
+.hrm-cycle-picker-hdr {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.1rem;
+  border-bottom: 1px solid #c8e6c9;
+  color: #1b5e20;
+  font-size: 0.88rem;
+}
+
+.hrm-cycle-picker-hint {
+  font-size: 0.76rem;
+  color: #388e3c;
+  margin-left: auto;
+}
+
+.hrm-cycle-picker-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.hrm-cycle-picker-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.6rem 1.1rem;
+  border-bottom: 1px solid #dcedc8;
+  flex-wrap: wrap;
+}
+
+.hrm-cycle-picker-item:last-child { border-bottom: none; }
+
+.hrm-cycle-picker-item--scheduled {
+  background: #f9f9f4;
+  opacity: 0.75;
+}
+
+.hrm-cycle-scheduled-note {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.76rem;
+  color: #b08000 !important;
+}
+
+.hrm-cycle-scheduled-badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.22rem 0.7rem;
+  border-radius: 99px;
+  background: #fff8e1;
+  color: #b08000;
+  border: 1px solid #ffe082;
+  white-space: nowrap;
+}
+
+.hrm-cycle-picker-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.hrm-cycle-picker-info strong {
+  font-size: 0.88rem;
+  color: #2D5016;
+}
+
+.hrm-cycle-picker-info span {
+  font-size: 0.76rem;
+  color: #388e3c;
+}
+
+.hrm-no-cycles {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.65rem 1.1rem;
+  background: #f8fbf8;
+  border: 1px solid #e0ede0;
+  border-radius: 9px;
+  margin-bottom: 1rem;
+  font-size: 0.82rem;
+  color: #6a8c6a;
+}
+
+/* Leaderboard filter bar */
+.hrm-lb-filter {
+  background: #f8fbf8;
+  border: 1px solid #dcedc8;
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.85rem;
+}
+
+.hrm-lb-filter-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.hrm-lb-filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.hrm-lb-filter-field label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #5a7a5a;
+}
+
+.hrm-lb-filter-field input[type="date"] {
+  padding: 0.35rem 0.6rem;
+  border: 1px solid #c8e6c9;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  color: #2D5016;
+  background: #fff;
+}
+
+/* Cycle submission badges */
+.hrm-cycle-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 2px 9px;
+  border-radius: 10px;
+  font-size: 0.71rem;
+  font-weight: 700;
+}
+
+.hrm-cycle-submitted { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+.hrm-cycle-approved  { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+
+/* Submit-to-cycle variant of mini button */
+.hrm-mini-btn-submit {
+  background: #f0fdf4;
+  color: #15803d;
+  border-color: #86efac;
+}
+
+.hrm-mini-btn-submit:hover { background: #dcfce7; }
+.hrm-mini-btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ─── Eval session ─────────────────────────── */
+.hrm-eval-session { display: flex; flex-direction: column; gap: 0.85rem; }
+
+.hrm-eval-session-hdr {
+  display: flex; align-items: center; gap: 0.85rem;
+  padding: 0.75rem 1.1rem;
+  background: #f5faf5; border: 1px solid #cde0cd;
+  border-radius: 9px;
+}
+
+.hrm-eval-back-btn {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  padding: 0.38rem 0.8rem; font-size: 0.78rem; font-weight: 600;
+  border: 1.5px solid #9fca7f; border-radius: 7px;
+  background: #fff; color: #2D5016; cursor: pointer;
+  white-space: nowrap;
+}
+.hrm-eval-back-btn:hover { background: #e8f5e9; }
+
+.hrm-eval-session-title {
+  display: block; font-size: 0.93rem; font-weight: 700; color: #2D5016;
+}
+.hrm-eval-session-close {
+  display: block; font-size: 0.75rem; color: #6a8c6a; margin-top: 1px;
+}
+
+.hrm-eval-card {
+  background: #fff; border: 1px solid #cde0cd;
+  border-radius: 10px; overflow: hidden;
+}
+.hrm-eval-submitted { border-color: #bfdbfe; }
+.hrm-eval-approved  { border-color: #bbf7d0; }
+.hrm-eval-returned  { border-color: #fecaca; }
+
+.hrm-eval-card-hdr {
+  display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;
+  padding: 0.75rem 1.1rem;
+  background: #f9fcf9; border-bottom: 1px solid #e8f5e9;
+}
+
+.hrm-eval-card-info {
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column; gap: 1px;
+}
+.hrm-eval-card-info strong { font-size: 0.88rem; color: #1e3a1e; }
+.hrm-eval-card-info span   { font-size: 0.75rem; color: #7a9a7a; }
+.hrm-eval-card-status { margin-left: auto; }
+
+.hrm-eval-no-kpi {
+  padding: 0.85rem 1.1rem;
+  font-size: 0.8rem; color: '#a0b8a0'; margin: 0;
+}
+
+.hrm-eval-kpi-list { padding: 0.65rem 1.1rem; display: flex; flex-direction: column; gap: 0.6rem; }
+
+.hrm-eval-kpi-row {
+  display: flex; align-items: flex-start; gap: 0.75rem; flex-wrap: wrap;
+  padding: 0.6rem 0.75rem;
+  background: #f8fbf8; border: 1px solid #e4ede4; border-radius: 8px;
+}
+
+.hrm-eval-kpi-meta { flex: 1; min-width: 160px; }
+.hrm-eval-kpi-name   { display: block; font-size: 0.84rem; font-weight: 600; color: #1e3a1e; }
+.hrm-eval-kpi-target { display: block; font-size: 0.72rem; color: '#6a8c6a'; margin-top: 2px; }
+
+.hrm-eval-kpi-inputs {
+  display: flex; gap: 0.5rem; flex-wrap: wrap; flex: 2; min-width: 280px;
+}
+.hrm-eval-kpi-inputs .sm-input { flex: 1; min-width: 130px; }
+.hrm-eval-notes-inp { flex: 2 !important; }
+
+.hrm-sel-rated { border-color: #4a7a4a !important; background: #f0fdf4 !important; color: #15803d !important; font-weight: 600; }
+
+.hrm-eval-card-footer {
+  display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;
+  padding: 0.65rem 1.1rem;
+  background: #fafcfa; border-top: 1px solid #e8f5e9;
+}
+
+.hrm-submitted-note {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  font-size: 0.78rem; font-weight: 600; color: #2563eb;
+}
+
 /* ─── Responsive ─────────────────────────── */
 @media (max-width: 640px) {
   .hrm-staff-stats { display: none; }

@@ -229,7 +229,12 @@ export default function AdminLeaveManagementPage() {
                       <td className="col-num">{(leavePage - 1) * PAGE_SIZE + i + 1}</td>
                       <td>
                         <div className="alm-staff-cell">
-                          <div className="alm-avatar">{initials(l.first_name, l.last_name, l.email)}</div>
+                          <div className="alm-avatar">
+                            {l.profile_photo
+                              ? <img src={`/uploads/${l.profile_photo}`} alt="" className="alm-avatar-img" />
+                              : initials(l.first_name, l.last_name, l.email)
+                            }
+                          </div>
                           <div>
                             <p className="alm-staff-name">{fullName ?? l.email}</p>
                             {fullName && <p className="alm-staff-email">{l.email}</p>}

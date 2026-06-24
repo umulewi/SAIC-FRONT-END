@@ -311,7 +311,9 @@ export default function AdminTaskDetailPage() {
             <div className="atm-form-row">
               <div className="form-group">
                 <label><Calendar size={13} /> Due Date</label>
-                <input type="date" value={editDeadline} onChange={e => setEditDeadline(e.target.value)} disabled={saving} />
+                <input type="date" value={editDeadline}
+                  min={new Date().toISOString().split('T')[0]}
+                  onChange={e => setEditDeadline(e.target.value)} disabled={saving} />
               </div>
               <div className="form-group">
                 <label><Clock size={13} /> Due Time</label>
@@ -749,7 +751,9 @@ export default function AdminTaskDetailPage() {
             {extendError && <div className="alert alert-error" style={{ marginBottom: '0.75rem' }}>{extendError}</div>}
             <div className="form-group">
               <label><Calendar size={13} /> New Deadline Date *</label>
-              <input type="date" value={newDeadline} onChange={e => setNewDeadline(e.target.value)} />
+              <input type="date" value={newDeadline}
+                min={new Date().toISOString().split('T')[0]}
+                onChange={e => setNewDeadline(e.target.value)} />
             </div>
             <div className="form-group">
               <label><Clock size={13} /> New Deadline Time <span style={{ fontSize: '0.78rem', color: '#9ab09a' }}>(optional)</span></label>

@@ -4,7 +4,7 @@ import {
   Scale, Handshake, Megaphone, BarChart3, Banknote, Calculator,
   GraduationCap, BookOpen, Leaf, Sprout, Beef, TrendingUp,
   Briefcase, Receipt, Car, Mail, DollarSign,
-  FolderOpen, Target, Users, Star, Award, BookMarked,
+  FolderOpen, Target, Users, Star, Award, BookMarked, CalendarRange,
 } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router-dom';
 import type { MenuItem } from '../../types';
@@ -17,18 +17,18 @@ const ICON_MAP: Record<string, React.ComponentType<{ size?: number }>> = {
   Scale, Handshake, Megaphone, BarChart3, Banknote, Calculator,
   GraduationCap, BookOpen, Leaf, Sprout, Beef, TrendingUp,
   Briefcase, Receipt, Car, Mail, DollarSign,
-  FolderOpen, Target, Users, Star, Award, BookMarked,
+  FolderOpen, Target, Users, Star, Award, BookMarked, CalendarRange,
 };
 
 const ADMIN_GROUPS = [
-  { label: 'Management',            items: ['overview', 'tasks', 'assigned-tasks', 'leave-management', 'petty-cash', 'staff-directory', 'documents'] },
-  { label: 'Administration Office', items: ['admin-manager', 'it-officer', 'legal-officer', 'partnership-off', 'marketing-officer', 'mel-officer'] },
-  { label: 'Finance',               items: ['finance-manager', 'accountant'] },
-  { label: 'Training',              items: ['training-manager', 'training-officer'] },
-  { label: 'Farm & Carbon Credits', items: ['farm-manager', 'crop-officer', 'livestock-officer'] },
-  { label: 'Transaction Advisory',  items: ['transaction-mgr', 'business-dev'] },
-  { label: 'Supporting Staff',      items: ['cashier', 'driver', 'messenger'] },
+  { label: 'Management',            items: ['overview', 'tasks', 'assigned-tasks', 'leave-management', 'petty-cash', 'staff-directory', 'documents', 'kpi-cycles'] },
   { label: 'Human Resources',       items: ['hr-manager-staff'] },
+  { label: 'Finance',               items: ['finance-manager', 'accountant'] },
+  { label: 'Administration Office', items: ['admin-manager', 'it-officer', 'legal-officer', 'partnership-off', 'marketing-officer', 'mel-officer'] },
+  { label: 'Training',              items: ['training-manager', 'training-officer'] },
+  { label: 'Transaction Advisory',  items: ['transaction-mgr', 'business-dev'] },
+  { label: 'Farm & Carbon Credits', items: ['farm-manager', 'crop-officer', 'livestock-officer'] },
+  { label: 'Supporting Staff',      items: ['cashier', 'driver', 'messenger'] },
 ];
 
 interface SidebarProps {

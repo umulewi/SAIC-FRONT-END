@@ -1,10 +1,9 @@
 /* ══════════════════════════════════════════════
-   SAIC MIS — Notifications Panel
+   SAIC MIS — Notifications Panel (restyled)
 ══════════════════════════════════════════════ */
 
-.np-wrap {
-  position: relative;
-}
+/* ─── Bell button ─────────────────────────── */
+.np-wrap { position: relative; }
 
 .np-bell-btn {
   position: relative;
@@ -15,8 +14,8 @@
   color: rgba(255,255,255,0.82); transition: all 0.15s;
 }
 .np-bell-btn:hover {
-  background: rgba(255,255,255,0.1);
-  border-color: rgba(255,255,255,0.4);
+  background: rgba(255,255,255,0.12);
+  border-color: rgba(255,255,255,0.45);
   color: #fff;
 }
 
@@ -24,68 +23,174 @@
   position: absolute; top: -5px; right: -5px;
   min-width: 18px; height: 18px;
   background: #e53935; color: #fff;
-  font-size: 0.62rem; font-weight: 700;
+  font-size: 0.6rem; font-weight: 800;
   border-radius: 100px; padding: 0 4px;
   display: flex; align-items: center; justify-content: center;
-  border: 2px solid #2D5016;
-  line-height: 1;
+  border: 2px solid #2D5016; line-height: 1;
 }
 
+/* ─── Panel container ─────────────────────── */
 .np-panel {
   position: absolute; top: calc(100% + 10px); right: 0;
-  width: 360px; max-width: 95vw;
-  background: #fff; border: 1px solid #e4ede4; border-radius: 16px;
-  box-shadow: 0 12px 40px rgba(0,0,0,0.14), 0 4px 12px rgba(0,0,0,0.06);
+  width: 380px; max-width: 95vw;
+  background: #fff;
+  border: 1px solid #e2e8e2;
+  border-radius: 18px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.15), 0 4px 16px rgba(0,0,0,0.08);
   z-index: 900;
   display: flex; flex-direction: column;
-  max-height: 480px; overflow: hidden;
+  max-height: 520px; overflow: hidden;
+  animation: np-slide-in 0.18s cubic-bezier(0.16,1,0.3,1);
 }
 
+@keyframes np-slide-in {
+  from { opacity: 0; transform: translateY(-8px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)    scale(1);    }
+}
+
+/* ─── Header ──────────────────────────────── */
 .np-head {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 0.9rem 1.1rem 0.75rem;
+  padding: 1rem 1.1rem 0.85rem;
+  background: linear-gradient(135deg, #2D5016 0%, #3a6820 100%);
+  flex-shrink: 0; border-radius: 17px 17px 0 0;
+}
+
+.np-head-left { display: flex; align-items: center; gap: 0.55rem; }
+
+.np-head-title {
+  font-size: 0.92rem; font-weight: 700; color: #fff; letter-spacing: 0.01em;
+}
+
+.np-head-badge {
+  font-size: 0.65rem; font-weight: 700; color: #2D5016;
+  background: #a8e063; border-radius: 100px;
+  padding: 0.15rem 0.55rem; line-height: 1.4;
+}
+
+.np-head-actions { display: flex; align-items: center; gap: 0.4rem; }
+
+.np-mark-all-btn {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  padding: 0.3rem 0.7rem; font-size: 0.72rem; font-weight: 600;
+  border: 1px solid rgba(255,255,255,0.3); border-radius: 8px;
+  background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.9);
+  cursor: pointer; transition: all 0.15s; white-space: nowrap;
+}
+.np-mark-all-btn:hover:not(:disabled) {
+  background: rgba(255,255,255,0.22); border-color: rgba(255,255,255,0.5);
+  color: #fff;
+}
+.np-mark-all-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.np-close-btn {
+  width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 8px; cursor: pointer; color: rgba(255,255,255,0.8);
+  transition: all 0.15s;
+}
+.np-close-btn:hover { background: rgba(255,255,255,0.22); color: #fff; }
+
+/* ─── Group labels ────────────────────────── */
+.np-group-label {
+  font-size: 0.68rem; font-weight: 700; color: #9aafa4;
+  text-transform: uppercase; letter-spacing: 0.07em;
+  padding: 0.65rem 1.1rem 0.3rem; margin: 0;
+  background: #f9faf9;
   border-bottom: 1px solid #f0f4f0;
-  flex-shrink: 0;
+  position: sticky; top: 0; z-index: 1;
 }
-.np-head-title { font-size: 0.9rem; font-weight: 700; color: #1e3a1e; }
-.np-head-actions { display: flex; gap: 0.35rem; }
-.np-action-btn {
-  width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
-  background: none; border: none; border-radius: 7px; cursor: pointer;
-  color: #8fa88f; transition: all 0.15s;
-}
-.np-action-btn:hover:not(:disabled) { background: #f0f7f0; color: #2D5016; }
-.np-action-btn:disabled { opacity: 0.4; }
 
+/* ─── Scrollable list ─────────────────────── */
 .np-list { overflow-y: auto; flex: 1; }
+.np-list::-webkit-scrollbar { width: 4px; }
+.np-list::-webkit-scrollbar-track { background: transparent; }
+.np-list::-webkit-scrollbar-thumb { background: #d4e4d4; border-radius: 4px; }
 
+/* ─── Empty state ─────────────────────────── */
 .np-empty {
-  display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
-  padding: 2.5rem 1rem; color: #c0d0c0; text-align: center;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 0.4rem; padding: 3rem 1rem; text-align: center;
 }
-.np-empty p { font-size: 0.82rem; margin: 0; color: #b0c8b0; }
+.np-empty-icon {
+  width: 54px; height: 54px; border-radius: 50%;
+  background: #f0f7f0; color: #a0c090;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 0.2rem;
+}
+.np-empty-title { font-size: 0.88rem; font-weight: 700; color: #3a5c1a; margin: 0; }
+.np-empty-sub   { font-size: 0.76rem; color: #a0b8a0; margin: 0; }
 
+/* ─── Individual item ─────────────────────── */
 .np-item {
-  display: flex; align-items: flex-start; gap: 0.7rem;
-  padding: 0.75rem 1rem; cursor: pointer;
-  border-bottom: 1px solid #f4faf4; transition: background 0.12s;
+  position: relative;
+  display: flex; align-items: flex-start; gap: 0.75rem;
+  padding: 0.8rem 1rem 0.8rem 1.15rem;
+  cursor: pointer; transition: background 0.12s;
+  border-bottom: 1px solid #f0f5f0;
 }
 .np-item:last-child { border-bottom: none; }
-.np-item:hover { background: #f8fcf8; }
-.np-item.np-unread { background: #f0f7f0; }
-.np-item.np-unread:hover { background: #eaf4ea; }
+.np-item:hover { background: #f7fbf7; }
 
-.np-item-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
-.np-item-body { flex: 1; min-width: 0; }
-.np-item-title { font-size: 0.82rem; font-weight: 600; color: #1e3a1e; margin: 0 0 0.15rem; line-height: 1.35; }
-.np-item-msg   { font-size: 0.76rem; color: #6a8c6a; margin: 0 0 0.25rem; line-height: 1.4; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-.np-item-time  { font-size: 0.68rem; color: #a0b8a0; }
+/* Unread: coloured left border via CSS variable */
+.np-item.np-unread {
+  background: #fafff8;
+  border-left: 3px solid var(--np-accent, #2D5016);
+  padding-left: calc(1.15rem - 3px);
+}
+.np-item.np-unread:hover { background: #f2fbf2; }
 
+/* Unread dot */
+.np-dot {
+  position: absolute; top: 1rem; right: 0.9rem;
+  width: 7px; height: 7px; border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Icon bubble */
+.np-icon-bubble {
+  width: 34px; height: 34px; border-radius: 10px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  margin-top: 1px;
+}
+
+/* Body */
+.np-item-body { flex: 1; min-width: 0; padding-right: 0.5rem; }
+.np-item-title {
+  font-size: 0.82rem; font-weight: 600; color: #1e3a1e;
+  margin: 0 0 0.2rem; line-height: 1.4;
+}
+.np-item.np-unread .np-item-title { color: #12280d; }
+
+.np-item-msg {
+  font-size: 0.75rem; color: #6a8c6a; margin: 0 0 0.3rem;
+  line-height: 1.45;
+  overflow: hidden; text-overflow: ellipsis;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+}
+
+.np-item-time {
+  font-size: 0.67rem; color: #a8bea8; font-weight: 500;
+}
+
+/* Delete button */
 .np-del-btn {
+  flex-shrink: 0; width: 22px; height: 22px;
+  display: flex; align-items: center; justify-content: center;
   background: none; border: none; cursor: pointer;
-  color: #c0d0c0; padding: 0.2rem;
-  border-radius: 5px; display: flex; align-items: center; flex-shrink: 0;
-  opacity: 0; transition: opacity 0.15s, color 0.15s;
+  color: #c0d0c0; border-radius: 6px;
+  opacity: 0; transition: opacity 0.15s, background 0.15s, color 0.15s;
+  margin-top: 2px;
 }
 .np-item:hover .np-del-btn { opacity: 1; }
-.np-del-btn:hover { color: #c0392b; }
+.np-del-btn:hover { background: #fee2e2; color: #c62828; }
+
+/* ─── Footer ──────────────────────────────── */
+.np-footer {
+  display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+  padding: 0.65rem 1rem; font-size: 0.72rem; font-weight: 600;
+  color: #8aaa8a; background: #f8fcf8;
+  border-top: 1px solid #eff5ef;
+  flex-shrink: 0; border-radius: 0 0 17px 17px;
+}

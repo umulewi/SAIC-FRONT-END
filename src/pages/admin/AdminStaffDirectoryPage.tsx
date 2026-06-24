@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import {
   Users, Search, Filter, Printer, X, ChevronDown, ChevronUp,
-  TrendingUp, ClipboardList, Star, AlertCircle, RefreshCw, Eye,
+  TrendingUp, Star, AlertCircle, RefreshCw, Eye,
   Phone, Mail, MapPin, Briefcase, CreditCard, Calendar, FileText,
   ExternalLink, User, CheckSquare,
 } from 'lucide-react';
@@ -31,8 +31,8 @@ function calcPerf(s: {
   total_points: number; eval_count: number;
   task_total: number;   task_completed: number;
 }) {
-  const kpi  = s.eval_count  > 0 ? (s.total_points / (s.eval_count * 100)) * 50 : 0;
-  const task = s.task_total  > 0 ? (s.task_completed / s.task_total) * 50        : 0;
+  const kpi  = s.eval_count > 0 ? (s.total_points / (s.eval_count * 100)) * 50 : 0;
+  const task = s.task_total > 0 ? (s.task_completed / s.task_total) * 50        : 50;
   return Math.round(kpi + task);
 }
 
@@ -308,8 +308,14 @@ export default function AdminStaffDirectoryPage({ role = 'admin' }: Props) {
   const [search,       setSearch]       = useState('');
   const [filterDept,   setFilterDept]   = useState('');
   const [filterStatus, setFilterStatus] = useState('');
-  const [dateFrom,     setDateFrom]     = useState('');
-  const [dateTo,       setDateTo]       = useState('');
+  const [dateFrom,     setDateFrom]     = useState<string>(() => {
+    if (role !== 'admin') return '';
+    const d = new Date(); d.setDate(d.getDate() - 14);
+    return d.toISOString().split('T')[0];
+  });
+  const [dateTo,       setDateTo]       = useState<string>(() =>
+    role === 'admin' ? new Date().toISOString().split('T')[0] : ''
+  );
   const [sortField,    setSortField]    = useState<'name' | 'dept' | 'perf'>('name');
   const [sortAsc,      setSortAsc]      = useState(true);
   const [detailTarget, setDetailTarget] = useState<DirectoryStaff | null>(null);
