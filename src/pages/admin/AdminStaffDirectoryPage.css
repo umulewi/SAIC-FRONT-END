@@ -377,3 +377,17 @@
   .asd-detail-columns { grid-template-columns: 1fr; }
   .asd-detail-perf-cols { grid-template-columns: 1fr; }
 }
+@media (max-width: 480px) {
+  .asd-detail-modal { max-height: 100vh; border-radius: 0; max-width: 100%; }
+  .asd-modal-backdrop { padding: 0; align-items: flex-end; }
+  .asd-detail-hero  { gap: 0.75rem; }
+  .asd-detail-name  { font-size: 0.95rem; }
+  .asd-perf-summary { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+  .asd-gauge-wrap   { width: 100%; flex-direction: row; gap: 1rem; align-items: center; }
+  .asd-gauge-svg    { width: 80px; }
+  .asd-date-filter  { flex-direction: column; gap: 0.5rem; }
+  .asd-date-inputs  { flex-direction: column; align-items: stretch; gap: 0.4rem; }
+  .asd-date-field   { flex-direction: column; gap: 0.2rem; }
+  .asd-date-input   { width: 100%; box-sizing: border-box; }
+  .asd-full-name, .asd-sub-email { white-space: normal; }
+}

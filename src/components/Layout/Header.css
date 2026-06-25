@@ -267,6 +267,16 @@
   }
   .hdr-user-info { display: none; }
   .hdr-page-title { display: none; }
+  .hdr-dropdown { min-width: min(90vw, 400px); right: -0.5rem; }
+}
+
+@media (max-width: 480px) {
+  .saic-header { padding: 0 0.75rem; height: 56px; }
+  .hdr-dropdown { min-width: calc(100vw - 1.5rem); right: -0.75rem; }
+  .cp-modal { border-radius: 16px; }
+  .cp-modal-body { padding: 1.1rem; }
+  .cp-modal-footer { flex-direction: column; }
+  .cp-submit-btn, .cp-cancel-btn { width: 100%; justify-content: center; }
 }
 
 /* ══════════════════════════════════════════════

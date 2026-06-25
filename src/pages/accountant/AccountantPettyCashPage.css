@@ -190,6 +190,29 @@
   padding-top: 0.5rem;
 }
 
+/* ─── Responsive ─────────────────────────── */
+@media (max-width: 640px) {
+  .pcp-summary-row  { flex-direction: column; }
+  .pcp-summary-card { flex: 1 1 100%; }
+  .apc-filters      { flex-direction: column; align-items: stretch; }
+  .apc-date-group   { flex-wrap: wrap; }
+  .pcp-batch-receipt-row { flex-direction: column; align-items: flex-start; }
+}
+@media (max-width: 480px) {
+  .pcp-drawer       { padding: 0.85rem 0.9rem 1rem; }
+  .pcp-batch-table  { font-size: 0.78rem; }
+  .pcp-batch-input  { padding: 0.35rem 0.45rem; font-size: 0.78rem; min-width: 80px; }
+  .pcp-batch-cash   { min-width: 72px; max-width: 100px; }
+  .pcp-batch-footer { flex-direction: column; align-items: stretch; }
+  .pcp-batch-footer .btn-primary,
+  .pcp-batch-footer .btn-secondary,
+  .pcp-batch-footer .apc-export-btn { width: 100%; justify-content: center; }
+  .apc-preset-row   { gap: 0.3rem; }
+  .apc-preset-btn   { padding: 0.25rem 0.55rem; font-size: 0.73rem; }
+  .apc-date-group   { flex-direction: column; align-items: stretch; }
+  .apc-date-label   { display: none; }
+}
+
 /* ─── Shared helpers used here ───────────── */
 .col-num { width: 42px; color: #a0b8a0; font-size: 0.78rem; }
 .atm-close-btn {

@@ -194,3 +194,28 @@
   border-top: 1px solid #eff5ef;
   flex-shrink: 0; border-radius: 0 0 17px 17px;
 }
+
+@media (max-width: 768px) {
+  /* Switch to fixed so the panel is always relative to the viewport, not the bell button */
+  .np-panel {
+    position: fixed;
+    top: 64px;
+    left: 0.5rem;
+    right: 0.5rem;
+    width: auto;
+    max-width: none;
+    border-radius: 14px;
+    max-height: calc(100vh - 80px);
+  }
+}
+
+@media (max-width: 480px) {
+  .np-panel {
+    top: 56px;
+    left: 0.4rem;
+    right: 0.4rem;
+    max-height: calc(100vh - 70px);
+  }
+  .np-head  { padding: 0.85rem 0.9rem 0.75rem; }
+  .np-mark-all-btn { padding: 0.28rem 0.55rem; font-size: 0.68rem; }
+}

@@ -476,6 +476,20 @@
 @media (max-width: 640px) {
   .hrm-staff-stats { display: none; }
   .hrm-staff-row   { gap: 0.75rem; }
-  .hrm-tabs        { gap: 0.3rem; }
-  .hrm-tab         { padding: 0.45rem 0.7rem; font-size: 0.75rem; }
+  .hrm-tabs        { gap: 0.3rem; overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
+  .hrm-tab         { padding: 0.45rem 0.7rem; font-size: 0.75rem; flex-shrink: 0; }
+  .hrm-inline-form { padding: 0.65rem; }
+  .hrm-eval-kpi-inputs { flex-direction: column; min-width: 0; }
+  .hrm-eval-kpi-inputs .sm-input { min-width: 0; }
+  .hrm-lb-filter-row { flex-direction: column; align-items: stretch; }
+  .adp-field-grid  { grid-template-columns: 1fr; }
+}
+@media (max-width: 480px) {
+  .hrm-staff-detail { padding: 0 0.85rem 1rem; }
+  .hrm-staff-row    { padding: 0.75rem 0.85rem; }
+  .hrm-eval-card-hdr { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+  .hrm-eval-card-status { margin-left: 0; }
+  .hrm-eval-kpi-row { flex-direction: column; gap: 0.5rem; }
+  .hrm-eval-kpi-meta { min-width: 0; }
+  .sm-form-footer   { padding: 0.85rem; }
 }

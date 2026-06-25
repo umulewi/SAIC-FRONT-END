@@ -356,6 +356,30 @@
 .sm-contract-link:hover { text-decoration: underline; }
 .sm-field-hint { font-size: 0.72rem; color: #9ab09a; margin: 0.2rem 0 0; }
 
+/* ─── Responsive ─────────────────────────── */
+@media (max-width: 640px) {
+  .sm-form-header { padding: 1rem 1.25rem; }
+  .sm-form-body   { padding: 1.25rem 1.25rem 0; }
+  .sm-form-footer { padding: 1rem 1.25rem; flex-wrap: wrap; }
+  .sm-submit-btn, .sm-cancel-btn { flex: 1; justify-content: center; }
+  .sm-delete-modal-body { padding: 1.25rem 1.5rem 1.5rem; }
+  .sm-delete-actions { flex-direction: column-reverse; }
+  .sm-confirm-delete-btn, .sm-cancel-btn { width: 100%; justify-content: center; }
+  .sm-photo-row   { gap: 0.85rem; }
+}
+@media (max-width: 480px) {
+  .sm-form-header { padding: 0.85rem 1rem; }
+  .sm-form-title  { font-size: 0.95rem; }
+  .sm-form-body   { padding: 1rem 1rem 0; }
+  .sm-form-footer { padding: 0.85rem 1rem; }
+  .sm-field-grid  { gap: 0.85rem; }
+  .sm-delete-modal-header { padding: 1.5rem 1.25rem 1.35rem; }
+  .sm-delete-modal-icon { width: 52px; height: 52px; }
+  .sm-photo-section { padding: 0.75rem 0.85rem; }
+  .sm-photo-controls { gap: 0.4rem; }
+  .sm-phone-cell  { white-space: normal; }
+}
+
 /* ─── Shared ─────────────────────────────── */
 .col-num { width: 42px; color: #a0b8a0; font-size: 0.78rem; }
 @keyframes spin { to { transform: rotate(360deg); } }

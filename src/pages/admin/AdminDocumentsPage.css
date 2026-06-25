@@ -142,3 +142,12 @@
 .adp-staff-role  { font-size: 0.72rem; color: #7a9a7a; }
 
 .adp-empty-msg { font-size: 0.82rem; color: #9ab09a; text-align: center; padding: 0.75rem 0; }
+
+@media (max-width: 480px) {
+  .adp-form-header { padding: 1rem; }
+  .adp-form-body   { padding: 1rem; }
+  .adp-doc-title, .adp-doc-desc { white-space: normal; max-width: none; }
+  .adp-modal { border-radius: 14px; }
+  .adp-modal-header { padding: 1rem; }
+  .adp-modal-body   { padding: 1rem; }
+}

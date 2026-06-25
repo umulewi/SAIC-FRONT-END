@@ -134,7 +134,7 @@
   -webkit-overflow-scrolling: touch;
 }
 .alm-root .saic-table {
-  min-width: 900px;
+  min-width: 720px;
 }
 
 /* ─── Responsive ─────────────────────────── */
@@ -145,4 +145,10 @@
   .alm-stats-row { grid-template-columns: repeat(2, 1fr); }
   .alm-filters { flex-direction: column; align-items: stretch; }
   .alm-filter-group { width: 100%; }
+  .alm-root .saic-table { min-width: 600px; }
+}
+@media (max-width: 480px) {
+  .alm-stats-row { grid-template-columns: repeat(2, 1fr); }
+  .alm-reason-text { max-width: 130px; }
+  .alm-reject-modal { max-width: 100%; margin: 0 0.5rem; }
 }

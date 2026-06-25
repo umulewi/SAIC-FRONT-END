@@ -269,3 +269,15 @@
 /* ── Spin ── */
 @keyframes hkc-spin { to { transform: rotate(360deg); } }
 .hkc-spin { animation: hkc-spin 0.8s linear infinite; }
+
+@media (max-width: 640px) {
+  .hkc-cycle-grid { grid-template-columns: 1fr; }
+  .hkc-eval-actions { flex-direction: column; align-items: stretch; }
+  .hkc-btn-save, .hkc-btn-submit { justify-content: center; }
+}
+@media (max-width: 480px) {
+  .hkc-card-header { flex-wrap: wrap; }
+  .hkc-field-row   { flex-direction: column; }
+  .hkc-field       { min-width: 0; }
+  .hkc-field-wide  { min-width: 0; }
+}

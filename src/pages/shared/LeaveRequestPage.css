@@ -79,3 +79,10 @@
   .lrp-balance-grid { grid-template-columns: repeat(2, 1fr); }
   .lrp-summary { flex-direction: column; align-items: flex-start; }
 }
+@media (max-width: 480px) {
+  .lrp-form-card { padding: 1rem; }
+  .lrp-balance-section { padding: 1rem; }
+  .lrp-type-grid { gap: 0.4rem; }
+  .lrp-type-chip { padding: 0.35rem 0.7rem; font-size: 0.76rem; }
+  .lrp-balance-grid { grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
+}

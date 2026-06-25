@@ -519,3 +519,8 @@
   }
   .lp-form-container { max-width: 100%; }
 }
+
+@media (max-width: 480px) {
+  .lp-right  { padding: 2rem 1rem 2.5rem; }
+  .fp-modal  { padding: 1.25rem 1.1rem 1.5rem; border-radius: 14px; }
+}

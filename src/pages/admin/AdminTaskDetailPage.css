@@ -229,3 +229,25 @@
 .atd-ext-new { color: #2D5016; }
 .atd-ext-reason { margin: 0 0 0.2rem; color: #4a5568; }
 .atd-ext-by { margin: 0; color: #9ab09a; font-size: 0.75rem; }
+
+@media (max-width: 640px) {
+  .atd-topbar { flex-wrap: wrap; }
+  .atd-topbar-actions { flex-wrap: wrap; }
+  .atd-card   { padding: 1rem; }
+  .atd-task-title { font-size: 1.05rem; }
+  .atd-assignee-row { flex-direction: column; gap: 0.5rem; }
+  .atd-assignee-actions { margin-left: 0; }
+  .atd-comment-input { flex-direction: column; }
+  .atd-comment-input textarea { min-height: 70px; }
+  .atd-comment-input .btn-primary { align-self: flex-end; }
+  .atd-modal  { padding: 1.25rem; }
+  .atd-modal-actions { flex-direction: column-reverse; }
+  .atd-modal-actions .btn-approve,
+  .atd-modal-actions .btn-reject { width: 100%; justify-content: center; }
+}
+@media (max-width: 480px) {
+  .atd-task-title { font-size: 0.92rem; }
+  .atd-card   { padding: 0.85rem; }
+  .atd-file-name { white-space: normal; }
+  .atm-drawer { padding: 0.85rem 0.9rem; }
+}

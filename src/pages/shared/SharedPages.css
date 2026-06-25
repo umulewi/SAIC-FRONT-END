@@ -571,10 +571,30 @@
   .hrm-tabs       { overflow-x: auto; flex-wrap: nowrap; }
 }
 
+/* 480px phones */
+@media (max-width: 480px) {
+  .page-title     { font-size: 1.05rem; }
+  .page-header    { gap: 0.5rem; }
+  .page-header-actions { gap: 0.4rem; }
+  .saic-table th,
+  .saic-table td  { padding: 0.55rem 0.65rem; font-size: 0.76rem; }
+  .leave-modal    { padding: 1.25rem; }
+  .leave-modal-actions { flex-direction: column-reverse; }
+  .leave-modal-actions .btn-primary,
+  .leave-modal-actions .btn-secondary { width: 100%; justify-content: center; }
+  .stats-grid     { grid-template-columns: 1fr 1fr !important; }
+  .profile-grid   { grid-template-columns: 1fr; }
+  .profile-hero   { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+  .form-row       { grid-template-columns: 1fr !important; }
+  .myd-card-title { white-space: normal; }
+  .detail-label   { min-width: 80px; }
+}
+
 /* Very small phones */
 @media (max-width: 400px) {
   .page-title     { font-size: 1rem; }
   .dashboard-main { padding: 0.75rem !important; }
   .saic-table th,
   .saic-table td  { padding: 0.5rem 0.6rem; font-size: 0.72rem; }
+  .stats-grid     { grid-template-columns: 1fr !important; }
 }

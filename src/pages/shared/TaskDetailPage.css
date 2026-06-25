@@ -62,3 +62,17 @@
 @media (max-width: 860px) { .tdp-layout { grid-template-columns: 1fr; } }
 .tdp-main { display: flex; flex-direction: column; gap: 1.25rem; }
 .tdp-sidebar { display: flex; flex-direction: column; gap: 1.25rem; }
+
+@media (max-width: 640px) {
+  .tdp-header-card { padding: 1rem; }
+  .tdp-title   { font-size: 1.1rem; }
+  .tdp-actions { flex-direction: column; align-items: stretch; }
+  .tdp-actions .btn-submit,
+  .tdp-actions .btn-secondary { width: 100%; justify-content: center; }
+  .tdp-submit-card { padding: 1rem; }
+}
+@media (max-width: 480px) {
+  .tdp-title   { font-size: 0.95rem; }
+  .tdp-badges  { flex-wrap: wrap; }
+  .tdp-header-top { flex-direction: column; align-items: flex-start; }
+}

@@ -99,4 +99,13 @@
   .apc-stats-row   { flex-direction: column; }
   .apc-filters     { flex-direction: column; align-items: stretch; }
   .apc-filter-group { width: 100%; }
+  .apc-stat-card   { flex: 1 1 100%; }
+}
+@media (max-width: 480px) {
+  .apc-preset-row  { gap: 0.3rem; }
+  .apc-preset-btn  { padding: 0.25rem 0.6rem; font-size: 0.74rem; }
+  .apc-breakdown   { gap: 0.4rem; }
+  .apc-breakdown-chip { font-size: 0.74rem; }
+  .apc-date-group  { flex-direction: column; align-items: stretch; }
+  .apc-date-label  { display: none; }
 }
