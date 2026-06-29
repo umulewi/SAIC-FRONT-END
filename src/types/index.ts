@@ -267,6 +267,7 @@ export interface PettyCash {
   grand_total?: number;
   receipt_file?: string | null;
   receipt_original?: string | null;
+  batch_id?: string | null;
 }
 
 export type LeaveType = 'annual' | 'sick' | 'maternity' | 'paternity' | 'emergency' | 'unpaid' | 'other';

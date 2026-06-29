@@ -213,9 +213,11 @@ export async function createPettyCash(
 export async function updatePettyCash(
   apiBase: string,
   id: number,
-  payload: { item: string; cash: number; date: string }
+  payload: FormData
 ) {
-  const { data } = await client.put(`${apiBase}/petty_cash/${id}`, payload);
+  const { data } = await client.put(`${apiBase}/petty_cash/${id}`, payload, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
   return data;
 }
 

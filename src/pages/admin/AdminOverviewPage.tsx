@@ -191,7 +191,7 @@ export default function AdminOverviewPage() {
             const perfSlice = analytics.user_performance.slice((perfPage - 1) * PAGE_SIZE, perfPage * PAGE_SIZE);
             return (
               <div className="an-table-card">
-                <h3 className="an-card-title"><Users size={16} /> Staff Performance</h3>
+                <h3 className="an-card-title"><Users size={16} /> Staff Task Performance</h3>
                 <div style={{ overflowX: 'auto' }}>
                   <table className="saic-table">
                     <thead>

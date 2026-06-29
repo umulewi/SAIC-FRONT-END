@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Fragment } from 'react';
 import {
   RefreshCw, Search, X, DollarSign,
   AlertCircle, Users, TrendingUp, FileDown,
-  ChevronLeft, ChevronRight,
+  ChevronLeft, ChevronRight, Paperclip, ExternalLink,
 } from 'lucide-react';
 import { adminGetPettyCash } from '../../api/role';
 import type { PettyCash } from '../../types';
@@ -33,6 +33,35 @@ function fmtCash(v: number) {
 function initials(first?: string, last?: string, email?: string) {
   if (first && last) return `${first[0]}${last[0]}`.toUpperCase();
   return (email?.[0] ?? '?').toUpperCase();
+}
+
+interface PcGroup {
+  key: string;
+  receipt_file?: string | null;
+  receipt_original?: string | null;
+  items: PettyCash[];
+  subtotal: number;
+}
+
+function buildGroups(records: PettyCash[]): PcGroup[] {
+  const groups: PcGroup[] = [];
+  const seen = new Map<string, PcGroup>();
+  for (const r of records) {
+    if (r.batch_id) {
+      if (seen.has(r.batch_id)) {
+        const g = seen.get(r.batch_id)!;
+        g.items.push(r);
+        g.subtotal += Number(r.cash);
+      } else {
+        const g: PcGroup = { key: r.batch_id, receipt_file: r.receipt_file, receipt_original: r.receipt_original, items: [r], subtotal: Number(r.cash) };
+        seen.set(r.batch_id, g);
+        groups.push(g);
+      }
+    } else {
+      groups.push({ key: `solo-${r.id}`, receipt_file: r.receipt_file, receipt_original: r.receipt_original, items: [r], subtotal: Number(r.cash) });
+    }
+  }
+  return groups;
 }
 
 export default function AdminPettyCashPage() {
@@ -102,8 +131,9 @@ export default function AdminPettyCashPage() {
   }, {});
 
   const hasFilter = !!(search || fromDate || toDate);
-  const apcTotalPages = Math.ceil(records.length / APC_PAGE_SIZE);
-  const apcPaged = records.slice((apcPage - 1) * APC_PAGE_SIZE, apcPage * APC_PAGE_SIZE);
+  const allGroups = buildGroups(records);
+  const apcTotalPages = Math.ceil(allGroups.length / APC_PAGE_SIZE);
+  const apcPaged = allGroups.slice((apcPage - 1) * APC_PAGE_SIZE, apcPage * APC_PAGE_SIZE);
 
   return (
     <div className="apc-root">
@@ -220,39 +250,105 @@ export default function AdminPettyCashPage() {
                 <th>Item / Description</th>
                 <th>Amount (RWF)</th>
                 <th>Date</th>
+                <th>Receipt</th>
               </tr>
             </thead>
             <tbody>
               {records.length === 0 && (
-                <tr><td colSpan={5}>
+                <tr><td colSpan={6}>
                   <div className="empty-state"><DollarSign size={38} /><p>No petty cash records found.</p></div>
                 </td></tr>
               )}
-              {apcPaged.map((r, i) => {
-                const fullName = r.first_name && r.last_name ? `${r.first_name} ${r.last_name}` : undefined;
+              {apcPaged.map((g, gi) => {
+                const r0 = g.items[0];
+                const fullName = r0.first_name && r0.last_name ? `${r0.first_name} ${r0.last_name}` : undefined;
+                const rowIdx = (apcPage - 1) * APC_PAGE_SIZE + gi + 1;
+
+                if (g.items.length === 1) {
+                  return (
+                    <tr key={g.key}>
+                      <td className="col-num">{rowIdx}</td>
+                      <td>
+                        <div className="apc-staff-cell">
+                          <div className="apc-avatar">
+                            {r0.profile_photo
+                              ? <img src={`/uploads/${r0.profile_photo}`} alt="" className="apc-avatar-img" />
+                              : initials(r0.first_name, r0.last_name, r0.email)
+                            }
+                          </div>
+                          <div>
+                            <p className="apc-staff-name">{fullName ?? r0.email}</p>
+                            {fullName && <p className="apc-staff-email">{r0.email}</p>}
+                          </div>
+                        </div>
+                      </td>
+                      <td style={{ color: '#1e3a1e', fontSize: '0.85rem', fontWeight: 500 }}>{r0.item}</td>
+                      <td style={{ fontWeight: 700, color: '#2D5016', whiteSpace: 'nowrap', fontSize: '0.85rem' }}>
+                        RWF {fmtCash(Number(r0.cash))}
+                      </td>
+                      <td style={{ fontSize: '0.82rem', color: '#6a8c6a', whiteSpace: 'nowrap' }}>{fmtDate(r0.date)}</td>
+                      <td className="pcp-group-receipt-cell">
+                        {r0.receipt_file
+                          ? <a href={`/uploads/${r0.receipt_file}`} target="_blank" rel="noopener noreferrer"
+                              className="pcp-receipt-link" title={r0.receipt_original ?? 'Receipt'}>
+                              <Paperclip size={12} />
+                              <span className="pcp-receipt-name">{r0.receipt_original ?? 'Receipt'}</span>
+                              <ExternalLink size={11} />
+                            </a>
+                          : <span className="sm-dash">—</span>
+                        }
+                      </td>
+                    </tr>
+                  );
+                }
+
                 return (
-                  <tr key={r.id}>
-                    <td className="col-num">{(apcPage - 1) * APC_PAGE_SIZE + i + 1}</td>
-                    <td>
-                      <div className="apc-staff-cell">
-                        <div className="apc-avatar">
-                          {r.profile_photo
-                            ? <img src={`/uploads/${r.profile_photo}`} alt="" className="apc-avatar-img" />
-                            : initials(r.first_name, r.last_name, r.email)
-                          }
-                        </div>
-                        <div>
-                          <p className="apc-staff-name">{fullName ?? r.email}</p>
-                          {fullName && <p className="apc-staff-email">{r.email}</p>}
-                        </div>
-                      </div>
-                    </td>
-                    <td style={{ color: '#1e3a1e', fontSize: '0.85rem', fontWeight: 500 }}>{r.item}</td>
-                    <td style={{ fontWeight: 700, color: '#2D5016', whiteSpace: 'nowrap', fontSize: '0.85rem' }}>
-                      RWF {fmtCash(Number(r.cash))}
-                    </td>
-                    <td style={{ fontSize: '0.82rem', color: '#6a8c6a', whiteSpace: 'nowrap' }}>{fmtDate(r.date)}</td>
-                  </tr>
+                  <Fragment key={g.key}>
+                    <tr className="pcp-group-header-row">
+                      <td colSpan={6}>
+                        <span className="pcp-group-meta">{g.items.length} items</span>
+                      </td>
+                    </tr>
+                    {g.items.map((r, ii) => (
+                      <tr key={r.id} className="pcp-group-item-row">
+                        <td className="col-num">{rowIdx}.{ii + 1}</td>
+                        {ii === 0 && (
+                          <td rowSpan={g.items.length} className="pcp-group-accountant-cell">
+                            <div className="apc-staff-cell">
+                              <div className="apc-avatar">
+                                {r0.profile_photo
+                                  ? <img src={`/uploads/${r0.profile_photo}`} alt="" className="apc-avatar-img" />
+                                  : initials(r0.first_name, r0.last_name, r0.email)
+                                }
+                              </div>
+                              <div>
+                                <p className="apc-staff-name">{fullName ?? r0.email}</p>
+                                {fullName && <p className="apc-staff-email">{r0.email}</p>}
+                              </div>
+                            </div>
+                          </td>
+                        )}
+                        <td style={{ color: '#1e3a1e', fontSize: '0.85rem', fontWeight: 500 }}>{r.item}</td>
+                        <td style={{ fontWeight: 700, color: '#2D5016', whiteSpace: 'nowrap', fontSize: '0.85rem' }}>
+                          RWF {fmtCash(Number(r.cash))}
+                        </td>
+                        <td style={{ fontSize: '0.82rem', color: '#6a8c6a', whiteSpace: 'nowrap' }}>{fmtDate(r.date)}</td>
+                        {ii === 0 && (
+                          <td rowSpan={g.items.length} className="pcp-group-receipt-cell">
+                            {g.receipt_file
+                              ? <a href={`/uploads/${g.receipt_file}`} target="_blank" rel="noopener noreferrer"
+                                  className="pcp-receipt-link" title={g.receipt_original ?? 'Receipt'}>
+                                  <Paperclip size={12} />
+                                  <span className="pcp-receipt-name">{g.receipt_original ?? 'Receipt'}</span>
+                                  <ExternalLink size={11} />
+                                </a>
+                              : <span className="sm-dash">—</span>
+                            }
+                          </td>
+                        )}
+                      </tr>
+                    ))}
+                  </Fragment>
                 );
               })}
               {records.length > 0 && (
@@ -261,7 +357,7 @@ export default function AdminPettyCashPage() {
                   <td style={{ fontWeight: 800, color: '#1e3a1e', fontSize: '0.95rem', whiteSpace: 'nowrap' }}>
                     RWF {fmtCash(grandTotal)}
                   </td>
-                  <td />
+                  <td /><td />
                 </tr>
               )}
             </tbody>
@@ -273,7 +369,7 @@ export default function AdminPettyCashPage() {
             <button className="atm-pg-btn" disabled={apcPage <= 1} onClick={() => setApcPage(p => p - 1)}>
               <ChevronLeft size={15} />
             </button>
-            <span className="atm-pg-info">Page {apcPage} of {apcTotalPages} ({records.length} records)</span>
+            <span className="atm-pg-info">Page {apcPage} of {apcTotalPages} ({allGroups.length} groups, {records.length} items)</span>
             <button className="atm-pg-btn" disabled={apcPage >= apcTotalPages} onClick={() => setApcPage(p => p + 1)}>
               <ChevronRight size={15} />
             </button>

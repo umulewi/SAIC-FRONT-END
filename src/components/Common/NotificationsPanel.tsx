@@ -128,7 +128,11 @@ export default function NotificationsPanel({ onCountChange }: Props) {
   return (
     <div className="np-wrap" ref={panelRef}>
       {/* Bell button */}
-      <button className="np-bell-btn" onClick={() => setOpen(o => !o)} aria-label="Notifications">
+      <button
+        className={`np-bell-btn${open ? ' np-bell-active' : ''}${unread > 0 ? ' np-has-unread' : ''}`}
+        onClick={() => setOpen(o => !o)}
+        aria-label="Notifications"
+      >
         <Bell size={18} />
         {unread > 0 && (
           <span className="np-badge">{unread > 99 ? '99+' : unread}</span>

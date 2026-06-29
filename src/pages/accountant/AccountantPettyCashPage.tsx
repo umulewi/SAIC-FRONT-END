@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, Fragment } from 'react';
 import {
-  Plus, Pencil, Trash2, X, CheckCircle, AlertCircle,
+  Plus, Pencil, X, CheckCircle, AlertCircle,
   RefreshCw, Loader2, DollarSign, Search, FileDown,
   ChevronLeft, ChevronRight, Paperclip, ExternalLink,
 } from 'lucide-react';
-import { getPettyCash, createPettyCash, updatePettyCash, deletePettyCash } from '../../api/role';
+import { getPettyCash, createPettyCash, updatePettyCash } from '../../api/role';
 import type { PettyCash } from '../../types';
 import {
   exportPettyCashPdf, getPresetDates, formatPeriodLabel,
@@ -49,6 +49,35 @@ function emptyRow(): BatchRow {
   return { _id: crypto.randomUUID(), item: '', cash: '', date: TODAY };
 }
 
+interface PcGroup {
+  key: string;
+  receipt_file?: string | null;
+  receipt_original?: string | null;
+  items: PettyCash[];
+  subtotal: number;
+}
+
+function buildGroups(records: PettyCash[]): PcGroup[] {
+  const groups: PcGroup[] = [];
+  const seen = new Map<string, PcGroup>();
+  for (const r of records) {
+    if (r.batch_id) {
+      if (seen.has(r.batch_id)) {
+        const g = seen.get(r.batch_id)!;
+        g.items.push(r);
+        g.subtotal += Number(r.cash);
+      } else {
+        const g: PcGroup = { key: r.batch_id, receipt_file: r.receipt_file, receipt_original: r.receipt_original, items: [r], subtotal: Number(r.cash) };
+        seen.set(r.batch_id, g);
+        groups.push(g);
+      }
+    } else {
+      groups.push({ key: `solo-${r.id}`, receipt_file: r.receipt_file, receipt_original: r.receipt_original, items: [r], subtotal: Number(r.cash) });
+    }
+  }
+  return groups;
+}
+
 export default function AccountantPettyCashPage({ apiBase }: Props) {
   const [records,  setRecords]  = useState<PettyCash[]>([]);
   const [loading,  setLoading]  = useState(true);
@@ -68,9 +97,11 @@ export default function AccountantPettyCashPage({ apiBase }: Props) {
   const [editing,  setEditing]  = useState<PettyCash | null>(null);
 
   // Edit-mode single fields
-  const [fItem, setFItem] = useState('');
-  const [fCash, setFCash] = useState('');
-  const [fDate, setFDate] = useState(TODAY);
+  const [fItem,    setFItem]    = useState('');
+  const [fCash,    setFCash]    = useState('');
+  const [fDate,    setFDate]    = useState(TODAY);
+  const [fReceipt, setFReceipt] = useState<File | null>(null); // replacement receipt (optional)
+  const fReceiptRef = useRef<HTMLInputElement>(null);
 
   // Create-mode batch
   const [batchRows,    setBatchRows]    = useState<BatchRow[]>([emptyRow()]);
@@ -81,9 +112,6 @@ export default function AccountantPettyCashPage({ apiBase }: Props) {
   const [formErr, setFormErr] = useState('');
   const [success, setSuccess] = useState('');
 
-  // Delete confirm
-  const [deleteTarget, setDeleteTarget] = useState<PettyCash | null>(null);
-  const [deleting,     setDeleting]     = useState(false);
 
   const load = (filters?: { from_date?: string; to_date?: string; search?: string }) => {
     setLoading(true); setError('');
@@ -138,12 +166,14 @@ export default function AccountantPettyCashPage({ apiBase }: Props) {
     setFItem(r.item);
     setFCash(String(r.cash));
     setFDate(r.date?.slice(0, 10) ?? TODAY);
+    setFReceipt(null);
     setFormErr(''); setSuccess(''); setFormOpen(true);
   };
 
   const closeForm = () => {
     setFormOpen(false); setEditing(null);
     setBatchRows([emptyRow()]); setBatchReceipt(null);
+    setFReceipt(null);
   };
 
   // ── Batch row helpers ──────────────────────────────────────────────
@@ -163,7 +193,12 @@ export default function AccountantPettyCashPage({ apiBase }: Props) {
     if (!fDate)                                                  { setFormErr('Date is required.'); return; }
     setSaving(true); setFormErr('');
     try {
-      await updatePettyCash(apiBase, editing!.id, { item: fItem.trim(), cash: Number(fCash), date: fDate });
+      const fd = new FormData();
+      fd.append('item', fItem.trim());
+      fd.append('cash', String(Number(fCash)));
+      fd.append('date', fDate);
+      if (fReceipt) fd.append('receipt', fReceipt);
+      await updatePettyCash(apiBase, editing!.id!, fd);
       closeForm();
       load({ search: search || undefined, from_date: fromDate || undefined, to_date: toDate || undefined });
     } catch (err: unknown) {
@@ -186,12 +221,14 @@ export default function AccountantPettyCashPage({ apiBase }: Props) {
     setSaving(true); setFormErr('');
     try {
       const snapshot = batchRows.map(r => ({ ...r }));
+      const batchId = snapshot.length > 1 ? crypto.randomUUID() : null;
       for (const r of snapshot) {
         const fd = new FormData();
         fd.append('item',    r.item.trim());
         fd.append('cash',    String(Number(r.cash)));
         fd.append('date',    r.date);
         fd.append('receipt', batchReceipt); // same file for all entries
+        if (batchId) fd.append('batch_id', batchId);
         await createPettyCash(apiBase, fd);
       }
       closeForm();
@@ -219,23 +256,11 @@ export default function AccountantPettyCashPage({ apiBase }: Props) {
     } finally { setSaving(false); }
   };
 
-  const handleDelete = async () => {
-    if (!deleteTarget?.id) return;
-    setDeleting(true);
-    try {
-      await deletePettyCash(apiBase, deleteTarget.id);
-      setDeleteTarget(null);
-      setSuccess('Record deleted.');
-      load({ search: search || undefined, from_date: fromDate || undefined, to_date: toDate || undefined });
-    } catch {
-      setError('Failed to delete record.');
-    } finally { setDeleting(false); }
-  };
-
   const total = records.reduce((sum, r) => sum + Number(r.cash), 0);
   const hasFilter = !!(search || fromDate || toDate);
-  const pcTotalPages = Math.ceil(records.length / PC_PAGE_SIZE);
-  const pcPaged = records.slice((pcPage - 1) * PC_PAGE_SIZE, pcPage * PC_PAGE_SIZE);
+  const allGroups = buildGroups(records);
+  const pcTotalPages = Math.ceil(allGroups.length / PC_PAGE_SIZE);
+  const pcPaged = allGroups.slice((pcPage - 1) * PC_PAGE_SIZE, pcPage * PC_PAGE_SIZE);
   const batchTotal = batchRows.reduce((s, r) => s + (Number(r.cash) || 0), 0);
 
   return (
@@ -295,6 +320,43 @@ export default function AccountantPettyCashPage({ apiBase }: Props) {
                 <input type="date" value={fDate}
                   max={TODAY}
                   onChange={e => { setFDate(e.target.value); setFormErr(''); }} disabled={saving} />
+              </div>
+              <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                <label>Receipt File</label>
+                <input
+                  ref={fReceiptRef}
+                  type="file"
+                  accept="image/*,.pdf"
+                  style={{ display: 'none' }}
+                  onChange={e => { setFReceipt(e.target.files?.[0] ?? null); setFormErr(''); }}
+                  disabled={saving}
+                />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+                  {editing?.receipt_file && !fReceipt && (
+                    <a href={`/uploads/${editing.receipt_file}`} target="_blank" rel="noopener noreferrer"
+                      className="pcp-receipt-link" title={editing.receipt_original ?? 'Receipt'}>
+                      <Paperclip size={12} />
+                      <span className="pcp-receipt-name">{editing.receipt_original ?? 'Current receipt'}</span>
+                      <ExternalLink size={11} />
+                    </a>
+                  )}
+                  <button
+                    type="button"
+                    className={`pcp-batch-file-btn${fReceipt ? ' pcp-batch-file-btn--set' : ''}`}
+                    onClick={() => fReceiptRef.current?.click()}
+                    disabled={saving}
+                  >
+                    {fReceipt
+                      ? <><CheckCircle size={13} />{fReceipt.name.length > 30 ? fReceipt.name.slice(0, 28) + '…' : fReceipt.name}</>
+                      : <><Paperclip size={13} />{editing?.receipt_file ? 'Replace file…' : 'Attach file (PDF / image)'}</>
+                    }
+                  </button>
+                  {fReceipt && (
+                    <button type="button" className="pcp-batch-remove" onClick={() => setFReceipt(null)} disabled={saving} title="Remove">
+                      <X size={12} />
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -490,36 +552,73 @@ export default function AccountantPettyCashPage({ apiBase }: Props) {
                       <div className="empty-state"><DollarSign size={38} /><p>No petty cash entries yet.</p></div>
                     </td></tr>
                   )}
-                  {pcPaged.map((r, i) => (
-                    <tr key={r.id}>
-                      <td className="col-num">{(pcPage - 1) * PC_PAGE_SIZE + i + 1}</td>
-                      <td className="pcp-item-cell">{r.item}</td>
-                      <td className="pcp-cash-cell">RWF {fmtCash(Number(r.cash))}</td>
-                      <td style={{ fontSize: '0.82rem', color: '#6a8c6a', whiteSpace: 'nowrap' }}>{fmtDate(r.date)}</td>
-                      <td>
-                        {r.receipt_file
-                          ? <a
-                              href={`/uploads/${r.receipt_file}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="pcp-receipt-link"
-                              title={r.receipt_original ?? 'Receipt'}
-                            >
-                              <Paperclip size={12} />
-                              <span className="pcp-receipt-name">{r.receipt_original ?? 'Receipt'}</span>
-                              <ExternalLink size={11} />
-                            </a>
-                          : <span className="sm-dash">—</span>
-                        }
-                      </td>
-                      <td>
-                        <div className="table-actions">
-                          <button className="pcp-btn-edit" onClick={() => openEdit(r)} title="Edit"><Pencil size={13} /></button>
-                          <button className="pcp-btn-delete" onClick={() => setDeleteTarget(r)} title="Delete"><Trash2 size={13} /></button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                  {pcPaged.map((g, gi) => {
+                    const rowIdx = (pcPage - 1) * PC_PAGE_SIZE + gi + 1;
+
+                    if (g.items.length === 1) {
+                      const r = g.items[0];
+                      return (
+                        <tr key={g.key}>
+                          <td className="col-num">{rowIdx}</td>
+                          <td className="pcp-item-cell">{r.item}</td>
+                          <td className="pcp-cash-cell">RWF {fmtCash(Number(r.cash))}</td>
+                          <td style={{ fontSize: '0.82rem', color: '#6a8c6a', whiteSpace: 'nowrap' }}>{fmtDate(r.date)}</td>
+                          <td className="pcp-group-receipt-cell">
+                            {r.receipt_file
+                              ? <a href={`/uploads/${r.receipt_file}`} target="_blank" rel="noopener noreferrer"
+                                  className="pcp-receipt-link" title={r.receipt_original ?? 'Receipt'}>
+                                  <Paperclip size={12} />
+                                  <span className="pcp-receipt-name">{r.receipt_original ?? 'Receipt'}</span>
+                                  <ExternalLink size={11} />
+                                </a>
+                              : <span className="sm-dash">—</span>
+                            }
+                          </td>
+                          <td>
+                            <button className="pcp-btn-edit" onClick={() => openEdit(r)} title="Edit"><Pencil size={13} /></button>
+                          </td>
+                        </tr>
+                      );
+                    }
+
+                    return (
+                      <Fragment key={g.key}>
+                        <tr className="pcp-group-header-row">
+                          <td colSpan={6}>
+                            <div className="pcp-group-header">
+                              <span className="pcp-group-meta">
+                                {g.items.length} items · RWF {fmtCash(g.subtotal)}
+                              </span>
+                            </div>
+                          </td>
+                        </tr>
+                        {g.items.map((r, ii) => (
+                          <tr key={r.id} className="pcp-group-item-row">
+                            <td className="col-num">{rowIdx}.{ii + 1}</td>
+                            <td className="pcp-item-cell">{r.item}</td>
+                            <td className="pcp-cash-cell">RWF {fmtCash(Number(r.cash))}</td>
+                            <td style={{ fontSize: '0.82rem', color: '#6a8c6a', whiteSpace: 'nowrap' }}>{fmtDate(r.date)}</td>
+                            {ii === 0 && (
+                              <td rowSpan={g.items.length} className="pcp-group-receipt-cell">
+                                {g.receipt_file
+                                  ? <a href={`/uploads/${g.receipt_file}`} target="_blank" rel="noopener noreferrer"
+                                      className="pcp-receipt-link" title={g.receipt_original ?? 'Receipt'}>
+                                      <Paperclip size={12} />
+                                      <span className="pcp-receipt-name">{g.receipt_original ?? 'Receipt'}</span>
+                                      <ExternalLink size={11} />
+                                    </a>
+                                  : <span className="sm-dash">—</span>
+                                }
+                              </td>
+                            )}
+                            <td>
+                              <button className="pcp-btn-edit" onClick={() => openEdit(r)} title="Edit"><Pencil size={13} /></button>
+                            </td>
+                          </tr>
+                        ))}
+                      </Fragment>
+                    );
+                  })}
                   {records.length > 0 && (
                     <tr className="pcp-total-row">
                       <td colSpan={2} style={{ fontWeight: 700, color: '#1e3a1e' }}>Total</td>
@@ -546,26 +645,6 @@ export default function AccountantPettyCashPage({ apiBase }: Props) {
         </>
       )}
 
-      {/* Delete confirm modal */}
-      {deleteTarget && (
-        <div className="leave-modal-overlay" onClick={e => e.target === e.currentTarget && setDeleteTarget(null)}>
-          <div className="leave-modal">
-            <h3>Delete Entry?</h3>
-            <p>
-              <strong>{deleteTarget.item}</strong> — RWF {fmtCash(Number(deleteTarget.cash))}<br />
-              <span style={{ fontSize: '0.8rem', color: '#9ab09a' }}>{fmtDate(deleteTarget.date)}</span>
-            </p>
-            <div className="leave-modal-actions">
-              <button className="btn-secondary" onClick={() => setDeleteTarget(null)} disabled={deleting}>
-                <X size={13} /> Cancel
-              </button>
-              <button className="btn-danger" onClick={handleDelete} disabled={deleting}>
-                {deleting ? <Loader2 size={13} className="spin" /> : <Trash2 size={13} />} Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

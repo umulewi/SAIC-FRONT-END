@@ -89,6 +89,84 @@
 .apc-staff-name  { font-size: 0.83rem; font-weight: 600; color: #1e3a1e; margin: 0; }
 .apc-staff-email { font-size: 0.73rem; color: #9ab09a; margin: 0; }
 
+/* ─── Receipt link ───────────────────────── */
+.pcp-receipt-link {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  font-size: 0.78rem; font-weight: 500; color: #2D5016;
+  text-decoration: none; max-width: 160px;
+  padding: 0.2rem 0.5rem; border-radius: 6px;
+  background: #f0f7f0; border: 1px solid #c8dfc8;
+  transition: background 0.15s, border-color 0.15s;
+}
+.pcp-receipt-link:hover { background: #e2f0e2; border-color: #9fca7f; }
+.pcp-receipt-name {
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 110px;
+}
+
+/* ─── Grouped receipt rows ───────────────── */
+.pcp-group-header-row td {
+  background: #edf6ed;
+  border-top: 2px solid #b5d5b5;
+  border-bottom: 1px solid #b5d5b5 !important;
+  padding: 0.6rem 0.85rem !important;
+}
+.pcp-group-header {
+  display: flex; align-items: center; gap: 0.85rem; flex-wrap: wrap;
+}
+.pcp-group-meta {
+  font-size: 0.78rem; font-weight: 700; color: #2D5016;
+  white-space: nowrap; margin-left: auto;
+  background: #fff; border: 1px solid #c8dfc8;
+  border-radius: 20px; padding: 0.2rem 0.65rem;
+}
+.pcp-group-item-row > td { background: #fafff8 !important; }
+.pcp-group-item-row > td:first-child { border-left: 3px solid #9fca7f; }
+.pcp-group-accountant-cell {
+  vertical-align: middle !important;
+  border-right: 1px solid #ddeedd !important;
+  background: #f4faf4 !important;
+  padding: 0.5rem 0.75rem !important;
+}
+.pcp-group-receipt-cell {
+  vertical-align: middle !important;
+  text-align: center;
+  border-left: 1px solid #ddeedd !important;
+  background: #f4faf4 !important;
+}
+
+/* ─── Centered receipt row ───────────────── */
+.pcp-receipt-center-row td {
+  background: #f4faf4 !important;
+  border-bottom: 1px solid #ddeedd !important;
+  padding: 0.7rem 1rem !important;
+  text-align: center;
+}
+.pcp-receipt-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.pcp-receipt-card {
+  display: inline-flex; align-items: center; gap: 0.55rem;
+  padding: 0.5rem 1.25rem;
+  background: #fff; border: 1.5px solid #b5d5b5;
+  border-radius: 10px; text-decoration: none;
+  color: #2D5016; font-size: 0.85rem; font-weight: 600;
+  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+  box-shadow: 0 1px 4px rgba(45,80,22,0.07);
+  max-width: 360px;
+}
+.pcp-receipt-card:hover {
+  background: #e6f4e6; border-color: #7dba5a;
+  box-shadow: 0 3px 10px rgba(45,80,22,0.13);
+}
+.pcp-receipt-card-icon { flex-shrink: 0; color: #3a8022; }
+.pcp-receipt-card-name {
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  max-width: 240px;
+}
+.pcp-receipt-card-ext { flex-shrink: 0; opacity: 0.6; }
+
 /* ─── Total row ──────────────────────────── */
 .apc-total-row td { background: #f0f7f0 !important; border-top: 2px solid #c8dfc8; }
 
