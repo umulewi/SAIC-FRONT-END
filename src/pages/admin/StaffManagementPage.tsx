@@ -52,12 +52,6 @@ const EMPTY_FORM: StaffFormData = {
   contract_start: '', contract_end: '', contract_status: 'active',
 };
 
-const CONTRACT_STATUS_LABELS: Record<string, string> = {
-  active: 'Active',
-  probation: 'Probation',
-  expired: 'Expired',
-  terminated: 'Terminated',
-};
 
 function initials(first: string, last: string) {
   return `${first?.[0] ?? ''}${last?.[0] ?? ''}`.toUpperCase() || '?';
