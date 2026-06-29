@@ -63,11 +63,6 @@ function initials(first: string, last: string) {
   return `${first?.[0] ?? ''}${last?.[0] ?? ''}`.toUpperCase() || '?';
 }
 
-function ContractBadge({ status }: { status?: string | null }) {
-  if (!status) return <span className="sm-dash">—</span>;
-  const cls = `sm-contract-badge sm-contract-${status}`;
-  return <span className={cls}>{CONTRACT_STATUS_LABELS[status] ?? status}</span>;
-}
 
 export default function StaffManagementPage({ roleId, label }: StaffManagementPageProps) {
   const [staff,      setStaff]      = useState<StaffMember[]>([]);

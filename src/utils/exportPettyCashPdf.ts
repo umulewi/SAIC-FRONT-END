@@ -22,7 +22,6 @@ export function exportPettyCashPdf(records: PettyCash[], opts: ExportOptions) {
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
 
   const BRAND   = '#2D5016';
-  const LIGHT   = '#f0f7f0';
   const PAGE_W  = doc.internal.pageSize.getWidth();
   const MARGIN  = 14;
 
@@ -82,11 +81,11 @@ export function exportPettyCashPdf(records: PettyCash[], opts: ExportOptions) {
         { header: 'Date',           dataKey: 'date' },
       ];
 
-  const rows = records.map((r, i) => {
+  const rows = records.map((r, i): Record<string, string | number> => {
     const name = r.first_name && r.last_name ? `${r.first_name} ${r.last_name}` : (r.email ?? '');
-    return opts.showAccountant
-      ? { num: i + 1, who: name, item: r.item, cash: `RWF ${fmt(Number(r.cash))}`, date: fmtDate(r.date) }
-      : { num: i + 1, item: r.item, cash: `RWF ${fmt(Number(r.cash))}`, date: fmtDate(r.date) };
+    const base: Record<string, string | number> = { num: i + 1, item: r.item, cash: `RWF ${fmt(Number(r.cash))}`, date: fmtDate(r.date) };
+    if (opts.showAccountant) base.who = name;
+    return base;
   });
 
   autoTable(doc, {

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Bell, X, CheckCheck, Trash2,
+  Bell, X, CheckCheck,
   ClipboardList, MessageSquare, Upload,
   CheckCircle2, XCircle, Clock, BarChart2,
   TrendingUp, Star,

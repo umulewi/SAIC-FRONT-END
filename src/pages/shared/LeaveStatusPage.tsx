@@ -141,7 +141,7 @@ export default function LeaveStatusPage({ apiBase }: Props) {
             <tbody>
               {leaves.map((l, i) => {
                 const status = (l.status ?? 'pending').toLowerCase();
-                const meta   = STATUS_META[status] ?? STATUS_META.pending;
+                const meta   = STATUS_META[status as keyof typeof STATUS_META] ?? STATUS_META.pending;
                 const type   = l.leave_type ?? 'annual';
                 const color  = TYPE_COLOR[type] ?? '#2D5016';
                 return (

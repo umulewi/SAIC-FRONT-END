@@ -41,7 +41,7 @@ function RatingBadge({ rating }: { rating?: string | null }) {
   );
 }
 
-function calcPerf(evalCount: number, totalPoints: number, taskTotal: number, taskCompleted: number) {
+function _calcPerf(evalCount: number, totalPoints: number, taskTotal: number, taskCompleted: number) {
   const kpi  = evalCount > 0 ? (totalPoints / (evalCount * 100)) * 50 : 0;
   const task = taskTotal > 0 ? (taskCompleted / taskTotal) * 50        : 50;
   return Math.round(kpi + task);
@@ -231,7 +231,7 @@ export default function HRManagerPage() {
     } catch { setError('Failed to remove KPI.'); }
   };
 
-  const handleSubmitToCycle = async (userId: number) => {
+  const _handleSubmitToCycle = async (userId: number) => {
     if (!openCycle) return;
     await saveEvaluation(openCycle.id, userId, { action: 'submit' }).catch(() => {});
   };
