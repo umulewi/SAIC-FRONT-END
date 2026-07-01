@@ -2,10 +2,11 @@ import { useEffect, useState, useRef } from 'react';
 import {
   RefreshCw, Search, Filter, CheckCircle, XCircle,
   Clock, AlertCircle, CalendarCheck, X, Users,
-  TrendingUp, Loader2, ChevronLeft, ChevronRight,
+  TrendingUp, Loader2, ChevronLeft, ChevronRight, FileDown,
 } from 'lucide-react';
 import { adminGetLeaveRequests, adminGetLeaveStats, adminUpdateLeaveStatus } from '../../api/role';
 import type { LeaveRequest, LeaveStats, LeaveTypeCount } from '../../types';
+import { getLeaveFormPdfBlob } from '../../utils/exportLeaveFormPdf';
 import PageHeader from '../../components/Common/PageHeader';
 import LoadingSpinner from '../../components/Common/LoadingSpinner';
 import '../shared/SharedPages.css';
@@ -60,6 +61,18 @@ export default function AdminLeaveManagementPage() {
 
   // Approve modal state
   const [approveTarget, setApproveTarget] = useState<LeaveRequest | null>(null);
+
+  // PDF preview state
+  const [pdfPreview, setPdfPreview] = useState<{ blobUrl: string; filename: string } | null>(null);
+
+  const openPdfPreview = (l: LeaveRequest) => {
+    if (pdfPreview) URL.revokeObjectURL(pdfPreview.blobUrl);
+    setPdfPreview(getLeaveFormPdfBlob(l));
+  };
+  const closePdfPreview = () => {
+    if (pdfPreview) URL.revokeObjectURL(pdfPreview.blobUrl);
+    setPdfPreview(null);
+  };
 
   // Reject modal state
   const [rejectTarget,  setRejectTarget]  = useState<LeaveRequest | null>(null);
@@ -278,9 +291,16 @@ export default function AdminLeaveManagementPage() {
                             </button>
                           </div>
                         ) : (
-                          <span style={{ fontSize: '0.75rem', color: '#b0c8b0' }}>
-                            {l.approved_by_name ?? 'Reviewed'}
-                          </span>
+                          <div className="alm-action-btns">
+                            {status === 'approved' && (
+                              <button className="alm-btn-approve" onClick={() => openPdfPreview(l)} title="Preview & download approved leave form">
+                                <FileDown size={12} /> Preview
+                              </button>
+                            )}
+                            <span style={{ fontSize: '0.75rem', color: '#b0c8b0' }}>
+                              {l.approved_by_name ?? 'Reviewed'}
+                            </span>
+                          </div>
                         )}
                       </td>
                     </tr>
@@ -302,6 +322,59 @@ export default function AdminLeaveManagementPage() {
             </div>
           )}
         </>
+      )}
+
+      {/* ── PDF Preview modal ── */}
+      {pdfPreview && (
+        <div className="leave-modal-overlay" onClick={e => e.target === e.currentTarget && closePdfPreview()}
+          style={{ zIndex: 1100 }}>
+          <div style={{
+            background: '#fff', borderRadius: 10, overflow: 'hidden',
+            display: 'flex', flexDirection: 'column',
+            width: 'min(860px, 96vw)', height: 'min(92vh, 920px)',
+            boxShadow: '0 8px 40px rgba(0,0,0,0.22)',
+          }}>
+            {/* header */}
+            <div style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              padding: '0.75rem 1rem', background: '#2D5016', color: '#fff',
+            }}>
+              <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>
+                Leave Form Preview — {pdfPreview.filename}
+              </span>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button
+                  onClick={() => {
+                    const a = document.createElement('a');
+                    a.href = pdfPreview.blobUrl;
+                    a.download = pdfPreview.filename;
+                    a.click();
+                  }}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 6,
+                    background: '#fff', color: '#2D5016',
+                    border: 'none', borderRadius: 6, padding: '0.35rem 0.75rem',
+                    fontWeight: 600, fontSize: '0.82rem', cursor: 'pointer',
+                  }}
+                >
+                  <FileDown size={14} /> Download
+                </button>
+                <button onClick={closePdfPreview} style={{
+                  background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: 6,
+                  color: '#fff', cursor: 'pointer', padding: '0.35rem 0.5rem', display: 'flex',
+                }}>
+                  <X size={16} />
+                </button>
+              </div>
+            </div>
+            {/* iframe */}
+            <iframe
+              src={pdfPreview.blobUrl}
+              style={{ flex: 1, border: 'none', width: '100%' }}
+              title="Leave Form PDF Preview"
+            />
+          </div>
+        </div>
       )}
 
       {/* ── Approve modal ── */}

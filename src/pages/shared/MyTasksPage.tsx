@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ClipboardList, Calendar, AlertCircle, Eye, ArrowRight, Search, Filter,
   UserPlus, CheckCircle, XCircle, Users, Loader2, X, Inbox, Send as SendIcon,
-  Plus, Clock, User,
+  Plus, Clock, User, Paperclip, BookOpen, AlignLeft, FileText,
 } from 'lucide-react';
-import { getTasks, assignToTeam, managerReviewTask, createTask, getTask, removeAssignee } from '../../api/tasks';
+import { getTasks, assignToTeam, managerReviewTask, createTask, getTask, removeAssignee, uploadTaskFiles } from '../../api/tasks';
 import { getMyTeam } from '../../api/role';
 import { useAuth } from '../../context/AuthContext';
 import type { EnhancedTask, TaskPriority, TeamMember } from '../../types';
@@ -149,8 +149,10 @@ export default function MyTasksPage({ apiBase }: MyTasksPageProps) {
   const [cDeadline,     setCDeadline]     = useState('');
   const [cDeadlineTime, setCDeadlineTime] = useState('');
   const [cAssignees,    setCAssignees]    = useState<number[]>([]);
+  const [cAttachments,  setCAttachments]  = useState<FileList | null>(null);
   const [createLoading, setCreateLoading] = useState(false);
   const [createError,   setCreateError]   = useState('');
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const load = async () => {
     setLoading(true); setError('');
@@ -231,7 +233,8 @@ export default function MyTasksPage({ apiBase }: MyTasksPageProps) {
   const resetCreate = () => {
     setCTitle(''); setCDescription(''); setCPriority('medium');
     setCInstructions(''); setCDeadline(''); setCDeadlineTime('');
-    setCAssignees([]); setCreateError('');
+    setCAssignees([]); setCAttachments(null); setCreateError('');
+    if (fileRef.current) fileRef.current.value = '';
   };
 
   const openCreate = async () => {
@@ -248,7 +251,7 @@ export default function MyTasksPage({ apiBase }: MyTasksPageProps) {
     if (!cTitle.trim()) { setCreateError('Title is required.'); return; }
     setCreateLoading(true); setCreateError('');
     try {
-      await createTask({
+      const res = await createTask({
         title: cTitle.trim(),
         description: cDescription.trim() || undefined,
         priority: cPriority,
@@ -257,6 +260,9 @@ export default function MyTasksPage({ apiBase }: MyTasksPageProps) {
         deadline_time: cDeadlineTime || undefined,
         assign_to: cAssignees,
       });
+      if (cAttachments && cAttachments.length > 0 && res.task_id) {
+        await uploadTaskFiles(res.task_id, Array.from(cAttachments), 'attachment');
+      }
       setShowCreate(false);
       resetCreate();
       if (tab !== 'given') setTab('given');
@@ -279,11 +285,141 @@ export default function MyTasksPage({ apiBase }: MyTasksPageProps) {
         title={isManager ? 'Tasks' : 'My Tasks'}
         subtitle={`${total} task${total !== 1 ? 's' : ''}`}
         actions={isManager ? (
-          <button className="btn-primary" onClick={openCreate}>
-            <Plus size={15} /> New Task
+          <button className="btn-primary" onClick={() => showCreate ? (setShowCreate(false), resetCreate()) : openCreate()}>
+            {showCreate ? <><X size={15} /> Cancel</> : <><Plus size={15} /> New Task</>}
           </button>
         ) : undefined}
       />
+
+      {/* ── Create task panel (managers only) ── */}
+      {showCreate && isManager && (
+        <div className="atm-panel">
+          <div className="atm-panel-header">
+            <div className="atm-panel-header-left">
+              <div className="atm-panel-icon"><ClipboardList size={19} /></div>
+              <div>
+                <h3 className="atm-panel-title">Create New Task</h3>
+                <p className="atm-panel-sub">This task is internal to your department — you are the final approver</p>
+              </div>
+            </div>
+            <button className="atm-panel-close" onClick={() => { setShowCreate(false); resetCreate(); }} type="button"><X size={18} /></button>
+          </div>
+          <div className="atm-panel-body">
+            {createError && (
+              <div className="alert alert-error" style={{ marginBottom: '1rem' }}>
+                <AlertCircle size={14} /> {createError}
+              </div>
+            )}
+            <form onSubmit={e => { e.preventDefault(); handleCreate(); }}>
+              <div className="atm-field-grid">
+
+                <div className="atm-field atm-field-full">
+                  <label className="atm-flabel"><FileText size={12} /> Task Title *</label>
+                  <input className="atm-finput" value={cTitle}
+                    onChange={e => { setCTitle(e.target.value); setCreateError(''); }}
+                    placeholder="e.g. Prepare quarterly report" disabled={createLoading} />
+                </div>
+
+                <div className="atm-field atm-field-full">
+                  <label className="atm-flabel">Priority Level</label>
+                  <div className="atm-priority-pills">
+                    {(['low', 'medium', 'high', 'urgent'] as TaskPriority[]).map(p => (
+                      <button key={p} type="button"
+                        className={`atm-priority-pill atm-p-${p}${cPriority === p ? ' active' : ''}`}
+                        onClick={() => setCPriority(p)} disabled={createLoading}>
+                        {p.charAt(0).toUpperCase() + p.slice(1)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="atm-field">
+                  <label className="atm-flabel"><Calendar size={12} /> Due Date</label>
+                  <input type="date" className="atm-finput" value={cDeadline}
+                    min={new Date().toISOString().split('T')[0]}
+                    onChange={e => setCDeadline(e.target.value)} disabled={createLoading} />
+                </div>
+                <div className="atm-field">
+                  <label className="atm-flabel"><Clock size={12} /> Due Time <span className="atm-flabel-opt">(optional)</span></label>
+                  <input type="time" className="atm-finput" value={cDeadlineTime}
+                    onChange={e => setCDeadlineTime(e.target.value)} disabled={createLoading} />
+                </div>
+
+                <div className="atm-field atm-field-full">
+                  <label className="atm-flabel"><AlignLeft size={12} /> Description</label>
+                  <textarea className="atm-finput atm-ftextarea" rows={2} value={cDescription}
+                    onChange={e => setCDescription(e.target.value)}
+                    placeholder="Brief overview of what this task is about…" disabled={createLoading} />
+                </div>
+
+                <div className="atm-field atm-field-full">
+                  <label className="atm-flabel"><BookOpen size={12} /> Instructions / Details</label>
+                  <textarea className="atm-finput atm-ftextarea" rows={3} value={cInstructions}
+                    onChange={e => setCInstructions(e.target.value)}
+                    placeholder="Step-by-step instructions for the assignee…" disabled={createLoading} />
+                </div>
+
+                <div className="atm-field atm-field-full">
+                  <label className="atm-flabel"><UserPlus size={12} /> Assign to Team Member</label>
+                  <div className="atm-staff-grid">
+                    {teamLoading
+                      ? <p style={{ fontSize: '0.8rem', color: '#9ab09a', margin: 0 }}>Loading team…</p>
+                      : teamMembers.length === 0
+                        ? <p style={{ fontSize: '0.8rem', color: '#9ab09a', margin: 0 }}>No team members found.</p>
+                        : teamMembers.map(m => {
+                            const sel = cAssignees.includes(m.users_id);
+                            return (
+                              <button key={m.users_id} type="button"
+                                className={`atm-staff-chip${sel ? ' selected' : ''}`}
+                                onClick={() => setCAssignees(prev => prev.includes(m.users_id) ? prev.filter(x => x !== m.users_id) : [...prev, m.users_id])}
+                                disabled={createLoading}>
+                                <span className="chip-avatar">{m.first_name[0]}{m.last_name[0]}</span>
+                                <span className="chip-name">{m.first_name} {m.last_name}</span>
+                                {m.role_name && <span className="chip-role">{m.role_name}</span>}
+                                {sel && <CheckCircle size={13} className="chip-check" />}
+                              </button>
+                            );
+                          })
+                    }
+                  </div>
+                  {cAssignees.length > 0 && (
+                    <p className="atm-assign-count">
+                      <Users size={13} /> {cAssignees.length} member{cAssignees.length !== 1 ? 's' : ''} selected
+                    </p>
+                  )}
+                </div>
+
+                <div className="atm-field atm-field-full">
+                  <label className="atm-flabel"><Paperclip size={12} /> Attach Files <span className="atm-flabel-opt">(optional)</span></label>
+                  <input ref={fileRef} type="file" multiple className="atm-finput"
+                    accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.txt,.zip"
+                    onChange={e => setCAttachments(e.target.files)}
+                    disabled={createLoading}
+                    style={{ padding: '0.45rem 0.75rem', cursor: 'pointer' }} />
+                  {cAttachments && cAttachments.length > 0 && (
+                    <p style={{ fontSize: '0.78rem', color: '#2D5016', margin: '0.3rem 0 0', display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <Paperclip size={12} /> {cAttachments.length} file{cAttachments.length !== 1 ? 's' : ''} selected
+                    </p>
+                  )}
+                </div>
+
+              </div>
+
+              <div className="atm-panel-footer">
+                <button type="submit" className="atm-submit-btn" disabled={createLoading}>
+                  {createLoading
+                    ? <><Loader2 size={15} className="spin" /> Creating…</>
+                    : <><CheckCircle size={15} /> Create &amp; Assign</>
+                  }
+                </button>
+                <button type="button" className="atm-cancel-btn" onClick={() => { setShowCreate(false); resetCreate(); }} disabled={createLoading}>
+                  <X size={15} /> Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Stats row */}
       <div className="mt-stat-row">
@@ -466,95 +602,6 @@ export default function MyTasksPage({ apiBase }: MyTasksPageProps) {
                 );
               })()}
               <button className="btn-secondary" onClick={() => setAssignTask(null)}>Cancel</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── Create Task Modal (managers only) ── */}
-      {showCreate && (
-        <div className="atd-modal-overlay" onClick={e => e.target === e.currentTarget && setShowCreate(false)}>
-          <div className="atd-modal" role="dialog" style={{ maxWidth: 580, maxHeight: '90vh', overflowY: 'auto' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-              <h3 className="atd-modal-title"><Plus size={18} className="icon-green" /> Create New Task</h3>
-              <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ab09a' }} onClick={() => setShowCreate(false)}><X size={18} /></button>
-            </div>
-            <p style={{ fontSize: '0.82rem', color: '#9ab09a', margin: '0 0 1rem' }}>This task will be assigned to your team. You are the final approver.</p>
-            {createError && <div className="alert alert-error" style={{ marginBottom: '0.75rem' }}><AlertCircle size={14} /> {createError}</div>}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-              <div className="form-group">
-                <label>Title *</label>
-                <input value={cTitle} onChange={e => { setCTitle(e.target.value); setCreateError(''); }}
-                  placeholder="e.g. Prepare quarterly report" disabled={createLoading} />
-              </div>
-              <div className="form-group">
-                <label>Priority</label>
-                <select value={cPriority} onChange={e => setCPriority(e.target.value as TaskPriority)} disabled={createLoading}>
-                  <option value="low">Low</option>
-                  <option value="medium">Medium</option>
-                  <option value="high">High</option>
-                  <option value="urgent">Urgent</option>
-                </select>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                <div className="form-group">
-                  <label><Calendar size={12} /> Due Date</label>
-                  <input type="date" value={cDeadline}
-                    min={new Date().toISOString().split('T')[0]}
-                    onChange={e => setCDeadline(e.target.value)} disabled={createLoading} />
-                </div>
-                <div className="form-group">
-                  <label><Clock size={12} /> Due Time</label>
-                  <input type="time" value={cDeadlineTime} onChange={e => setCDeadlineTime(e.target.value)} disabled={createLoading} />
-                </div>
-              </div>
-              <div className="form-group">
-                <label>Description</label>
-                <textarea rows={2} value={cDescription} onChange={e => setCDescription(e.target.value)}
-                  placeholder="Brief overview of what this task is about…" disabled={createLoading} />
-              </div>
-              <div className="form-group">
-                <label>Instructions / Details</label>
-                <textarea rows={3} value={cInstructions} onChange={e => setCInstructions(e.target.value)}
-                  placeholder="Step-by-step instructions for the assignee…" disabled={createLoading} />
-              </div>
-              <div className="form-group">
-                <label><Users size={12} /> Assign to Team Member</label>
-                {teamLoading ? (
-                  <p style={{ fontSize: '0.82rem', color: '#9ab09a' }}>Loading team…</p>
-                ) : teamMembers.length === 0 ? (
-                  <p style={{ fontSize: '0.82rem', color: '#9ab09a' }}>No team members found.</p>
-                ) : (
-                  <div className="atm-staff-grid">
-                    {teamMembers.map(m => {
-                      const sel = cAssignees.includes(m.users_id);
-                      return (
-                        <button key={m.users_id} type="button"
-                          className={`atm-staff-chip ${sel ? 'selected' : ''}`}
-                          onClick={() => setCAssignees(prev => prev.includes(m.users_id) ? prev.filter(x => x !== m.users_id) : [...prev, m.users_id])}
-                          disabled={createLoading}>
-                          <span className="chip-avatar">{m.first_name[0]}{m.last_name[0]}</span>
-                          <span className="chip-name">{m.first_name} {m.last_name}</span>
-                          {m.role_name && <span className="chip-role">{m.role_name}</span>}
-                          {sel && <CheckCircle size={12} className="chip-check" />}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-                {cAssignees.length > 0 && (
-                  <p style={{ fontSize: '0.78rem', color: '#2D5016', fontWeight: 600, margin: '0.35rem 0 0', display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <Users size={13} /> {cAssignees.length} member{cAssignees.length !== 1 ? 's' : ''} selected
-                  </p>
-                )}
-              </div>
-            </div>
-            <div className="atd-modal-actions" style={{ marginTop: '1.25rem' }}>
-              <button className="btn-approve" onClick={handleCreate} disabled={createLoading || !cTitle.trim()}>
-                {createLoading ? <Loader2 size={14} className="spin" /> : <CheckCircle size={14} />}
-                Create Task
-              </button>
-              <button className="btn-secondary" onClick={() => setShowCreate(false)} disabled={createLoading}>Cancel</button>
             </div>
           </div>
         </div>

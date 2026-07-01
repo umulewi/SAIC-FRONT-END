@@ -7,10 +7,12 @@ export default defineConfig({
     proxy: {
       '/api': {
         target: 'https://saic-mis-backend-1.onrender.com',
+        // target: 'http://localhost:5000',
         changeOrigin: true,
       },
       '/uploads': {
         target: 'https://saic-mis-backend-1.onrender.com',
+        // target: 'http://localhost:5000',
         changeOrigin: true,
       },
     },

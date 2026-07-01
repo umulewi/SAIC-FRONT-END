@@ -15,7 +15,8 @@ export default function Header({ onToggleSidebar, sidebarCollapsed }: HeaderProp
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [dropdownOpen,   setDropdownOpen]   = useState(false);
+  const [logoutConfirm,  setLogoutConfirm]  = useState(false);
 
   // Change password modal state
   const [cpOpen,    setCpOpen]    = useState(false);
@@ -30,6 +31,7 @@ export default function Header({ onToggleSidebar, sidebarCollapsed }: HeaderProp
   const [cpSuccess, setCpSuccess] = useState('');
 
   const handleLogout = () => { logout(); navigate('/login'); };
+  const openLogoutConfirm = () => { setDropdownOpen(false); setLogoutConfirm(true); };
 
   const openChangePw = () => {
     setDropdownOpen(false);
@@ -101,7 +103,7 @@ export default function Header({ onToggleSidebar, sidebarCollapsed }: HeaderProp
                     <KeyRound size={15} />
                     Change Password
                   </button>
-                  <button className="hdr-drop-item hdr-drop-logout" onClick={handleLogout}>
+                  <button className="hdr-drop-item hdr-drop-logout" onClick={openLogoutConfirm}>
                     <LogOut size={15} />
                     Sign Out
                   </button>
@@ -216,6 +218,36 @@ export default function Header({ onToggleSidebar, sidebarCollapsed }: HeaderProp
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* ── Logout Confirmation ── */}
+      {logoutConfirm && (
+        <div className="cp-overlay" onClick={e => e.target === e.currentTarget && setLogoutConfirm(false)}>
+          <div className="cp-modal" style={{ maxWidth: 380 }}>
+            <div className="cp-modal-header">
+              <div className="cp-modal-icon" style={{ background: '#fff5f5', color: '#c53030' }}>
+                <LogOut size={20} />
+              </div>
+              <div>
+                <h3 className="cp-modal-title">Sign Out</h3>
+                <p className="cp-modal-sub">You will be returned to the login screen</p>
+              </div>
+              <button className="cp-close-btn" onClick={() => setLogoutConfirm(false)} type="button"><X size={18} /></button>
+            </div>
+            <div className="cp-modal-body">
+              <p style={{ fontSize: '0.88rem', color: '#4a6a4a', margin: '0 0 1.25rem', lineHeight: 1.55 }}>
+                Are you sure you want to sign out? Any unsaved work will be lost.
+              </p>
+              <div className="cp-modal-footer">
+                <button className="cp-submit-btn" style={{ background: '#c53030', borderColor: '#c53030' }} onClick={handleLogout}>
+                  <LogOut size={14} /> Yes, Sign Out
+                </button>
+                <button className="cp-cancel-btn" onClick={() => setLogoutConfirm(false)}>
+                  <X size={14} /> Cancel
+                </button>
+              </div>
             </div>
           </div>
         </div>

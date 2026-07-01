@@ -282,6 +282,13 @@ export interface LeaveRequest {
   first_name?: string;
   last_name?: string;
   profile_photo?: string | null;
+  telephone?: string | null;
+  manager_name?: string | null;
+  province?: string | null;
+  district?: string | null;
+  sector?: string | null;
+  cell?: string | null;
+  village?: string | null;
   leave_type?: LeaveType;
   reason: string;
   start_date: string;
