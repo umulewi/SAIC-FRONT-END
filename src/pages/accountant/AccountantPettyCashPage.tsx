@@ -39,14 +39,15 @@ function fmtCash(v: number) {
 }
 
 interface BatchRow {
-  _id:  string;
-  item: string;
-  cash: string;
-  date: string;
+  _id:        string;
+  item:       string;
+  quantity:   string;
+  unit_price: string;
+  date:       string;
 }
 
 function emptyRow(): BatchRow {
-  return { _id: crypto.randomUUID(), item: '', cash: '', date: TODAY };
+  return { _id: crypto.randomUUID(), item: '', quantity: '1', unit_price: '', date: TODAY };
 }
 
 interface PcGroup {
@@ -97,9 +98,10 @@ export default function AccountantPettyCashPage({ apiBase }: Props) {
   const [editing,  setEditing]  = useState<PettyCash | null>(null);
 
   // Edit-mode single fields
-  const [fItem,    setFItem]    = useState('');
-  const [fCash,    setFCash]    = useState('');
-  const [fDate,    setFDate]    = useState(TODAY);
+  const [fItem,       setFItem]       = useState('');
+  const [fQuantity,   setFQuantity]   = useState('1');
+  const [fUnitPrice,  setFUnitPrice]  = useState('');
+  const [fDate,       setFDate]       = useState(TODAY);
   const [fReceipt, setFReceipt] = useState<File | null>(null); // replacement receipt (optional)
   const fReceiptRef = useRef<HTMLInputElement>(null);
 
@@ -164,7 +166,8 @@ export default function AccountantPettyCashPage({ apiBase }: Props) {
   const openEdit = (r: PettyCash) => {
     setEditing(r);
     setFItem(r.item);
-    setFCash(String(r.cash));
+    setFQuantity(String(r.quantity ?? 1));
+    setFUnitPrice(String(r.unit_price ?? r.cash));
     setFDate(r.date?.slice(0, 10) ?? TODAY);
     setFReceipt(null);
     setFormErr(''); setSuccess(''); setFormOpen(true);
@@ -188,15 +191,18 @@ export default function AccountantPettyCashPage({ apiBase }: Props) {
   // ── Save (edit single) ─────────────────────────────────────────────
   const handleSaveEdit = async (e: { preventDefault(): void }) => {
     e.preventDefault();
-    if (!fItem.trim())                                           { setFormErr('Item description is required.'); return; }
-    if (!fCash || isNaN(Number(fCash)) || Number(fCash) === 0) { setFormErr('Enter a valid cash amount.'); return; }
-    if (!fDate)                                                  { setFormErr('Date is required.'); return; }
+    const qty    = Number(fQuantity)   || 1;
+    const uPrice = Number(fUnitPrice)  || 0;
+    if (!fItem.trim())    { setFormErr('Item description is required.'); return; }
+    if (!uPrice)          { setFormErr('Enter a valid unit price.'); return; }
+    if (!fDate)           { setFormErr('Date is required.'); return; }
     setSaving(true); setFormErr('');
     try {
       const fd = new FormData();
-      fd.append('item', fItem.trim());
-      fd.append('cash', String(Number(fCash)));
-      fd.append('date', fDate);
+      fd.append('item',       fItem.trim());
+      fd.append('quantity',   String(qty));
+      fd.append('unit_price', String(uPrice));
+      fd.append('date',       fDate);
       if (fReceipt) fd.append('receipt', fReceipt);
       await updatePettyCash(apiBase, editing!.id!, fd);
       closeForm();
@@ -212,9 +218,9 @@ export default function AccountantPettyCashPage({ apiBase }: Props) {
     for (let i = 0; i < batchRows.length; i++) {
       const r = batchRows[i];
       const n = i + 1;
-      if (!r.item.trim())                                            { setFormErr(`Row ${n}: Item description is required.`); return; }
-      if (!r.cash || isNaN(Number(r.cash)) || Number(r.cash) === 0) { setFormErr(`Row ${n}: Enter a valid cash amount.`); return; }
-      if (!r.date)                                                   { setFormErr(`Row ${n}: Date is required.`); return; }
+      if (!r.item.trim())                                                     { setFormErr(`Row ${n}: Item description is required.`); return; }
+      if (!r.unit_price || isNaN(Number(r.unit_price)) || Number(r.unit_price) === 0) { setFormErr(`Row ${n}: Enter a valid unit price.`); return; }
+      if (!r.date)                                                            { setFormErr(`Row ${n}: Date is required.`); return; }
     }
     if (!batchReceipt) { setFormErr('Please attach a receipt file for this batch.'); return; }
 
@@ -223,11 +229,14 @@ export default function AccountantPettyCashPage({ apiBase }: Props) {
       const snapshot = batchRows.map(r => ({ ...r }));
       const batchId = snapshot.length > 1 ? crypto.randomUUID() : null;
       for (const r of snapshot) {
+        const qty    = Number(r.quantity)   || 1;
+        const uPrice = Number(r.unit_price) || 0;
         const fd = new FormData();
-        fd.append('item',    r.item.trim());
-        fd.append('cash',    String(Number(r.cash)));
-        fd.append('date',    r.date);
-        fd.append('receipt', batchReceipt); // same file for all entries
+        fd.append('item',       r.item.trim());
+        fd.append('quantity',   String(qty));
+        fd.append('unit_price', String(uPrice));
+        fd.append('date',       r.date);
+        fd.append('receipt', batchReceipt);
         if (batchId) fd.append('batch_id', batchId);
         await createPettyCash(apiBase, fd);
       }
@@ -238,7 +247,10 @@ export default function AccountantPettyCashPage({ apiBase }: Props) {
       setRecords(fresh); setPcPage(1);
       if (exportAfter) {
         const batchAsPc: PettyCash[] = snapshot.map((r, i) => ({
-          id: -(i + 1), item: r.item.trim(), cash: Number(r.cash), date: r.date,
+          id: -(i + 1), item: r.item.trim(),
+          cash: (Number(r.quantity) || 1) * (Number(r.unit_price) || 0),
+          quantity: Number(r.quantity) || 1, unit_price: Number(r.unit_price) || 0,
+          date: r.date,
         }));
         exportPettyCashPdf(batchAsPc, {
           title: 'Petty Cash Entry',
@@ -261,7 +273,7 @@ export default function AccountantPettyCashPage({ apiBase }: Props) {
   const allGroups = buildGroups(records);
   const pcTotalPages = Math.ceil(allGroups.length / PC_PAGE_SIZE);
   const pcPaged = allGroups.slice((pcPage - 1) * PC_PAGE_SIZE, pcPage * PC_PAGE_SIZE);
-  const batchTotal = batchRows.reduce((s, r) => s + (Number(r.cash) || 0), 0);
+  const batchTotal = batchRows.reduce((s, r) => s + (Number(r.quantity) || 1) * (Number(r.unit_price) || 0), 0);
 
   return (
     <div className="pcp-root">
@@ -311,9 +323,20 @@ export default function AccountantPettyCashPage({ apiBase }: Props) {
                   onChange={e => { setFItem(e.target.value); setFormErr(''); }} disabled={saving} />
               </div>
               <div className="form-group">
-                <label>Amount (RWF) *</label>
-                <input type="number" step="0.01" value={fCash} placeholder="0.00"
-                  onChange={e => { setFCash(e.target.value); setFormErr(''); }} disabled={saving} />
+                <label>Quantity *</label>
+                <input type="number" step="0.01" min="0.01" value={fQuantity} placeholder="1"
+                  onChange={e => { setFQuantity(e.target.value); setFormErr(''); }} disabled={saving} />
+              </div>
+              <div className="form-group">
+                <label>Unit Price (RWF) *</label>
+                <input type="number" step="0.01" min="0" value={fUnitPrice} placeholder="0.00"
+                  onChange={e => { setFUnitPrice(e.target.value); setFormErr(''); }} disabled={saving} />
+              </div>
+              <div className="form-group">
+                <label>Amount (RWF)</label>
+                <input type="text" readOnly
+                  value={`RWF ${fmtCash((Number(fQuantity) || 1) * (Number(fUnitPrice) || 0))}`}
+                  style={{ background: '#f4faf4', color: '#2D5016', fontWeight: 600 }} />
               </div>
               <div className="form-group">
                 <label>Date *</label>
@@ -394,7 +417,9 @@ export default function AccountantPettyCashPage({ apiBase }: Props) {
                   <tr>
                     <th>#</th>
                     <th>Item / Description *</th>
-                    <th>Amount (RWF) *</th>
+                    <th>Qty *</th>
+                    <th>Unit Price (RWF) *</th>
+                    <th>Amount (RWF)</th>
                     <th>Date *</th>
                     <th></th>
                   </tr>
@@ -416,7 +441,7 @@ export default function AccountantPettyCashPage({ apiBase }: Props) {
                 {batchRows.length > 1 && (
                   <tfoot>
                     <tr>
-                      <td colSpan={2} style={{ fontWeight: 700, color: '#2D5016', padding: '0.5rem 0.6rem' }}>
+                      <td colSpan={4} style={{ fontWeight: 700, color: '#2D5016', padding: '0.5rem 0.6rem' }}>
                         Total ({batchRows.length} entries)
                       </td>
                       <td style={{ fontWeight: 700, color: '#2D5016', padding: '0.5rem 0.6rem' }}>
@@ -661,6 +686,7 @@ interface BatchRowProps {
 }
 
 function BatchRowInput({ row, index, onChange, onRemove, canRemove, disabled, maxDate }: BatchRowProps) {
+  const amount = (Number(row.quantity) || 1) * (Number(row.unit_price) || 0);
   return (
     <tr className="pcp-batch-row">
       <td className="pcp-batch-num">{index + 1}</td>
@@ -679,11 +705,28 @@ function BatchRowInput({ row, index, onChange, onRemove, canRemove, disabled, ma
           className="pcp-batch-input pcp-batch-cash"
           type="number"
           step="0.01"
+          min="0.01"
+          placeholder="1"
+          value={row.quantity}
+          onChange={e => onChange(row._id, 'quantity', e.target.value)}
+          disabled={disabled}
+          style={{ width: 60 }}
+        />
+      </td>
+      <td>
+        <input
+          className="pcp-batch-input pcp-batch-cash"
+          type="number"
+          step="0.01"
+          min="0"
           placeholder="0.00"
-          value={row.cash}
-          onChange={e => onChange(row._id, 'cash', e.target.value)}
+          value={row.unit_price}
+          onChange={e => onChange(row._id, 'unit_price', e.target.value)}
           disabled={disabled}
         />
+      </td>
+      <td style={{ fontWeight: 600, color: '#2D5016', whiteSpace: 'nowrap', padding: '0.3rem 0.5rem', fontSize: '0.82rem' }}>
+        {amount > 0 ? `RWF ${new Intl.NumberFormat('en-US', { minimumFractionDigits: 2 }).format(amount)}` : '—'}
       </td>
       <td>
         <input

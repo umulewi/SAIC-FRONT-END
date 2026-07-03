@@ -5,6 +5,7 @@ import {
   GraduationCap, BookOpen, Leaf, Sprout, Beef, TrendingUp,
   Briefcase, Receipt, Car, Mail, DollarSign,
   FolderOpen, Target, Users, Star, Award, BookMarked, CalendarRange,
+  Shield,
 } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router-dom';
 import type { MenuItem } from '../../types';
@@ -18,10 +19,11 @@ const ICON_MAP: Record<string, React.ComponentType<{ size?: number }>> = {
   GraduationCap, BookOpen, Leaf, Sprout, Beef, TrendingUp,
   Briefcase, Receipt, Car, Mail, DollarSign,
   FolderOpen, Target, Users, Star, Award, BookMarked, CalendarRange,
+  Shield,
 };
 
 const ADMIN_GROUPS = [
-  { label: 'Management',            items: ['overview', 'tasks', 'assigned-tasks', 'leave-management', 'petty-cash', 'staff-directory', 'documents', 'kpi-cycles'] },
+  { label: 'Management',            items: ['overview', 'tasks', 'assigned-tasks', 'leave-management', 'petty-cash', 'payroll', 'staff-directory', 'documents', 'kpi-cycles', 'login-logs'] },
   { label: 'Human Resources',       items: ['hr-manager-staff'] },
   { label: 'Finance',               items: ['finance-manager', 'accountant'] },
   { label: 'Administration Office', items: ['admin-manager', 'it-officer', 'legal-officer', 'partnership-off', 'marketing-officer', 'mel-officer'] },

@@ -259,6 +259,8 @@ export interface PettyCash {
   users_id?: number;
   item: string;
   cash: number;
+  quantity?: number;
+  unit_price?: number;
   date: string;
   email?: string;
   first_name?: string;
@@ -268,6 +270,45 @@ export interface PettyCash {
   receipt_file?: string | null;
   receipt_original?: string | null;
   batch_id?: string | null;
+}
+
+export interface LoginLog {
+  id: number;
+  users_id?: number;
+  email: string;
+  role?: string | null;
+  full_name?: string | null;
+  login_time: string;
+  ip_address?: string | null;
+}
+
+export interface PayrollEntry {
+  role_id: number;
+  position: string;
+  department: string;
+  basic_salary: number;
+  transport_allowance: number;
+  meals_allowance: number;
+  comm_allowance: number;
+  users_id?: number | null;
+  email?: string | null;
+  first_name?: string | null;
+  last_name?: string | null;
+  is_active: 0 | 1;
+  is_paid?: 0 | 1 | null;
+  paid_date?: string | null;
+  payment_notes?: string | null;
+}
+
+export interface PayrollConfig {
+  id?: number;
+  role_id: number;
+  role_name?: string;
+  department_name?: string;
+  basic_salary: number;
+  transport_allowance: number;
+  meals_allowance: number;
+  comm_allowance: number;
 }
 
 export type LeaveType = 'annual' | 'sick' | 'maternity' | 'paternity' | 'emergency' | 'unpaid' | 'other';

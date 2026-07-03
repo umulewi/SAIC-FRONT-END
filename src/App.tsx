@@ -30,11 +30,14 @@ import StaffManagementPage from './pages/admin/StaffManagementPage';
 // Role-specific pages
 import AccountantPettyCashPage from './pages/accountant/AccountantPettyCashPage';
 
-// HR Manager page
-import HRManagerPage from './pages/hr/HRManagerPage';
+// HR Manager pages
+import HRManagerPage    from './pages/hr/HRManagerPage';
+import HRPayrollPage    from './pages/hr/HRPayrollPage';
 
 // Admin KPI cycles page
-import AdminKpiCyclesPage from './pages/admin/AdminKpiCyclesPage';
+import AdminKpiCyclesPage   from './pages/admin/AdminKpiCyclesPage';
+import AdminPayrollPage     from './pages/admin/AdminPayrollPage';
+import AdminLoginLogsPage   from './pages/admin/AdminLoginLogsPage';
 
 const MANAGER_SLUGS = new Set([
   'admin_manager',
@@ -94,6 +97,8 @@ function AppRoutes() {
           <Route path="documents"         element={<AdminDocumentsPage />} />
           <Route path="staff-directory"  element={<AdminStaffDirectoryPage role="admin" />} />
           <Route path="kpi-cycles"       element={<AdminKpiCyclesPage />} />
+          <Route path="payroll"          element={<AdminPayrollPage />} />
+          <Route path="login-logs"       element={<AdminLoginLogsPage />} />
 
           {/* Staff management — keyed by role ID, matching sidebar paths */}
           {Object.entries(ADMIN_STAFF_ROLES).map(([roleId, label]) => (
@@ -119,6 +124,7 @@ function AppRoutes() {
           <Route path="tasks/:id"   element={<TaskDetailPage apiBase="/hr_manager" />} />
           <Route path="leave-request" element={<LeaveRequestPage apiBase="/hr_manager" />} />
           <Route path="leave-status"  element={<LeaveStatusPage apiBase="/hr_manager" />} />
+          <Route path="hr-payroll"     element={<HRPayrollPage />} />
           <Route path="my-documents"  element={<MyDocumentsPage />} />
         </Route>
 

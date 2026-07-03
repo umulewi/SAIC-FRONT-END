@@ -1,0 +1,264 @@
+.apy-root { padding: 0; }
+
+.apy-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.apy-legend { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+.apy-badge  { font-size: 0.76rem; font-weight: 600; }
+.apy-badge.apy-active  { color: #276749; }
+.apy-badge.apy-vacant  { color: #9e9e9e; }
+.apy-badge.apy-paid    { color: #1565c0; }
+.apy-badge.apy-unpaid  { color: #c53030; }
+
+/* Setup panel */
+.apy-setup-panel {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+.apy-setup-chip {
+  background: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.apy-setup-chip:hover { background: #f0faf0; border-color: #2D5016; color: #2D5016; }
+
+/* Table */
+.apy-table-card { padding: 0; }
+.apy-table { font-size: 0.8rem; }
+.apy-table th { font-size: 0.72rem; white-space: nowrap; }
+.apy-num { text-align: right !important; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.apy-highlight { background: #e8f5e9 !important; font-weight: 600; color: #2D5016 !important; }
+.apy-paye      { color: #b7791f !important; }
+.apy-orange    { color: #c05621 !important; font-weight: 600; }
+.apy-bold      { font-weight: 700 !important; }
+
+.apy-dept-row td { background: #2D5016 !important; color: #fff !important; font-weight: 700; font-size: 0.78rem; padding: 0.35rem 0.75rem !important; letter-spacing: 0.04em; }
+
+.apy-row-active { }
+.apy-row-vacant td { color: #9e9e9e !important; }
+.apy-row-vacant .apy-highlight { background: #f5f5f5 !important; color: #9e9e9e !important; }
+
+.apy-position-cell { min-width: 180px; }
+.apy-staff-name { font-size: 0.72rem; color: #2D5016; font-style: italic; margin-top: 1px; }
+
+.apy-active-badge {
+  display: inline-block;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+.apy-active-badge.true  { background: #d1fae5; color: #065f46; }
+.apy-active-badge.false { background: #f3f4f6; color: #9ca3af; }
+
+.apy-pay-badge {
+  display: inline-block;
+  padding: 0.18rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.apy-pay-badge.paid   { background: #dbeafe; color: #1e40af; }
+.apy-pay-badge.unpaid { background: #fee2e2; color: #b91c1c; }
+
+.apy-edit-btn {
+  background: #f4faf4;
+  border: 1px solid #c8dfc8;
+  border-radius: 5px;
+  padding: 0.25rem 0.45rem;
+  cursor: pointer;
+  color: #2D5016;
+  margin-right: 4px;
+  transition: background 0.15s;
+}
+.apy-edit-btn:hover { background: #e8f5e9; }
+
+.apy-pay-btn {
+  border: none;
+  border-radius: 5px;
+  padding: 0.25rem 0.55rem;
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.apy-pay-btn.pay   { background: #2D5016; color: #fff; }
+.apy-pay-btn.unpay { background: #fee2e2; color: #b91c1c; }
+.apy-pay-btn:hover { opacity: 0.85; }
+
+.apy-total-row td {
+  background: #1e3a1e !important;
+  color: #fff !important;
+  font-weight: 700 !important;
+  font-size: 0.8rem;
+}
+.apy-total-row .apy-highlight { background: #276749 !important; color: #fff !important; }
+.apy-total-row .apy-orange    { color: #fbd38d !important; }
+.apy-total-row .apy-paye      { color: #fef3c7 !important; }
+.apy-total-row .apy-bold      { color: #fff !important; }
+
+.btn-icon {
+  background: #f4faf4;
+  border: 1px solid #c8dfc8;
+  border-radius: 5px;
+  padding: 0.25rem 0.45rem;
+  cursor: pointer;
+  color: #2D5016;
+  display: inline-flex;
+  align-items: center;
+  transition: background 0.15s;
+}
+.btn-icon:hover { background: #e8f5e9; }
+
+.apy-delete-btn {
+  background: transparent;
+  border: 1px solid #fca5a5;
+  border-radius: 5px;
+  padding: 0.25rem 0.4rem;
+  cursor: pointer;
+  color: #b91c1c;
+  display: inline-flex;
+  align-items: center;
+  transition: background 0.15s, border-color 0.15s;
+}
+.apy-delete-btn:hover { background: #fee2e2; border-color: #b91c1c; }
+
+.apy-cfg-preview {
+  font-size: 0.8rem;
+  color: #2D5016;
+  background: #f0faf0;
+  border-left: 3px solid #2D5016;
+  padding: 0.4rem 0.7rem;
+  border-radius: 0 4px 4px 0;
+  margin-top: 0.5rem;
+}
+
+.apy-footnote {
+  font-size: 0.72rem;
+  color: #9e9e9e;
+  margin-top: 0.75rem;
+  line-height: 1.6;
+}
+
+/* ── Payroll modal shell ──────────────────────────────────────────────────── */
+.leave-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  background: #2D5016;
+  color: #fff;
+  padding: 0.95rem 1.5rem;
+  border-radius: 12px 12px 0 0;
+  /* bleed to modal edges (leave-modal padding is 1.75rem 2rem) */
+  margin: -1.75rem -2rem 1.5rem;
+}
+
+.leave-modal-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.leave-modal-close {
+  background: transparent;
+  border: none;
+  color: rgba(255,255,255,0.85);
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+  border-radius: 6px;
+  transition: background 0.15s, color 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.leave-modal-close:hover {
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+}
+
+.leave-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 0.25rem 0;
+}
+
+.leave-modal-footer {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  justify-content: flex-end;
+  padding-top: 1.1rem;
+  margin-top: 0.5rem;
+  border-top: 1px solid #e8f0e8;
+}
+
+/* ── Payroll form fields ─────────────────────────────────────────────────── */
+.atm-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.atm-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #374151;
+  letter-spacing: 0.01em;
+}
+
+.atm-input {
+  padding: 0.52rem 0.75rem;
+  border: 1.5px solid #d4e4d4;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  color: #1e3a1e;
+  background: #fff;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.atm-input:focus {
+  border-color: #2D5016;
+  box-shadow: 0 0 0 3px rgba(45,80,22,0.1);
+}
+.atm-input[readonly] {
+  background: #f7faf7;
+  color: #6a8c6a;
+  cursor: default;
+}
+.atm-input::placeholder { color: #b0c8b0; }
+
+@media (prefers-color-scheme: dark) {
+  .apy-setup-panel    { background: #1e2a0e; border-color: #4a6022; }
+  .apy-setup-chip     { background: #2a3a12; border-color: #4a6022; color: #c8e6a0; }
+  .apy-active-badge.false { background: #2a2a2a; color: #9ca3af; }
+  .apy-dept-row td    { background: #1a3010 !important; }
+  .apy-total-row td   { background: #0f1f08 !important; }
+  .atm-label          { color: #c8d8c8; }
+  .atm-input          { background: #1a2a12; border-color: #3a5a22; color: #e8f0e8; }
+  .atm-input:focus    { border-color: #6aaa40; }
+  .atm-input[readonly]{ background: #141e0a; color: #6a9a6a; }
+  .leave-modal-body   { color: #c8d8c8; }
+  .leave-modal-footer { border-color: #3a5a22; }
+  .apy-cfg-preview    { background: #1a2a12; color: #8ac46a; border-left-color: #6aaa40; }
+}

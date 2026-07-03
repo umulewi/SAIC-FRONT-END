@@ -41,6 +41,8 @@ export const ROLE_CONFIG: Record<string, RoleConfig> = {
       { id: 'staff-directory',   label: 'Staff Directory',      icon: 'BookOpen',        path: 'staff-directory' },
       { id: 'documents',         label: 'Documents',            icon: 'FolderOpen',      path: 'documents' },
       { id: 'kpi-cycles',        label: 'KPI Cycles',           icon: 'CalendarRange',   path: 'kpi-cycles' },
+      { id: 'payroll',           label: 'Payroll',              icon: 'Banknote',        path: 'payroll' },
+      { id: 'login-logs',        label: 'Login Activity',       icon: 'Shield',          path: 'login-logs' },
     ],
   },
 
@@ -205,6 +207,7 @@ export const ROLE_CONFIG: Record<string, RoleConfig> = {
       { id: 'overview',        label: 'Overview',       icon: 'LayoutDashboard', path: 'overview' },
       { id: 'hr-manager',      label: 'Staff & KPIs',   icon: 'Users',           path: 'hr-manager' },
       { id: 'staff-directory', label: 'Staff Directory', icon: 'BookOpen',        path: 'staff-directory' },
+      { id: 'hr-payroll',      label: 'Payroll',        icon: 'Banknote',        path: 'hr-payroll' },
       ...commonMenuItems,
     ],
   },

@@ -1,7 +1,8 @@
 import client from './client';
 import type {
   StaffProfile, Task, AssignedTask, LeaveRequest, LeaveBalance,
-  LeaveStats, LeaveTypeCount, StaffMember, RoleInfo, Department, PettyCash, TeamMember,
+  LeaveStats, LeaveTypeCount, StaffMember, RoleInfo, Department,
+  PettyCash, TeamMember, LoginLog, PayrollEntry, PayrollConfig,
 } from '../types';
 
 // ─── Non-admin role endpoints ─────────────────────────────────────────────
@@ -239,4 +240,58 @@ export async function adminGetPettyCash(filters?: {
   if (filters?.to_date)   params.set('to_date',   filters.to_date);
   const { data } = await client.get(`/admin/petty-cash?${params}`);
   return { records: data.petty_cash ?? [], total: data.total ?? 0 };
+}
+
+export async function adminGetLoginLogs(filters?: {
+  search?: string;
+  from_date?: string;
+  to_date?: string;
+}): Promise<LoginLog[]> {
+  const params = new URLSearchParams();
+  if (filters?.search)    params.set('search',    filters.search);
+  if (filters?.from_date) params.set('from_date', filters.from_date);
+  if (filters?.to_date)   params.set('to_date',   filters.to_date);
+  const { data } = await client.get(`/admin/login-logs?${params}`);
+  return data.login_logs ?? [];
+}
+
+// Admin: read-only payroll register
+export async function adminDeletePayrollEntry(roleId: number): Promise<void> {
+  await client.delete(`/admin/payroll-config/${roleId}`);
+}
+
+export async function adminGetPayrollRegister(month: number, year: number): Promise<PayrollEntry[]> {
+  const { data } = await client.get(`/admin/payroll-register?month=${month}&year=${year}`);
+  return data.payroll ?? [];
+}
+
+// HR: full payroll management
+export async function hrGetPayrollRegister(month: number, year: number): Promise<PayrollEntry[]> {
+  const { data } = await client.get(`/hr/payroll-register?month=${month}&year=${year}`);
+  return data.payroll ?? [];
+}
+
+export async function hrGetPayrollConfig(): Promise<PayrollConfig[]> {
+  const { data } = await client.get('/hr/payroll-config');
+  return data.configs ?? [];
+}
+
+export async function hrSavePayrollConfig(roleId: number, config: Omit<PayrollConfig, 'id' | 'role_id' | 'role_name' | 'department_name'>): Promise<void> {
+  await client.put(`/hr/payroll-config/${roleId}`, config);
+}
+
+export async function hrGetRolesWithoutPayroll(): Promise<{ id: number; role_name: string; department_name: string }[]> {
+  const { data } = await client.get('/hr/roles-without-payroll');
+  return data.roles ?? [];
+}
+
+export async function hrMarkPayrollPayment(payload: {
+  users_id: number;
+  month: number;
+  year: number;
+  is_paid: boolean;
+  paid_date?: string;
+  notes?: string;
+}): Promise<void> {
+  await client.post('/hr/payroll-payment', payload);
 }
