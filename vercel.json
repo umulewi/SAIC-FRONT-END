@@ -2,11 +2,11 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://api.saicmis.com/api/:path*"
+      "destination": "http://localhost:5000/api/:path*"
     },
     {
       "source": "/uploads/:path*",
-      "destination": "https://api.saicmis.com/uploads/:path*"
+      "destination": "http://localhost:5000/uploads/:path*"
     },
     {
       "source": "/(.*)",

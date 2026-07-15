@@ -6,13 +6,13 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://api.saicmis.com',
-        // target: 'http://localhost:5000',
+        // target: 'https://api.saicmis.com',
+        target: 'http://localhost:5000',
         changeOrigin: true,
       },
       '/uploads': {
-        target: 'https://api.saicmis.com',
-        // target: 'http://localhost:5000',
+        // target: 'https://api.saicmis.com',
+        target: 'http://localhost:5000',
         changeOrigin: true,
       },
     },
