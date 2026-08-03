@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { uploadUrl } from '../../utils/uploads';
 import {
   Users, Target, Star, ChevronDown, ChevronUp, Plus, Pencil, Trash2,
   CheckCircle, X, Loader2, AlertCircle, RefreshCw, Award, Calendar,
@@ -426,7 +427,7 @@ export default function HRManagerPage() {
                   <div className="hrm-eval-card-hdr">
                     <div className="hrm-staff-avatar">
                       {m.profile_photo
-                        ? <img src={`/uploads/${m.profile_photo}`} alt="photo" className="hrm-avatar-img" />
+                        ? <img src={uploadUrl(m.profile_photo)} alt="photo" className="hrm-avatar-img" />
                         : `${m.first_name?.[0] ?? ''}${m.last_name?.[0] ?? ''}`.toUpperCase()
                       }
                     </div>
@@ -576,7 +577,7 @@ export default function HRManagerPage() {
               <div className="hrm-staff-row" onClick={() => toggleExpand(m.users_id)}>
                 <div className="hrm-staff-avatar">
                   {m.profile_photo
-                    ? <img src={`/uploads/${m.profile_photo}`} alt="photo" className="hrm-avatar-img" />
+                    ? <img src={uploadUrl(m.profile_photo)} alt="photo" className="hrm-avatar-img" />
                     : `${m.first_name?.[0] ?? ''}${m.last_name?.[0] ?? ''}`.toUpperCase()
                   }
                 </div>

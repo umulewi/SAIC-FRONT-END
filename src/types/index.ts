@@ -127,7 +127,10 @@ export type NotificationType =
   | 'task_submitted'
   | 'task_approved'
   | 'task_rejected'
-  | 'task_status';
+  | 'task_status'
+  | 'project_added'
+  | 'project_updated'
+  | 'new_message';
 
 export interface Notification {
   id: number;

@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { RefreshCw, Search, X, AlertCircle, Shield, ChevronLeft, ChevronRight } from 'lucide-react';
-import { adminGetLoginLogs } from '../../api/role';
+import { RefreshCw, Search, X, AlertCircle, Shield, ChevronLeft, ChevronRight, Trash2, Loader2 } from 'lucide-react';
+import { adminGetLoginLogs, adminDeleteLoginLog } from '../../api/role';
 import type { LoginLog } from '../../types';
 import PageHeader from '../../components/Common/PageHeader';
 import LoadingSpinner from '../../components/Common/LoadingSpinner';
 import '../shared/SharedPages.css';
+import './StaffManagementPage.css';
 
 const PAGE_SIZE = 20;
 
@@ -29,6 +30,9 @@ export default function AdminLoginLogsPage() {
   const [to,      setTo]      = useState('');
   const [page,    setPage]    = useState(1);
 
+  const [deleteTarget, setDeleteTarget] = useState<LoginLog | null>(null);
+  const [deleting,     setDeleting]     = useState(false);
+
   const load = async (s = search, f = from, t = to) => {
     setLoading(true); setError('');
     try {
@@ -44,6 +48,19 @@ export default function AdminLoginLogsPage() {
   };
 
   useEffect(() => { load(); }, []);
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      await adminDeleteLoginLog(deleteTarget.id);
+      setLogs(prev => prev.filter(l => l.id !== deleteTarget.id));
+      setDeleteTarget(null);
+    } catch {
+      setError('Failed to delete log entry.');
+      setDeleteTarget(null);
+    } finally { setDeleting(false); }
+  };
 
   const totalPages = Math.ceil(logs.length / PAGE_SIZE);
   const paged = logs.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -106,11 +123,12 @@ export default function AdminLoginLogsPage() {
                     <th>Role</th>
                     <th>Login Time</th>
                     <th>IP Address</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {paged.length === 0 && (
-                    <tr><td colSpan={5}>
+                    <tr><td colSpan={6}>
                       <div className="empty-state"><Shield size={38} /><p>No login records found.</p></div>
                     </td></tr>
                   )}
@@ -150,6 +168,12 @@ export default function AdminLoginLogsPage() {
                       <td style={{ fontSize: '0.8rem', color: '#6a8c6a', fontFamily: 'monospace' }}>
                         {log.ip_address ?? '—'}
                       </td>
+                      <td>
+                        <button className="sm-btn-delete" style={{ fontSize: '0.78rem' }}
+                          onClick={() => setDeleteTarget(log)} title="Delete this log entry">
+                          <Trash2 size={13} /> Delete
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -169,6 +193,43 @@ export default function AdminLoginLogsPage() {
             </div>
           )}
         </>
+      )}
+
+      {/* ── Delete confirmation modal ── */}
+      {deleteTarget && (
+        <div className="sm-delete-overlay" onClick={e => e.target === e.currentTarget && setDeleteTarget(null)}>
+          <div className="sm-delete-modal">
+            <div className="sm-delete-modal-header">
+              <div className="sm-delete-modal-icon">
+                <Trash2 size={30} />
+              </div>
+              <h3 className="sm-delete-modal-title">Delete Log Entry?</h3>
+              <p className="sm-delete-modal-sub">This action is permanent and cannot be reversed</p>
+            </div>
+            <div className="sm-delete-modal-body">
+              <p className="sm-delete-body-text">
+                You are about to permanently remove the login record for{' '}
+                <strong className="sm-delete-name">{deleteTarget.full_name?.trim() || deleteTarget.email}</strong>
+                {' '}on <strong>{fmtDatetime(deleteTarget.login_time)}</strong>.
+              </p>
+              <div className="sm-delete-warning-strip">
+                <AlertCircle size={14} />
+                This cannot be undone. Please confirm carefully.
+              </div>
+              <div className="sm-delete-actions">
+                <button className="sm-cancel-btn" onClick={() => setDeleteTarget(null)} disabled={deleting}>
+                  <X size={13} /> Cancel
+                </button>
+                <button className="sm-confirm-delete-btn" onClick={handleDelete} disabled={deleting}>
+                  {deleting
+                    ? <><Loader2 size={13} className="spin" /> Deleting…</>
+                    : <><Trash2 size={13} /> Yes, Delete</>
+                  }
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

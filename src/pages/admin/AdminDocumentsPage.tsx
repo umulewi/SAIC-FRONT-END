@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { uploadUrl } from '../../utils/uploads';
 import {
   Upload, Trash2, X, CheckCircle, AlertCircle, Loader2,
   FolderOpen, FileText, UserPlus, Users, ExternalLink,
@@ -261,7 +262,7 @@ export default function AdminDocumentsPage() {
                       <div>
                         <p className="adp-doc-title">{doc.title}</p>
                         {doc.description && <p className="adp-doc-desc">{doc.description}</p>}
-                        <a href={`/uploads/${doc.file_name}`} target="_blank" rel="noopener noreferrer" className="adp-file-link">
+                        <a href={uploadUrl(doc.file_name)} target="_blank" rel="noopener noreferrer" className="adp-file-link">
                           {doc.original_name} <ExternalLink size={11} />
                         </a>
                       </div>

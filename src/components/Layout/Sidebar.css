@@ -169,6 +169,22 @@
   margin-left: auto;
 }
 
+.sb-notif-badge {
+  margin-left: auto;
+  min-width: 18px;
+  height: 18px;
+  background: #dc2626;
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  border-radius: 99px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  flex-shrink: 0;
+}
+
 /* ─── Collapsed icon-only mode ─── */
 
 .saic-sidebar.collapsed .sb-item {

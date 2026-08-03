@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { uploadUrl } from '../../utils/uploads';
 import {
   ArrowLeft, CheckCircle, XCircle, MessageSquare, Paperclip, Users,
   Clock, Calendar, AlertCircle, Download, Loader2, Send, UserPlus,
@@ -638,7 +639,7 @@ export default function AdminTaskDetailPage() {
             <div className="atd-files-list">
               {(task.files ?? []).length === 0 && <p className="atd-empty-text">No files attached.</p>}
               {(task.files ?? []).map(f => (
-                <a key={f.id} href={`/uploads/${f.file_name}`} download={f.original_name}
+                <a key={f.id} href={uploadUrl(f.file_name)} download={f.original_name}
                   className="atd-file-row" target="_blank" rel="noreferrer">
                   <span className="atd-file-icon">{fileIcon(f.mime_type)}</span>
                   <span className="atd-file-info">

@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
+import { uploadUrl } from '../../utils/uploads';
 import {
   RefreshCw, Search, Filter, CheckCircle, XCircle,
   Clock, AlertCircle, CalendarCheck, X, Users,
@@ -244,7 +245,7 @@ export default function AdminLeaveManagementPage() {
                         <div className="alm-staff-cell">
                           <div className="alm-avatar">
                             {l.profile_photo
-                              ? <img src={`/uploads/${l.profile_photo}`} alt="" className="alm-avatar-img" />
+                              ? <img src={uploadUrl(l.profile_photo)} alt="" className="alm-avatar-img" />
                               : initials(l.first_name, l.last_name, l.email)
                             }
                           </div>

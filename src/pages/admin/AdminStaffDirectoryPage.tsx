@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { uploadUrl } from '../../utils/uploads';
 import {
   Users, Search, Filter, Printer, X, ChevronDown, ChevronUp,
   TrendingUp, Star, AlertCircle, RefreshCw, Eye,
@@ -124,7 +125,7 @@ export function StaffDetailModal({ staff, isAdmin, dateFrom, dateTo, onClose }: 
           <div className="asd-detail-hero">
             <div className="asd-detail-avatar">
               {staff.profile_photo
-                ? <img src={`/uploads/${staff.profile_photo}`} alt="" className="asd-avatar-img" />
+                ? <img src={uploadUrl(staff.profile_photo)} alt="" className="asd-avatar-img" />
                 : <span>{initials(staff.first_name, staff.last_name)}</span>
               }
             </div>
@@ -175,7 +176,7 @@ export function StaffDetailModal({ staff, isAdmin, dateFrom, dateTo, onClose }: 
                   <div className="asd-detail-row">
                     <span className="asd-detail-icon"><FileText size={13} /></span>
                     <span className="asd-detail-label">File</span>
-                    <a href={`/uploads/${staff.contract_file}`} target="_blank" rel="noreferrer"
+                    <a href={uploadUrl(staff.contract_file)} target="_blank" rel="noreferrer"
                       className="asd-contract-link" onClick={e => e.stopPropagation()}>
                       {staff.contract_original ?? 'View Contract'} <ExternalLink size={11} />
                     </a>
@@ -506,7 +507,7 @@ export default function AdminStaffDirectoryPage({ role = 'admin' }: Props) {
                       <div className="asd-name-cell">
                         <div className="asd-avatar">
                           {s.profile_photo
-                            ? <img src={`/uploads/${s.profile_photo}`} alt="" className="asd-avatar-img" />
+                            ? <img src={uploadUrl(s.profile_photo)} alt="" className="asd-avatar-img" />
                             : <span>{initials(s.first_name, s.last_name)}</span>
                           }
                         </div>

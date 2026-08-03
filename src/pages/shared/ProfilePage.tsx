@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react';
+import { uploadUrl } from '../../utils/uploads';
 import {
   User, Phone, MapPin, Building2, BadgeCheck,
   CreditCard, Calendar, FileText, ExternalLink,
@@ -71,7 +72,7 @@ export default function ProfilePage({ apiBase }: ProfilePageProps) {
           <div className="asd-detail-hero">
             <div className="asd-detail-avatar">
               {profile.profile_photo
-                ? <img src={`/uploads/${profile.profile_photo}`} alt="" className="asd-avatar-img" />
+                ? <img src={uploadUrl(profile.profile_photo)} alt="" className="asd-avatar-img" />
                 : <span>{initials(profile.first_name, profile.last_name)}</span>
               }
             </div>
@@ -137,7 +138,7 @@ export default function ProfilePage({ apiBase }: ProfilePageProps) {
                       <div className="asd-detail-row">
                         <span className="asd-detail-icon"><FileText size={13} /></span>
                         <span className="asd-detail-label">File</span>
-                        <a href={`/uploads/${profile.contract_file}`} target="_blank" rel="noreferrer"
+                        <a href={uploadUrl(profile.contract_file)} target="_blank" rel="noreferrer"
                           className="asd-contract-link">
                           {profile.contract_original ?? 'View Contract'} <ExternalLink size={11} />
                         </a>

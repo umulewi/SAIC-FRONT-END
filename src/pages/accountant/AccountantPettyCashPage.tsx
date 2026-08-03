@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, Fragment } from 'react';
+import { uploadUrl } from '../../utils/uploads';
 import {
   Plus, Pencil, X, CheckCircle, AlertCircle,
   RefreshCw, Loader2, DollarSign, Search, FileDown,
@@ -356,7 +357,7 @@ export default function AccountantPettyCashPage({ apiBase }: Props) {
                 />
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
                   {editing?.receipt_file && !fReceipt && (
-                    <a href={`/uploads/${editing.receipt_file}`} target="_blank" rel="noopener noreferrer"
+                    <a href={uploadUrl(editing.receipt_file)} target="_blank" rel="noopener noreferrer"
                       className="pcp-receipt-link" title={editing.receipt_original ?? 'Receipt'}>
                       <Paperclip size={12} />
                       <span className="pcp-receipt-name">{editing.receipt_original ?? 'Current receipt'}</span>
@@ -590,7 +591,7 @@ export default function AccountantPettyCashPage({ apiBase }: Props) {
                           <td style={{ fontSize: '0.82rem', color: '#6a8c6a', whiteSpace: 'nowrap' }}>{fmtDate(r.date)}</td>
                           <td className="pcp-group-receipt-cell">
                             {r.receipt_file
-                              ? <a href={`/uploads/${r.receipt_file}`} target="_blank" rel="noopener noreferrer"
+                              ? <a href={uploadUrl(r.receipt_file)} target="_blank" rel="noopener noreferrer"
                                   className="pcp-receipt-link" title={r.receipt_original ?? 'Receipt'}>
                                   <Paperclip size={12} />
                                   <span className="pcp-receipt-name">{r.receipt_original ?? 'Receipt'}</span>
@@ -626,7 +627,7 @@ export default function AccountantPettyCashPage({ apiBase }: Props) {
                             {ii === 0 && (
                               <td rowSpan={g.items.length} className="pcp-group-receipt-cell">
                                 {g.receipt_file
-                                  ? <a href={`/uploads/${g.receipt_file}`} target="_blank" rel="noopener noreferrer"
+                                  ? <a href={uploadUrl(g.receipt_file)} target="_blank" rel="noopener noreferrer"
                                       className="pcp-receipt-link" title={g.receipt_original ?? 'Receipt'}>
                                       <Paperclip size={12} />
                                       <span className="pcp-receipt-name">{g.receipt_original ?? 'Receipt'}</span>

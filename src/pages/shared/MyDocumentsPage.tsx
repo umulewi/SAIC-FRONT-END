@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { FileText, FolderOpen, ExternalLink, RefreshCw, AlertCircle } from 'lucide-react';
 import { getMyDocuments } from '../../api/documents';
+import { uploadUrl } from '../../utils/uploads';
 import type { CompanyDocument } from '../../api/documents';
 import PageHeader from '../../components/Common/PageHeader';
 import LoadingSpinner from '../../components/Common/LoadingSpinner';
@@ -70,7 +71,7 @@ export default function MyDocumentsPage() {
                 </div>
               </div>
               <a
-                href={`/uploads/${doc.file_name}`}
+                href={uploadUrl(doc.file_name)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="myd-open-btn"

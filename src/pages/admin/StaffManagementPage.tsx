@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { uploadUrl } from '../../utils/uploads';
 import {
   getCellsBySector, getDistrictsByProvince, getProvinces,
   getSectorsByDistrict, getVillagesByCell,
@@ -326,8 +327,8 @@ export default function StaffManagementPage({ roleId, label }: StaffManagementPa
                 <span className="sm-label"><Camera size={12} /> Profile Photo</span>
                 <div className="sm-photo-row">
                   <div className="sm-photo-thumb">
-                    {(photoPreview ?? (currentPhoto ? `/uploads/${currentPhoto}` : null))
-                      ? <img src={photoPreview ?? `/uploads/${currentPhoto}`} alt="profile" className="sm-photo-img" />
+                    {(photoPreview ?? (currentPhoto ? uploadUrl(currentPhoto) : null))
+                      ? <img src={photoPreview ?? uploadUrl(currentPhoto)} alt="profile" className="sm-photo-img" />
                       : <div className="sm-photo-initials">{initials(form.first_name, form.last_name)}</div>
                     }
                   </div>
@@ -466,7 +467,7 @@ export default function StaffManagementPage({ roleId, label }: StaffManagementPa
               <div className="sm-contract-upload" style={{ marginTop: '0.85rem' }}>
                 <label className="sm-label"><FileText size={12} /> Contract Document</label>
                 {currentContractFile && (
-                  <a href={`/uploads/${currentContractFile}`} target="_blank" rel="noopener noreferrer"
+                  <a href={uploadUrl(currentContractFile)} target="_blank" rel="noopener noreferrer"
                      className="sm-contract-link">
                     <ExternalLink size={12} /> {currentContractOrig ?? 'View current contract'}
                   </a>
@@ -574,7 +575,7 @@ export default function StaffManagementPage({ roleId, label }: StaffManagementPa
                     <div className="sm-staff-cell">
                       <div className="sm-staff-avatar">
                         {m.profile_photo
-                          ? <img src={`/uploads/${m.profile_photo}`} alt="photo" className="sm-avatar-img" />
+                          ? <img src={uploadUrl(m.profile_photo)} alt="photo" className="sm-avatar-img" />
                           : initials(m.first_name, m.last_name)
                         }
                       </div>

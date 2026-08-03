@@ -4,9 +4,13 @@ import {
   Bell, X, CheckCheck,
   ClipboardList, MessageSquare, Upload,
   CheckCircle2, XCircle, Clock, BarChart2,
-  TrendingUp, Star,
+  TrendingUp, Star, FolderKanban,
 } from 'lucide-react';
-import { getNotifications, markAsRead, markAllAsRead, deleteNotification } from '../../api/notifications';
+import {
+  getNotifications, markAsRead, markAllAsRead, deleteNotification,
+  getClientNotifications, markAllClientRead,
+} from '../../api/notifications';
+import { useAuth } from '../../context/AuthContext';
 import type { Notification, NotificationType } from '../../types';
 import './NotificationsPanel.css';
 
@@ -21,6 +25,11 @@ function getTypeStyle(type: NotificationType, title = ''): TypeStyle {
   if (type === 'task_submitted') return { icon: <Upload         size={14} />, color: '#00695c', bg: '#d1fae5' };
   if (type === 'task_approved')  return { icon: <CheckCircle2   size={14} />, color: '#2D5016', bg: '#dcfce7' };
   if (type === 'task_rejected')  return { icon: <XCircle        size={14} />, color: '#c62828', bg: '#fee2e2' };
+
+  // client portal types
+  if (type === 'project_added')   return { icon: <FolderKanban  size={14} />, color: '#2D5016', bg: '#dcfce7' };
+  if (type === 'project_updated') return { icon: <TrendingUp    size={14} />, color: '#1565c0', bg: '#dbeafe' };
+  if (type === 'new_message')     return { icon: <MessageSquare size={14} />, color: '#7b1fa2', bg: '#f3e5f5' };
 
   // task_status — differentiate by title keyword
   if (t.includes('deadline') || t.includes('approaching'))
@@ -55,7 +64,10 @@ function isToday(iso: string) {
 interface Props { onCountChange?: (n: number) => void; }
 
 export default function NotificationsPanel({ onCountChange }: Props) {
-  const navigate = useNavigate();
+  const navigate   = useNavigate();
+  const { user }   = useAuth();
+  const isClient   = user?.role === 'Client';
+
   const [open,    setOpen]    = useState(false);
   const [notifs,  setNotifs]  = useState<Notification[]>([]);
   const [unread,  setUnread]  = useState(0);
@@ -65,12 +77,12 @@ export default function NotificationsPanel({ onCountChange }: Props) {
 
   const fetchNotifs = useCallback(async () => {
     try {
-      const res = await getNotifications();
+      const res = isClient ? await getClientNotifications() : await getNotifications();
       setNotifs(res.notifications);
       setUnread(res.unread_count);
       onCountChange?.(res.unread_count);
     } catch { /* silent */ }
-  }, [onCountChange]);
+  }, [onCountChange, isClient]);
 
   useEffect(() => {
     fetchNotifs();
@@ -87,6 +99,10 @@ export default function NotificationsPanel({ onCountChange }: Props) {
   }, []);
 
   const handleRead = async (n: Notification) => {
+    if (isClient) {
+      // Client notifications: no per-item endpoint; just close panel
+      return;
+    }
     if (!n.is_read) {
       await markAsRead(n.id);
       setNotifs(prev => prev.map(x => x.id === n.id ? { ...x, is_read: 1 } : x));
@@ -105,7 +121,11 @@ export default function NotificationsPanel({ onCountChange }: Props) {
 
   const handleMarkAll = async () => {
     setLoading(true);
-    await markAllAsRead();
+    if (isClient) {
+      await markAllClientRead().catch(() => {});
+    } else {
+      await markAllAsRead();
+    }
     setNotifs(prev => prev.map(x => ({ ...x, is_read: 1 })));
     setUnread(0); onCountChange?.(0);
     setLoading(false);
@@ -113,6 +133,7 @@ export default function NotificationsPanel({ onCountChange }: Props) {
 
   const handleDelete = async (e: React.MouseEvent, id: number) => {
     e.stopPropagation();
+    if (isClient) return; // client notifications have no delete endpoint
     await deleteNotification(id);
     setNotifs(prev => {
       const updated  = prev.filter(x => x.id !== id);
@@ -175,14 +196,14 @@ export default function NotificationsPanel({ onCountChange }: Props) {
             {today.length > 0 && (
               <>
                 <p className="np-group-label">Today</p>
-                {today.map(n => <NotifItem key={n.id} n={n} onRead={handleRead} onDelete={handleDelete} />)}
+                {today.map(n => <NotifItem key={n.id} n={n} onRead={handleRead} onDelete={handleDelete} hideDelete={isClient} />)}
               </>
             )}
 
             {earlier.length > 0 && (
               <>
                 <p className="np-group-label">Earlier</p>
-                {earlier.map(n => <NotifItem key={n.id} n={n} onRead={handleRead} onDelete={handleDelete} />)}
+                {earlier.map(n => <NotifItem key={n.id} n={n} onRead={handleRead} onDelete={handleDelete} hideDelete={isClient} />)}
               </>
             )}
           </div>
@@ -201,11 +222,12 @@ export default function NotificationsPanel({ onCountChange }: Props) {
 // ── Single notification item ──────────────────────────────────────────────────
 interface ItemProps {
   n: Notification;
-  onRead:   (n: Notification) => void;
-  onDelete: (e: React.MouseEvent, id: number) => void;
+  onRead:      (n: Notification) => void;
+  onDelete:    (e: React.MouseEvent, id: number) => void;
+  hideDelete?: boolean;
 }
 
-function NotifItem({ n, onRead, onDelete }: ItemProps) {
+function NotifItem({ n, onRead, onDelete, hideDelete }: ItemProps) {
   const style   = getTypeStyle(n.type, n.title);
   const unread  = !n.is_read;
 
@@ -229,10 +251,12 @@ function NotifItem({ n, onRead, onDelete }: ItemProps) {
         <span className="np-item-time">{fmtTime(n.created_at)}</span>
       </div>
 
-      {/* Delete */}
-      <button className="np-del-btn" onClick={e => onDelete(e, n.id)} title="Dismiss">
-        <X size={12} />
-      </button>
+      {/* Delete (hidden for client role) */}
+      {!hideDelete && (
+        <button className="np-del-btn" onClick={e => onDelete(e, n.id)} title="Dismiss">
+          <X size={12} />
+        </button>
+      )}
     </div>
   );
 }

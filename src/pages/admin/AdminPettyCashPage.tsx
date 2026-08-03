@@ -1,4 +1,5 @@
 import { useEffect, useState, Fragment } from 'react';
+import { uploadUrl } from '../../utils/uploads';
 import {
   RefreshCw, Search, X, DollarSign,
   AlertCircle, Users, TrendingUp, FileDown,
@@ -272,7 +273,7 @@ export default function AdminPettyCashPage() {
                         <div className="apc-staff-cell">
                           <div className="apc-avatar">
                             {r0.profile_photo
-                              ? <img src={`/uploads/${r0.profile_photo}`} alt="" className="apc-avatar-img" />
+                              ? <img src={uploadUrl(r0.profile_photo)} alt="" className="apc-avatar-img" />
                               : initials(r0.first_name, r0.last_name, r0.email)
                             }
                           </div>
@@ -289,7 +290,7 @@ export default function AdminPettyCashPage() {
                       <td style={{ fontSize: '0.82rem', color: '#6a8c6a', whiteSpace: 'nowrap' }}>{fmtDate(r0.date)}</td>
                       <td className="pcp-group-receipt-cell">
                         {r0.receipt_file
-                          ? <a href={`/uploads/${r0.receipt_file}`} target="_blank" rel="noopener noreferrer"
+                          ? <a href={uploadUrl(r0.receipt_file)} target="_blank" rel="noopener noreferrer"
                               className="pcp-receipt-link" title={r0.receipt_original ?? 'Receipt'}>
                               <Paperclip size={12} />
                               <span className="pcp-receipt-name">{r0.receipt_original ?? 'Receipt'}</span>
@@ -317,7 +318,7 @@ export default function AdminPettyCashPage() {
                             <div className="apc-staff-cell">
                               <div className="apc-avatar">
                                 {r0.profile_photo
-                                  ? <img src={`/uploads/${r0.profile_photo}`} alt="" className="apc-avatar-img" />
+                                  ? <img src={uploadUrl(r0.profile_photo)} alt="" className="apc-avatar-img" />
                                   : initials(r0.first_name, r0.last_name, r0.email)
                                 }
                               </div>
@@ -336,7 +337,7 @@ export default function AdminPettyCashPage() {
                         {ii === 0 && (
                           <td rowSpan={g.items.length} className="pcp-group-receipt-cell">
                             {g.receipt_file
-                              ? <a href={`/uploads/${g.receipt_file}`} target="_blank" rel="noopener noreferrer"
+                              ? <a href={uploadUrl(g.receipt_file)} target="_blank" rel="noopener noreferrer"
                                   className="pcp-receipt-link" title={g.receipt_original ?? 'Receipt'}>
                                   <Paperclip size={12} />
                                   <span className="pcp-receipt-name">{g.receipt_original ?? 'Receipt'}</span>

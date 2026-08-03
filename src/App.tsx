@@ -35,9 +35,14 @@ import HRManagerPage    from './pages/hr/HRManagerPage';
 import HRPayrollPage    from './pages/hr/HRPayrollPage';
 
 // Admin KPI cycles page
-import AdminKpiCyclesPage   from './pages/admin/AdminKpiCyclesPage';
-import AdminPayrollPage     from './pages/admin/AdminPayrollPage';
-import AdminLoginLogsPage   from './pages/admin/AdminLoginLogsPage';
+import AdminKpiCyclesPage       from './pages/admin/AdminKpiCyclesPage';
+import AdminPayrollPage         from './pages/admin/AdminPayrollPage';
+import AdminLoginLogsPage       from './pages/admin/AdminLoginLogsPage';
+import AdminOrganizationsPage   from './pages/admin/AdminOrganizationsPage';
+
+// Client Portal pages
+import ClientProjectsPage from './pages/client/ClientProjectsPage';
+import ClientMessagesPage from './pages/client/ClientMessagesPage';
 
 const MANAGER_SLUGS = new Set([
   'admin_manager',
@@ -98,6 +103,7 @@ function AppRoutes() {
           <Route path="staff-directory"  element={<AdminStaffDirectoryPage role="admin" />} />
           <Route path="kpi-cycles"       element={<AdminKpiCyclesPage />} />
           <Route path="payroll"          element={<AdminPayrollPage />} />
+          <Route path="organizations"    element={<AdminOrganizationsPage />} />
           <Route path="login-logs"       element={<AdminLoginLogsPage />} />
 
           {/* Staff management — keyed by role ID, matching sidebar paths */}
@@ -151,6 +157,16 @@ function AppRoutes() {
             )}
           </Route>
         ))}
+
+        {/* Client Portal routes */}
+        <Route
+          path="/dashboard/client"
+          element={<RoleRoute allowedRoles={['Client']} basePath="/dashboard/client" />}
+        >
+          <Route index element={<Navigate to="overview" replace />} />
+          <Route path="overview"  element={<ClientProjectsPage />} />
+          <Route path="messages"  element={<ClientMessagesPage />} />
+        </Route>
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

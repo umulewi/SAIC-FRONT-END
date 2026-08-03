@@ -255,6 +255,10 @@ export async function adminGetLoginLogs(filters?: {
   return data.login_logs ?? [];
 }
 
+export async function adminDeleteLoginLog(id: number): Promise<void> {
+  await client.delete(`/admin/login-logs/${id}`);
+}
+
 // Admin: read-only payroll register
 export async function adminDeletePayrollEntry(roleId: number): Promise<void> {
   await client.delete(`/admin/payroll-config/${roleId}`);
