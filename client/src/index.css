@@ -1,0 +1,104 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Manrope", system-ui, sans-serif;
+  --font-display: "Sora", system-ui, sans-serif;
+
+  --color-brand-50: #f1faf1;
+  --color-brand-100: #ddf3dd;
+  --color-brand-200: #bde7bd;
+  --color-brand-300: #8fd390;
+  --color-brand-400: #5cb75f;
+  --color-brand-500: #379b3c;
+  --color-brand-600: #277d2c;
+  --color-brand-700: #206325;
+  --color-brand-800: #1d4f21;
+  --color-brand-900: #19421d;
+  --color-brand-950: #0a240c;
+
+  --color-earth-50: #fdf8f0;
+  --color-earth-100: #f8ecd7;
+  --color-earth-200: #f0d6ad;
+  --color-earth-300: #e6ba79;
+  --color-earth-400: #dc9c4c;
+  --color-earth-500: #d0812f;
+  --color-earth-600: #b56424;
+  --color-earth-700: #914a20;
+  --color-earth-800: #763c20;
+  --color-earth-900: #63331d;
+
+  --color-ink-50: #f6f7f6;
+  --color-ink-100: #e2e5e2;
+  --color-ink-200: #c5cac5;
+  --color-ink-300: #9fa89f;
+  --color-ink-400: #798379;
+  --color-ink-500: #5e675e;
+  --color-ink-600: #4a524a;
+  --color-ink-700: #3c423c;
+  --color-ink-800: #2a2f2a;
+  --color-ink-900: #1a1d1a;
+  --color-ink-950: #0e100e;
+
+  --shadow-soft: 0 8px 30px -8px rgb(26 29 26 / 0.15);
+  --shadow-card: 0 2px 8px -2px rgb(26 29 26 / 0.08), 0 12px 32px -12px rgb(26 29 26 / 0.12);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-white text-ink-700 font-sans antialiased;
+  }
+  h1, h2, h3, h4 {
+    @apply font-display text-ink-950;
+  }
+  ::selection {
+    background: var(--color-brand-200);
+    color: var(--color-brand-950);
+  }
+  * {
+    scrollbar-color: var(--color-brand-300) transparent;
+    scrollbar-width: thin;
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--color-brand-200);
+    border-radius: 999px;
+    border: 2px solid white;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: var(--color-brand-400);
+  }
+}
+
+@layer utilities {
+  .container-page {
+    @apply mx-auto w-full max-w-7xl px-6 lg:px-10;
+  }
+  .text-balance {
+    text-wrap: balance;
+  }
+  .bg-noise {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");
+  }
+  .animate-shine {
+    background-size: 200% 100%;
+    animation: shine 2.4s linear infinite;
+  }
+}
+
+@keyframes shine {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
