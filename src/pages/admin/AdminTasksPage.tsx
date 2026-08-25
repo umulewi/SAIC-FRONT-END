@@ -56,8 +56,6 @@ export default function AdminTasksPage() {
   const [deleteTarget, setDeleteTarget] = useState<{ id: number; title: string } | null>(null);
   const [deleting,     setDeleting]     = useState(false);
 
-  // Only show Department Managers in the assignee list (admin tasks go to managers first)
-  const managerStaff = staff.filter(s => (s.role_name ?? '').endsWith('Manager'));
 
   const load = async (p = page) => {
     setLoading(true); setError('');
@@ -234,11 +232,10 @@ export default function AdminTasksPage() {
 
                 <div className="atm-field atm-field-full">
                   <label className="atm-flabel">
-                    <UserPlus size={12} /> Assign to Manager
-                    <span className="atm-flabel-opt"> (manager will then assign to their team)</span>
+                    <UserPlus size={12} /> Assign to Staff
                   </label>
                   <div className="atm-staff-grid">
-                    {managerStaff.map(s => {
+                    {staff.map(s => {
                       const uid = s.users_id;
                       const sel = selectedUsers.includes(uid);
                       return (
@@ -252,12 +249,11 @@ export default function AdminTasksPage() {
                         </button>
                       );
                     })}
-                    {staff.length === 0 && <p style={{ fontSize: '0.8rem', color: '#9ab09a', margin: 0 }}>Loading managers…</p>}
-                    {staff.length > 0 && managerStaff.length === 0 && <p style={{ fontSize: '0.8rem', color: '#9ab09a', margin: 0 }}>No managers registered yet.</p>}
+                    {staff.length === 0 && <p style={{ fontSize: '0.8rem', color: '#9ab09a', margin: 0 }}>Loading staff…</p>}
                   </div>
                   {selectedUsers.length > 0 && (
                     <p className="atm-assign-count">
-                      <Users size={13} /> {selectedUsers.length} manager{selectedUsers.length !== 1 ? 's' : ''} selected
+                      <Users size={13} /> {selectedUsers.length} staff member{selectedUsers.length !== 1 ? 's' : ''} selected
                     </p>
                   )}
                 </div>
