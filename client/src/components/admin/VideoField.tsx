@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { Loader2, Video, X } from "lucide-react";
-import { uploadImage } from "../../lib/api";
+import { resolveAssetUrl, uploadImage } from "../../lib/api";
 import { Field, TextInput } from "./Field";
 
 export function VideoField({
@@ -33,7 +33,7 @@ export function VideoField({
       <div className="flex flex-col gap-3">
         {value && (
           <div className="relative w-full max-w-xs overflow-hidden rounded-xl bg-ink-950">
-            <video src={value} className="h-40 w-full object-cover" muted loop autoPlay playsInline />
+            <video src={resolveAssetUrl(value)} className="h-40 w-full object-cover" muted loop autoPlay playsInline />
             <button
               type="button"
               onClick={() => onChange("")}

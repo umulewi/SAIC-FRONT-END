@@ -37,13 +37,18 @@ export function Career() {
       <PageHero
         eyebrow="Careers at SAIC"
         title="Help build Rwanda's agribusiness future"
-        subtitle="We're always looking for mission-driven people passionate about sustainable agriculture and community development."
+        subtitle="See what it means to work here, learn about the team culture, and explore opportunities that directly support sustainable agriculture, advisory work, and community development across Rwanda."
       />
 
-      <section className="bg-white py-16">
+      <section className="bg-white py-12 lg:py-12">
         <div className="container-page">
           <Reveal>
-            <SectionHeading align="center" eyebrow="Why SAIC" title="A team worth joining" />
+            <SectionHeading
+              align="center"
+              eyebrow="Why SAIC"
+              title="A team worth joining"
+              subtitle="We value collaboration, learning, and meaningful work, so this section shows the environment, expectations, and growth opportunities you can expect on the team."
+            />
           </Reveal>
           <div className="mx-auto mt-12 grid max-w-5xl gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {perks.map((perk, i) => (
@@ -61,10 +66,15 @@ export function Career() {
         </div>
       </section>
 
-      <section className="bg-ink-50/60 py-16 pb-24">
+      <section className="bg-ink-50/60 py-12 pb-16 lg:pb-16">
         <div className="container-page">
           <Reveal>
-            <SectionHeading eyebrow="Open Roles" title="Current opportunities" />
+            <SectionHeading
+              align="center"
+              eyebrow="Open Roles"
+              title="Current opportunities"
+              subtitle="Each opening includes a short overview so you can quickly understand the role, the location, the responsibilities, and the kind of experience we are looking for."
+            />
           </Reveal>
 
           {jobOpenings.length === 0 ? (
@@ -73,7 +83,7 @@ export function Career() {
                 <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-ink-50 text-ink-400">
                   <Briefcase className="h-6 w-6" />
                 </span>
-                <p className="text-ink-400">No open roles right now — check back soon.</p>
+                <p className="text-ink-400">No open roles right now — check back soon for new opportunities, future openings, and new ways to contribute.</p>
               </div>
             </Reveal>
           ) : (
@@ -115,7 +125,7 @@ export function Career() {
               <div className="pointer-events-none absolute -top-16 -right-16 h-56 w-56 rounded-full bg-white/10 blur-3xl" />
               <div className="pointer-events-none absolute -bottom-16 -left-16 h-56 w-56 rounded-full bg-earth-400/25 blur-3xl" />
               <p className="relative text-balance text-lg text-white/90">
-                Don't see a role that fits? Send us your CV — we're always open to meeting talented people.
+                Don't see a role that fits? Send us your CV — we review talent continuously and may reach out when a matching opportunity opens across programs or support teams.
               </p>
               <div className="relative mt-5">
                 <Button href={sections ? `mailto:${sections.contact.email}` : "/contact"} variant="secondary" withArrow>

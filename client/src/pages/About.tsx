@@ -58,11 +58,11 @@ export function About() {
       <PageHero
         eyebrow="About SAIC"
         title={about.headline}
-        subtitle="A closer look at our mission, our model, and the communities we serve."
+        subtitle="This page explains how SAIC is structured, what each program does, and how the full model supports agribusinesses from first input to market access."
       />
 
-      <section className="bg-white py-4 pb-20 lg:pb-24">
-        <div className="container-page grid gap-14 lg:grid-cols-2 lg:items-center">
+      <section className="bg-white py-4 pb-16 lg:pb-12">
+        <div className="container-page grid gap-10 lg:grid-cols-2 lg:items-center">
           <Reveal>
             <div className="relative">
               <div className="group aspect-[4/3.3] overflow-hidden rounded-[2rem] shadow-card ring-1 ring-ink-900/5">
@@ -86,30 +86,35 @@ export function About() {
             </div>
           </Reveal>
 
-          <Reveal delay={0.1} className="flex flex-col gap-5">
+              <Reveal delay={0.1} className="flex flex-col items-center gap-5 text-center">
             <span className="inline-flex w-fit items-center gap-2 rounded-full bg-brand-50 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-brand-700">
               Our Story
             </span>
-            <h2 className="text-balance text-2xl font-bold sm:text-3xl">
+                <h2 className="max-w-xl text-balance text-xl font-bold sm:text-2xl lg:text-3xl">
               Building circular agribusiness value chains
             </h2>
-            <p className="leading-relaxed text-ink-500">{about.body}</p>
+                <p className="max-w-3xl text-balance text-sm leading-relaxed text-ink-500 sm:text-base lg:text-lg">
+                  {about.body}
+                </p>
+                <p className="max-w-3xl text-balance text-sm leading-relaxed text-ink-500 sm:text-base lg:text-lg">
+                  We combine inputs, advisory support, production guidance, and market access so each step in the journey is easier to understand and more practical for the communities we serve.
+                </p>
           </Reveal>
         </div>
       </section>
 
-      <section className="relative overflow-hidden bg-ink-50/60 py-20 lg:py-24">
+      <section className="relative overflow-hidden bg-ink-50/60 py-16 lg:py-12">
         <div className="container-page">
           <Reveal>
             <SectionHeading
-              align="center"
+            align="center"
               eyebrow="Our Model"
               title="How we build sustainable value chains"
-              subtitle="Every partnership moves through the same circular model — from first inputs to a product ready for market."
+              subtitle="This section breaks the work into a simple flow, showing how inputs, production, value addition, and market access connect to create a stronger agribusiness system for the communities we support."
             />
           </Reveal>
 
-          <div className="relative mx-auto mt-14 grid max-w-5xl gap-8 sm:grid-cols-3">
+          <div className="relative mx-auto mt-10 grid max-w-5xl gap-8 sm:grid-cols-3">
             <div className="absolute left-0 right-0 top-8 hidden h-px bg-gradient-to-r from-transparent via-brand-200 to-transparent sm:block" />
             {chainSteps.map((step, i) => (
               <Reveal key={step.title} delay={i * 0.1}>
@@ -132,13 +137,18 @@ export function About() {
       <CoreValues values={coreValues} />
       <ImpactAreas areas={impactAreas} />
 
-      <section className="bg-white py-20 lg:py-24">
+      <section className="bg-white py-16 lg:py-12">
         <div className="container-page">
           <Reveal>
-            <SectionHeading align="center" eyebrow="Our Journey" title="From founding to five years of impact" />
+            <SectionHeading
+              align="center"
+              eyebrow="Our Journey"
+              title="From founding to five years of impact"
+              subtitle="A short timeline that shows how SAIC grew from an idea into an active partner for farmers, cooperatives, and agribusinesses across different stages of growth."
+            />
           </Reveal>
 
-          <div className="relative mx-auto mt-14 max-w-2xl">
+          <div className="relative mx-auto mt-10 max-w-2xl">
             <div className="absolute left-6 top-2 bottom-2 w-px bg-ink-100" />
             <div className="flex flex-col gap-10">
               {milestones.map((milestone, i) => (

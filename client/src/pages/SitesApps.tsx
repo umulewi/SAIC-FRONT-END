@@ -20,7 +20,7 @@ export function SitesApps() {
       <PageHero
         eyebrow="Sites & Apps"
         title="Our digital tools and platforms"
-        subtitle="A directory of websites and applications built and maintained by SAIC and our programs."
+        subtitle="Explore the websites and applications we use to share information, support services, and make our programs easier to access, understand, and use in daily work."
       />
 
       <section className="bg-white py-4 pb-24">

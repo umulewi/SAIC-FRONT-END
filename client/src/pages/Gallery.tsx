@@ -24,7 +24,7 @@ export function Gallery() {
       <PageHero
         eyebrow="News & Gallery"
         title="Stories from the field"
-        subtitle="Updates, event highlights, and stories from the communities and entrepreneurs we work with."
+        subtitle="Browse updates, field moments, and stories that show how our programs work in practice across the communities, entrepreneurs, and partners we support."
       />
 
       <section className="bg-white py-4 pb-24">

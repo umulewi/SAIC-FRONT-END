@@ -79,8 +79,15 @@ export interface CoreValue extends BaseItem {
 export interface Service extends BaseItem {
   title: string;
   description: string;
+  content?: string;
+  offerings?: ServiceOffering[];
   image: string;
   href: string;
+}
+
+export interface ServiceOffering {
+  title: string;
+  description: string;
 }
 
 export interface ImpactArea extends BaseItem {
@@ -105,6 +112,7 @@ export interface TeamMember extends BaseItem {
   role: string;
   photo: string;
   bio: string;
+  employeeOfTheYear?: boolean;
 }
 
 export interface SiteApp extends BaseItem {

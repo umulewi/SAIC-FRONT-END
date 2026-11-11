@@ -8,9 +8,10 @@ import { ImpactAreas } from "../components/sections/ImpactAreas";
 import { ProgramsSection } from "../components/sections/ProgramsSection";
 import { PartnersGrid } from "../components/sections/PartnersGrid";
 import { CTASection } from "../components/sections/CTASection";
+import { publicServices } from "../lib/services";
 
 export function Home() {
-  const { sections, stats, coreValues, services, impactAreas, programs, partners } = useContent();
+  const { sections, stats, coreValues, impactAreas, programs, partners } = useContent();
   if (!sections) return null;
 
   return (
@@ -18,7 +19,7 @@ export function Home() {
       <Hero hero={sections.hero} />
       <StatsBar stats={stats} />
       <CoreValues values={coreValues} />
-      <ServicesGrid services={services} />
+      <ServicesGrid services={publicServices} />
       <AboutSection about={sections.about} />
       <ImpactAreas areas={impactAreas} />
       <ProgramsSection programs={programs} />

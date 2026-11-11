@@ -7,17 +7,18 @@ export function ImpactAreas({ areas }: { areas: ImpactArea[] }) {
   if (areas.length === 0) return null;
 
   return (
-    <section className="bg-white py-20 lg:py-28">
+    <section className="bg-white py-16 lg:py-12">
       <div className="container-page">
         <Reveal>
           <SectionHeading
             align="center"
             eyebrow="Where We Focus"
             title="Impact across technology, people, and community"
+            subtitle="These focus areas show where our work creates the clearest change and how each one contributes to a stronger agricultural value chain."
           />
         </Reveal>
 
-        <div className="mt-14 grid gap-8 lg:grid-cols-3">
+        <div className="mt-10 grid gap-8 lg:grid-cols-3">
           {areas.map((area, i) => (
             <Reveal key={area.id} delay={i * 0.1}>
               <div className="group relative aspect-[4/5] overflow-hidden rounded-3xl shadow-card">

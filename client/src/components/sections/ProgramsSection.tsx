@@ -10,7 +10,7 @@ export function ProgramsSection({ programs }: { programs: Program[] }) {
   if (programs.length === 0) return null;
 
   return (
-    <section className="relative overflow-hidden bg-ink-950 py-20 lg:py-28">
+    <section className="relative overflow-hidden bg-ink-950 py-16 lg:py-12">
       <div className="pointer-events-none absolute top-0 right-0 h-96 w-96 rounded-full bg-brand-700/30 blur-3xl" />
       <div className="container-page relative">
         <Reveal>
@@ -19,11 +19,11 @@ export function ProgramsSection({ programs }: { programs: Program[] }) {
             light
             eyebrow="Our Programs"
             title="Three programs, one shared mission"
-            subtitle="Purpose-built initiatives that meet entrepreneurs, cooperatives, and institutions exactly where they are."
+            subtitle="Each program focuses on a different part of the ecosystem, but they all work together to help communities learn, build, and grow with practical support."
           />
         </Reveal>
 
-        <div className="mx-auto mt-14 grid max-w-5xl gap-6 sm:grid-cols-3">
+        <div className="mx-auto mt-10 grid max-w-5xl gap-6 sm:grid-cols-3">
           {programs.map((program, i) => {
             const IconCmp = programIcons[i % programIcons.length];
             return (

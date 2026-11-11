@@ -2,6 +2,7 @@ import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { ContentProvider } from "./context/ContentContext";
+import { ConfirmProvider } from "./context/ConfirmContext";
 import { PublicLayout } from "./components/layout/PublicLayout";
 import { ProtectedRoute } from "./components/admin/ProtectedRoute";
 import { Logo } from "./components/ui/Logo";
@@ -9,10 +10,14 @@ import { Logo } from "./components/ui/Logo";
 import { Home } from "./pages/Home";
 import { About } from "./pages/About";
 import { Services } from "./pages/Services";
+import { ServiceDetail } from "./pages/ServiceDetail";
+import { SubServiceDetail } from "./pages/SubServiceDetail";
 import { SitesApps } from "./pages/SitesApps";
 import { Team } from "./pages/Team";
 import { Gallery } from "./pages/Gallery";
+import { StoryDetail } from "./pages/StoryDetail";
 import { Career } from "./pages/Career";
+import { JobDetail } from "./pages/JobDetail";
 import { Contact } from "./pages/Contact";
 import { NotFound } from "./pages/NotFound";
 import { ScrollToTop } from "./components/ui/ScrollToTop";
@@ -55,6 +60,15 @@ const TeamEditor = lazy(() => import("./pages/admin/TeamEditor").then((m) => ({ 
 const SitesAppsEditor = lazy(() =>
   import("./pages/admin/SitesAppsEditor").then((m) => ({ default: m.SitesAppsEditor }))
 );
+const StoriesEditor = lazy(() =>
+  import("./pages/admin/StoriesEditor").then((m) => ({ default: m.StoriesEditor }))
+);
+const JobOpeningsEditor = lazy(() =>
+  import("./pages/admin/JobOpeningsEditor").then((m) => ({ default: m.JobOpeningsEditor }))
+);
+const Applications = lazy(() =>
+  import("./pages/admin/Applications").then((m) => ({ default: m.Applications }))
+);
 const Messages = lazy(() => import("./pages/admin/Messages").then((m) => ({ default: m.Messages })));
 
 function AdminFallback() {
@@ -85,7 +99,9 @@ function App() {
             element={
               <ProtectedRoute>
                 <Suspense fallback={<AdminFallback />}>
-                  <AdminLayout />
+                  <ConfirmProvider>
+                    <AdminLayout />
+                  </ConfirmProvider>
                 </Suspense>
               </ProtectedRoute>
             }
@@ -105,6 +121,9 @@ function App() {
             <Route path="partners" element={<PartnersEditor />} />
             <Route path="team" element={<TeamEditor />} />
             <Route path="sites-apps" element={<SitesAppsEditor />} />
+            <Route path="stories" element={<StoriesEditor />} />
+            <Route path="jobs" element={<JobOpeningsEditor />} />
+            <Route path="applications" element={<Applications />} />
             <Route path="messages" element={<Messages />} />
           </Route>
 
@@ -118,10 +137,14 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/about" element={<About />} />
             <Route path="/services" element={<Services />} />
+            <Route path="/services/:serviceSlug" element={<ServiceDetail />} />
+            <Route path="/services/:serviceSlug/:subSlug" element={<SubServiceDetail />} />
             <Route path="/sites-apps" element={<SitesApps />} />
             <Route path="/team" element={<Team />} />
             <Route path="/gallery" element={<Gallery />} />
+            <Route path="/gallery/:id" element={<StoryDetail />} />
             <Route path="/career" element={<Career />} />
+            <Route path="/career/:id" element={<JobDetail />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="*" element={<NotFound />} />
           </Route>

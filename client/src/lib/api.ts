@@ -1,7 +1,29 @@
 import axios from "axios";
 import type { Application, CollectionMap, CollectionName, ContactMessage, Sections } from "../types";
 
-export const api = axios.create({ baseURL: "/api" });
+// In production the client and API are hosted on different subdomains, so
+// relative paths like "/api" resolve against the client's own origin instead
+// of the API. VITE_API_URL should be set to the API's origin (e.g.
+// https://api.stewardincubation.saicmis.com) at build time for those deploys.
+// Left unset, everything falls back to relative paths, which is what local
+// dev relies on (Vite's dev-server proxy in vite.config.ts).
+const API_ORIGIN = import.meta.env.VITE_API_URL?.replace(/\/$/, "") ?? "";
+
+export const api = axios.create({ baseURL: `${API_ORIGIN}/api` });
+
+/**
+ * Resolves a path returned from the API/database into a URL the browser can
+ * actually load. Uploaded files (/uploads/...) live on the API's origin, not
+ * the client's, so they need the same origin prefix as the API itself.
+ * Client-bundled static assets (/illustrations/...) and already-absolute
+ * URLs are returned unchanged.
+ */
+export function resolveAssetUrl(path?: string | null): string {
+  if (!path) return "";
+  if (/^https?:\/\//.test(path)) return path;
+  if (path.startsWith("/uploads/")) return `${API_ORIGIN}${path}`;
+  return path;
+}
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("saic_token");

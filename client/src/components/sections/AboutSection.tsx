@@ -7,10 +7,10 @@ import { CountUp } from "../ui/CountUp";
 
 export function AboutSection({ about }: { about: AboutContent }) {
   return (
-    <section className="relative overflow-hidden bg-white py-20 lg:py-28">
+    <section className="relative overflow-hidden bg-white py-16 lg:py-12">
       <div className="pointer-events-none absolute top-1/3 -left-32 h-72 w-72 rounded-full bg-earth-100/60 blur-3xl" />
 
-      <div className="container-page relative grid gap-14 lg:grid-cols-2 lg:items-center">
+      <div className="container-page relative grid gap-10 lg:grid-cols-2 lg:items-center">
         <Reveal>
           <div className="relative">
             <div className="group aspect-[4/3.2] overflow-hidden rounded-[2rem] shadow-card ring-1 ring-ink-900/5">
@@ -36,8 +36,10 @@ export function AboutSection({ about }: { about: AboutContent }) {
 
         <Reveal delay={0.1}>
           <SectionHeading eyebrow={about.eyebrow} title={about.headline} />
-          <p className="mt-6 text-balance leading-relaxed text-ink-500">{about.body}</p>
-          <div className="mt-8">
+          <p className="mx-auto mt-6 max-w-4xl text-balance text-center leading-relaxed text-ink-500 sm:text-lg lg:text-xl">
+            {about.body}
+          </p>
+          <div className="mt-8 flex justify-center">
             <Button href="/about" variant="outline" withArrow>
               Discover our story
             </Button>

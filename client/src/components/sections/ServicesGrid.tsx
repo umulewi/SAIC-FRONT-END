@@ -8,16 +8,18 @@ import { Button } from "../ui/Button";
 
 export function ServicesGrid({ services }: { services: Service[] }) {
   if (services.length === 0) return null;
+  const preview = services.slice(0, 3);
 
   return (
-    <section className="bg-ink-50/60 py-20 lg:py-28">
+    <section className="bg-ink-50/60 py-16 lg:py-12">
       <div className="container-page">
         <Reveal>
-          <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-end">
+          <div className="mx-auto flex max-w-4xl flex-col items-center gap-6 text-center">
             <SectionHeading
+              align="center"
               eyebrow="What We Offer"
               title="Comprehensive support for every stage of growth"
-              subtitle="From ideation to market access — 14 services designed around the realities of agribusiness in Rwanda."
+              subtitle="Each service is built to solve a specific challenge, from early planning and technical guidance to market readiness and long-term business support for agribusinesses."
             />
             <Button href="/services" variant="outline" withArrow className="shrink-0">
               View all services
@@ -25,8 +27,8 @@ export function ServicesGrid({ services }: { services: Service[] }) {
           </div>
         </Reveal>
 
-        <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {services.map((service, i) => (
+        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {preview.map((service, i) => (
             <Reveal key={service.id} delay={i * 0.08}>
               <Link
                 to={service.href}

@@ -39,7 +39,7 @@ export function Contact() {
       <PageHero
         eyebrow="Contact Us"
         title="Let's talk about your agribusiness"
-        subtitle="Whether you're an entrepreneur, cooperative, or partner organization — our team is ready to help."
+        subtitle="Use this page to reach the team, ask about programs, start a partnership conversation, or request support for your agribusiness plans, projects, or next steps."
       />
 
       <section className="bg-white py-4 pb-24">

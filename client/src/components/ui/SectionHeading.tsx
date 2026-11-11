@@ -10,13 +10,15 @@ export function SectionHeading({
   eyebrow,
   title,
   subtitle,
-  align = "left",
+  align = "center",
   light = false,
 }: SectionHeadingProps) {
   const alignment = align === "center" ? "text-center items-center mx-auto" : "text-left items-start";
+  const titleWidth = align === "center" ? "mx-auto max-w-xl text-lg sm:text-xl lg:text-2xl" : "max-w-2xl";
+  const subtitleWidth = align === "center" ? "mx-auto max-w-5xl text-sm sm:text-base lg:text-lg" : "max-w-2xl";
 
   return (
-    <div className={`flex flex-col gap-4 max-w-2xl ${alignment}`}>
+    <div className={`flex flex-col gap-4 ${align === "center" ? "max-w-5xl" : "max-w-2xl"} ${alignment}`}>
       {eyebrow && (
         <span
           className={`inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-wider ${
@@ -27,11 +29,15 @@ export function SectionHeading({
           {eyebrow}
         </span>
       )}
-      <h2 className={`text-balance text-3xl font-bold sm:text-4xl lg:text-[2.75rem] lg:leading-[1.1] ${light ? "text-white" : ""}`}>
+      <h2
+        className={`text-balance ${titleWidth} font-bold leading-[1.2] ${light ? "text-white" : ""}`}
+      >
         {title}
       </h2>
       {subtitle && (
-        <p className={`text-balance text-lg leading-relaxed ${light ? "text-white/80" : "text-ink-500"}`}>
+        <p
+          className={`text-balance ${subtitleWidth} leading-relaxed ${light ? "text-white/80" : "text-ink-500"}`}
+        >
           {subtitle}
         </p>
       )}

@@ -32,3 +32,19 @@ export function TextArea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement
 export function Select(props: React.SelectHTMLAttributes<HTMLSelectElement>) {
   return <select {...props} className={`${inputBase} ${props.className ?? ""}`} />;
 }
+
+export function Checkbox({
+  label,
+  ...props
+}: { label: string } & React.InputHTMLAttributes<HTMLInputElement>) {
+  return (
+    <label className="flex cursor-pointer items-center gap-2.5 text-sm font-semibold text-ink-800">
+      <input
+        type="checkbox"
+        className="h-4 w-4 rounded border-ink-300 text-brand-600 focus:ring-2 focus:ring-brand-100"
+        {...props}
+      />
+      {label}
+    </label>
+  );
+}

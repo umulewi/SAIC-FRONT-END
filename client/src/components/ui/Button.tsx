@@ -52,7 +52,7 @@ export function Button({
   className = "",
   disabled = false,
 }: ButtonProps) {
-  const classes = `relative isolate overflow-hidden inline-flex items-center justify-center gap-2 rounded-full font-semibold transition-all duration-200 outline-offset-2 active:scale-[0.97] disabled:opacity-50 disabled:pointer-events-none disabled:active:scale-100 ${variants[variant]} ${sizes[size]} ${className}`;
+  const classes = `relative isolate overflow-hidden inline-flex items-center justify-center gap-2 rounded-full font-semibold transition-all duration-200 outline-offset-2 cursor-pointer active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 disabled:pointer-events-none disabled:active:scale-100 ${variants[variant]} ${sizes[size]} ${className}`;
 
   const shine = shineEligible[variant] && (
     <span className="pointer-events-none absolute inset-0 -z-10 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-full" />

@@ -4,6 +4,7 @@ import { Link, useParams } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, Briefcase, CheckCircle2, FileText, Loader2, MapPin, Upload, X } from "lucide-react";
 import { useContent } from "../context/ContentContext";
+import { SectionHeading } from "../components/ui/SectionHeading";
 import { Reveal } from "../components/ui/Reveal";
 import { Button } from "../components/ui/Button";
 import { submitApplication, uploadResume } from "../lib/api";
@@ -70,7 +71,7 @@ export function JobDetail() {
 
   return (
     <article>
-      <section className="relative overflow-hidden bg-gradient-to-b from-brand-50/70 via-white to-white pb-4 pt-20 lg:pt-28">
+      <section className="relative overflow-hidden bg-gradient-to-b from-brand-50/70 via-white to-white pb-4 pt-14 lg:pt-12">
         <div className="pointer-events-none absolute -top-24 right-0 h-72 w-72 rounded-full bg-brand-200/40 blur-3xl" />
         <div className="container-page relative">
           <Reveal>
@@ -83,26 +84,37 @@ export function JobDetail() {
             <span className="inline-flex items-center gap-2 rounded-full bg-brand-100 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-brand-700">
               {job.type}
             </span>
-            <h1 className="mt-5 max-w-2xl text-balance text-3xl font-bold leading-[1.15] sm:text-4xl lg:text-5xl">
+            <h1 className="mt-5 max-w-2xl text-balance text-2xl font-bold leading-[1.2] sm:text-3xl lg:text-4xl">
               {job.title}
             </h1>
             <p className="mt-4 inline-flex items-center gap-1.5 text-ink-500">
               <MapPin className="h-4 w-4" /> {job.location}
             </p>
+            <p className="mt-5 max-w-4xl text-balance text-lg leading-relaxed text-ink-500 sm:text-xl">
+              Review the overview below to understand what this role involves, the kind of person who will succeed in it, and how the position supports the team and the communities we serve.
+            </p>
           </Reveal>
         </div>
       </section>
 
-      <section className="bg-white py-12 pb-24">
+      <section className="bg-white py-12 pb-12 lg:pb-12">
         <div className="container-page grid gap-12 lg:grid-cols-[1.2fr_1fr]">
           <Reveal>
-            <div className="flex flex-col gap-5 text-base leading-relaxed text-ink-600">
+            <div className="flex flex-col gap-6">
+              <SectionHeading
+                align="center"
+                eyebrow="Role overview"
+                title={`What you'll do as ${job.title}`}
+                subtitle="The summary below explains the responsibilities, the day-to-day expectations, and why this role matters inside the wider program and team structure."
+              />
+              <div className="flex max-w-3xl flex-col gap-5 text-base leading-relaxed text-ink-600 sm:text-lg">
               {job.description
                 .split(/\n+/)
                 .filter((p) => p.trim())
                 .map((paragraph, i) => (
                   <p key={i}>{paragraph}</p>
                 ))}
+              </div>
             </div>
           </Reveal>
 
@@ -143,6 +155,9 @@ export function JobDetail() {
                       <Briefcase className="h-4 w-4 text-brand-600" />
                       <h2 className="font-bold text-ink-950">Apply for this role</h2>
                     </div>
+                    <p className="text-sm leading-relaxed text-ink-500">
+                      Share your background, explain why this role fits you, and attach your CV so we can review your application in context and understand what you would bring to the team.
+                    </p>
 
                     <div className="flex flex-col gap-1.5">
                       <label className="text-sm font-semibold text-ink-800">Full name</label>

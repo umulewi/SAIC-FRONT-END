@@ -13,6 +13,7 @@ export function TeamEditor() {
         { key: "role", label: "Role", type: "text" },
         { key: "photo", label: "Photo", type: "image" },
         { key: "bio", label: "Bio", type: "textarea" },
+        { key: "employeeOfTheYear", label: "Employee of the Year", type: "checkbox" },
       ]}
     />
   );

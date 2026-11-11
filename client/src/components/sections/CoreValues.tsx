@@ -7,18 +7,18 @@ export function CoreValues({ values }: { values: CoreValue[] }) {
   if (values.length === 0) return null;
 
   return (
-    <section className="bg-white py-20 lg:py-28">
+    <section className="bg-white py-16 lg:py-12">
       <div className="container-page">
         <Reveal>
           <SectionHeading
             align="center"
             eyebrow="What Drives Us"
             title="The values behind every partnership"
-            subtitle="Three principles guide how we work with entrepreneurs, cooperatives, and communities across Rwanda."
+            subtitle="These values explain how we approach every relationship, how we make decisions, and what people can expect when working with SAIC over time."
           />
         </Reveal>
 
-        <div className="mt-14 grid gap-6 sm:grid-cols-3">
+        <div className="mt-10 grid gap-6 sm:grid-cols-3">
           {values.map((value, i) => (
             <Reveal key={value.id} delay={i * 0.1}>
               <div className="group h-full rounded-3xl border border-ink-100 bg-white p-8 shadow-card transition-all hover:-translate-y-1 hover:border-brand-200">

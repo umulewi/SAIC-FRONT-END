@@ -2,15 +2,17 @@ import { useEffect, useState } from "react";
 import { ArrowDown, ArrowUp, Loader2, Pencil, Plus, Save, Trash2, X } from "lucide-react";
 import type { BaseItem, CollectionName } from "../../types";
 import { createItem, deleteItem, getCollection, updateItem } from "../../lib/api";
-import { Field, TextInput, TextArea, Select } from "./Field";
+import { Checkbox, Field, TextInput, TextArea, Select } from "./Field";
 import { ImageField } from "./ImageField";
 import { Button } from "../ui/Button";
+import { useConfirm } from "../../context/ConfirmContext";
 
 export type FieldSchema =
   | { key: string; label: string; type: "text" }
-  | { key: string; label: string; type: "textarea" }
+  | { key: string; label: string; type: "textarea"; rows?: number }
   | { key: string; label: string; type: "image" }
-  | { key: string; label: string; type: "select"; options: string[] };
+  | { key: string; label: string; type: "select"; options: string[] }
+  | { key: string; label: string; type: "checkbox" };
 
 interface CollectionEditorProps<N extends CollectionName> {
   name: N;
@@ -26,7 +28,7 @@ type Item = BaseItem & Record<string, unknown>;
 function emptyItem(fields: FieldSchema[]): Record<string, unknown> {
   const obj: Record<string, unknown> = {};
   for (const f of fields) {
-    obj[f.key] = f.type === "select" ? f.options[0] : "";
+    obj[f.key] = f.type === "select" ? f.options[0] : f.type === "checkbox" ? false : "";
   }
   return obj;
 }
@@ -44,6 +46,7 @@ export function CollectionEditor<N extends CollectionName>({
   const [editingId, setEditingId] = useState<number | "new" | null>(null);
   const [draft, setDraft] = useState<Record<string, unknown>>({});
   const [saving, setSaving] = useState(false);
+  const confirm = useConfirm();
 
   const load = async () => {
     setLoading(true);
@@ -89,8 +92,13 @@ export function CollectionEditor<N extends CollectionName>({
     }
   };
 
-  const remove = async (id: number) => {
-    if (!confirm("Delete this item? This cannot be undone.")) return;
+  const remove = async (id: number, label: string) => {
+    const ok = await confirm({
+      title: `Delete "${label}"?`,
+      description: "This item will be permanently removed. This cannot be undone.",
+      confirmLabel: "Delete",
+    });
+    if (!ok) return;
     await deleteItem(name, id);
     await load();
   };
@@ -141,7 +149,7 @@ export function CollectionEditor<N extends CollectionName>({
                   {f.type === "textarea" && (
                     <Field label={f.label}>
                       <TextArea
-                        rows={3}
+                        rows={f.rows ?? 3}
                         value={(draft[f.key] as string) ?? ""}
                         onChange={(e) => setDraft({ ...draft, [f.key]: e.target.value })}
                       />
@@ -167,6 +175,13 @@ export function CollectionEditor<N extends CollectionName>({
                         ))}
                       </Select>
                     </Field>
+                  )}
+                  {f.type === "checkbox" && (
+                    <Checkbox
+                      label={f.label}
+                      checked={Boolean(draft[f.key])}
+                      onChange={(e) => setDraft({ ...draft, [f.key]: e.target.checked })}
+                    />
                   )}
                 </div>
               );
@@ -204,7 +219,7 @@ export function CollectionEditor<N extends CollectionName>({
                 <button
                   onClick={() => move(index, -1)}
                   disabled={index === 0}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg text-ink-500 hover:bg-ink-50 disabled:opacity-30"
+                  className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-ink-500 hover:bg-ink-50 disabled:cursor-not-allowed disabled:opacity-30"
                   aria-label="Move up"
                 >
                   <ArrowUp className="h-4 w-4" />
@@ -212,21 +227,21 @@ export function CollectionEditor<N extends CollectionName>({
                 <button
                   onClick={() => move(index, 1)}
                   disabled={index === items.length - 1}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg text-ink-500 hover:bg-ink-50 disabled:opacity-30"
+                  className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-ink-500 hover:bg-ink-50 disabled:cursor-not-allowed disabled:opacity-30"
                   aria-label="Move down"
                 >
                   <ArrowDown className="h-4 w-4" />
                 </button>
                 <button
                   onClick={() => startEdit(item)}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg text-brand-600 hover:bg-brand-50"
+                  className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-brand-600 hover:bg-brand-50"
                   aria-label="Edit"
                 >
                   <Pencil className="h-4 w-4" />
                 </button>
                 <button
-                  onClick={() => remove(item.id)}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg text-red-500 hover:bg-red-50"
+                  onClick={() => remove(item.id, String(item[titleKey] ?? "this item"))}
+                  className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-red-500 hover:bg-red-50"
                   aria-label="Delete"
                 >
                   <Trash2 className="h-4 w-4" />

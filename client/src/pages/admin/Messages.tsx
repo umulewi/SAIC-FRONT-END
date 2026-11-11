@@ -2,10 +2,12 @@ import { useEffect, useState } from "react";
 import { Mail, MailOpen, Trash2 } from "lucide-react";
 import type { ContactMessage } from "../../types";
 import { deleteMessage, getMessages, markMessageRead } from "../../lib/api";
+import { useConfirm } from "../../context/ConfirmContext";
 
 export function Messages() {
   const [messages, setMessages] = useState<ContactMessage[]>([]);
   const [loading, setLoading] = useState(true);
+  const confirm = useConfirm();
 
   const load = async () => {
     setLoading(true);
@@ -24,8 +26,13 @@ export function Messages() {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (!confirm("Delete this message?")) return;
+  const handleDelete = async (id: number, subject: string) => {
+    const ok = await confirm({
+      title: `Delete "${subject}"?`,
+      description: "This message will be permanently removed. This cannot be undone.",
+      confirmLabel: "Delete",
+    });
+    if (!ok) return;
     await deleteMessage(id);
     setMessages((prev) => prev.filter((m) => m.id !== id));
   };
@@ -70,9 +77,9 @@ export function Messages() {
                   <button
                     onClick={(e) => {
                       e.preventDefault();
-                      handleDelete(msg.id);
+                      handleDelete(msg.id, msg.subject);
                     }}
-                    className="flex h-8 w-8 items-center justify-center rounded-lg text-red-500 hover:bg-red-50"
+                    className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-red-500 hover:bg-red-50"
                     aria-label="Delete"
                   >
                     <Trash2 className="h-4 w-4" />

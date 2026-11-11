@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ImageOff } from "lucide-react";
+import { resolveAssetUrl } from "../../lib/api";
 
 interface MediaProps {
   src?: string | null;
@@ -33,7 +34,7 @@ export function Media({ src, alt, className = "", gradient = "brand" }: MediaPro
 
   return (
     <img
-      src={src}
+      src={resolveAssetUrl(src)}
       alt={alt}
       className={className}
       loading="lazy"

@@ -26,7 +26,7 @@ export function StoryDetail() {
 
   return (
     <article>
-      <section className="relative overflow-hidden bg-gradient-to-b from-brand-50/70 via-white to-white pb-4 pt-20 lg:pt-28">
+      <section className="relative overflow-hidden bg-gradient-to-b from-brand-50/70 via-white to-white pb-4 pt-16 lg:pt-20">
         <div className="pointer-events-none absolute -top-24 right-0 h-72 w-72 rounded-full bg-brand-200/40 blur-3xl" />
         <div className="container-page relative">
           <Reveal>
@@ -48,7 +48,7 @@ export function StoryDetail() {
                 </span>
               )}
             </div>
-            <h1 className="mt-5 max-w-3xl text-balance text-3xl font-bold leading-[1.15] sm:text-4xl lg:text-5xl">
+            <h1 className="mt-5 max-w-3xl text-balance text-2xl font-bold leading-[1.2] sm:text-3xl lg:text-4xl">
               {story.title}
             </h1>
             {story.excerpt && (
@@ -66,7 +66,7 @@ export function StoryDetail() {
         </div>
       </Reveal>
 
-      <section className="bg-white py-16">
+      <section className="bg-white py-12 lg:py-16">
         <div className="container-page">
           <Reveal delay={0.15} className="mx-auto max-w-2xl">
             <div className="flex flex-col gap-5 text-base leading-relaxed text-ink-600">

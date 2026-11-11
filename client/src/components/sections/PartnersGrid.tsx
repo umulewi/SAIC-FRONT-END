@@ -6,7 +6,7 @@ export function PartnersGrid({ partners }: { partners: Partner[] }) {
   if (partners.length === 0) return null;
 
   return (
-    <section className="bg-white py-16 lg:py-20">
+    <section className="bg-white py-10 lg:py-10">
       <div className="container-page">
         <Reveal>
           <p className="text-center text-sm font-bold uppercase tracking-wider text-ink-400">
