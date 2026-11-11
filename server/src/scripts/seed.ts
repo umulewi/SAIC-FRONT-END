@@ -98,32 +98,55 @@ async function main() {
   // --- Services ---
   await seedCollection("services", [
     {
-      title: "Agribusiness Incubation",
-      description:
-        "Business ideation, mentorship, coaching, and comprehensive training to turn agricultural ideas into thriving enterprises.",
-      image: "/images/service-incubation.jpg",
-      href: "/services#incubation",
-    },
-    {
-      title: "Content Creation & Branding",
-      description:
-        "Marketing, social media management, and website development that help agribusinesses build a compelling brand presence.",
-      image: "/images/service-branding.jpg",
-      href: "/services#branding",
-    },
-    {
       title: "Transaction Advisory",
       description:
-        "B2B and B2C facilitation, plus grant and loan support to help agribusinesses access the capital they need to grow.",
+        "Strategic support that connects agribusinesses to markets, finance, partnerships, and sustainable growth opportunities.",
+      content:
+        "Our transaction advisory team helps businesses prepare for growth, access the right opportunities, and build strong commercial relationships.",
+      offerings: [
+        { title: "B2B Facilitation", description: "Connect with buyers, suppliers, processors, and strategic business partners." },
+        { title: "B2C Market Linkages", description: "Reach customers through focused market access and sales opportunities." },
+        { title: "Grant Application Support", description: "Develop stronger grant applications, budgets, and supporting documents." },
+        { title: "Loan Readiness", description: "Prepare business plans and financial information for lending opportunities." },
+        { title: "Investment Readiness", description: "Position your business to communicate value clearly to investors and funders." },
+        { title: "Partnership Development", description: "Build practical partnerships that unlock resources and sustainable growth." },
+      ],
       image: "/images/service-advisory.jpg",
-      href: "/services#advisory",
+      href: "/services#transaction-advisory",
     },
     {
-      title: "Training & Education",
+      title: "Farm Production Management & Carbon Credit Services",
       description:
-        "Certified programs in farm operations, disaster management, and SME management for professionals and entrepreneurs.",
+        "Hands-on production systems and climate-smart support that improve farm performance, resilience, and environmental value.",
+      content:
+        "We help farms improve daily operations while identifying opportunities to reduce emissions, protect natural resources, and benefit from carbon markets.",
+      offerings: [
+        { title: "Farm Planning", description: "Plan crops, livestock, inputs, labour, and production targets for each season." },
+        { title: "Production Management", description: "Improve farm processes, records, quality control, and operational efficiency." },
+        { title: "Climate-Smart Agriculture", description: "Adopt practical methods that strengthen productivity and climate resilience." },
+        { title: "Soil & Water Management", description: "Protect soil health and use water efficiently for long-term productivity." },
+        { title: "Carbon Project Assessment", description: "Assess farm activities and opportunities for measurable carbon benefits." },
+        { title: "Carbon Credit Advisory", description: "Support monitoring, documentation, and preparation for carbon credit programs." },
+      ],
+      image: "/images/service-incubation.jpg",
+      href: "/services#farm-production",
+    },
+    {
+      title: "Training and Incubation Services",
+      description:
+        "Practical learning, coaching, and incubation support that turns agricultural ideas into capable and sustainable enterprises.",
+      content:
+        "From early-stage ideation to business growth, we build the knowledge, confidence, and systems entrepreneurs need to succeed.",
+      offerings: [
+        { title: "Agribusiness Ideation", description: "Turn agricultural opportunities into clear and practical business concepts." },
+        { title: "Business Planning", description: "Create realistic business models, plans, budgets, and growth strategies." },
+        { title: "Entrepreneurship Training", description: "Build essential skills in leadership, management, marketing, and finance." },
+        { title: "Technical Farm Training", description: "Develop practical knowledge for efficient and profitable farm operations." },
+        { title: "Mentorship & Coaching", description: "Receive continued guidance from experienced business and agriculture professionals." },
+        { title: "Enterprise Incubation", description: "Access structured support, tools, and networks as your enterprise grows." },
+      ],
       image: "/images/service-training.jpg",
-      href: "/services#training",
+      href: "/services#training-incubation",
     },
   ]);
 
@@ -248,6 +271,62 @@ async function main() {
     },
   ]);
 
+  // --- Stories ---
+  await seedCollection("stories", [
+    {
+      title: "Farmer Field Day: Climate-Smart Irrigation",
+      category: "Events",
+      date: "March 2026",
+      excerpt: "Farmers across Kayonza gathered to see drip irrigation and water-saving techniques in action.",
+      content:
+        "SAIC hosted a farmer field day focused on climate-smart irrigation, bringing together cooperative members to see drip irrigation and rainwater harvesting techniques firsthand.\nParticipants learned how small changes in water management can significantly boost yields while reducing costs, especially during dry seasons.\nThe event closed with a Q&A session led by our agribusiness advisors, and several cooperatives have since begun piloting the techniques on their own plots.",
+      image: "/illustrations/impact-technology.svg",
+    },
+    {
+      title: "Stewardship Academy Cohort 4 Graduation",
+      category: "Training",
+      date: "January 2026",
+      excerpt: "Forty entrepreneurs completed our flagship agribusiness training program.",
+      content:
+        "The fourth cohort of the Stewardship Agribusiness Academy graduated this month, with forty entrepreneurs completing months of hands-on training in farm business management, financial planning, and market access.\nGraduates presented business plans to a panel of advisors and partner organizations, several of which are now moving forward with SAIC's transaction advisory support.\nWe're proud of this cohort's dedication and excited to see their businesses grow.",
+      image: "/illustrations/service-training.svg",
+    },
+    {
+      title: "New Partnership Signed with COLEAD",
+      category: "Partnerships",
+      date: "November 2025",
+      excerpt: "A new agreement expands technical support for horticulture exporters.",
+      content:
+        "SAIC signed a new partnership agreement with COLEAD to expand technical support for horticulture producers working toward export markets.\nThe partnership will bring additional training on food safety standards, post-harvest handling, and certification support to cooperatives in our network.\nThis is part of our ongoing effort to connect Rwandan producers with larger, more resilient markets.",
+      image: "/illustrations/service-branding.svg",
+    },
+  ]);
+
+  // --- Job Openings ---
+  await seedCollection("jobOpenings", [
+    {
+      title: "Field Agribusiness Advisor",
+      location: "Kigali, Rwanda",
+      type: "Full-time",
+      description:
+        "SAIC is looking for a Field Agribusiness Advisor to work directly with cooperatives and entrepreneurs across our program regions.\nYou'll conduct farm visits, deliver hands-on business advisory, and help clients access financing and markets.\nWe're looking for someone with a background in agribusiness or rural development, strong communication skills, and a genuine passion for community-driven growth.\nThis role involves regular travel to program sites outside Kigali.",
+    },
+    {
+      title: "Training & Curriculum Officer",
+      location: "Kigali, Rwanda",
+      type: "Full-time",
+      description:
+        "We're hiring a Training & Curriculum Officer to help design and deliver courses for the Stewardship Agribusiness Academy.\nResponsibilities include developing training materials, facilitating workshops, and evaluating program outcomes.\nIdeal candidates have experience in adult education or agricultural extension, and are comfortable working with both English and Kinyarwanda speakers.",
+    },
+    {
+      title: "Monitoring & Evaluation Associate",
+      location: "Remote / Kigali",
+      type: "Contract",
+      description:
+        "SAIC seeks a Monitoring & Evaluation Associate to help track program impact across our incubation, advisory, and training initiatives.\nYou'll design data collection tools, analyze outcomes, and prepare reports for partner organizations.\nStrong analytical skills and experience with M&E frameworks in development contexts are required. This is a contract position with flexible remote work options.",
+    },
+  ]);
+
   // --- CTA ---
   await upsertSection("cta", {
     headline: "Ready to Transform Your Agribusiness?",
@@ -262,7 +341,7 @@ async function main() {
     phone: "+250 798 598 710",
     address: "KN 3 Rd, ININD House, Kigali City, Rwanda",
     mapEmbedUrl:
-      "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15949.0!2d30.0605!3d-1.9441!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1",
+      "https://maps.google.com/maps?q=SOLVIT+AFRICA+Training+Center,-1.9646179,30.1014274&z=17&output=embed",
   });
 
   // --- Footer ---
