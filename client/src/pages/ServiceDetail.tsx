@@ -50,7 +50,7 @@ export function ServiceDetail() {
             <div className="aspect-[4/3] w-full sm:aspect-[16/8] lg:aspect-[21/9]">
               <Media src={service.image} alt={service.title} className="h-full w-full object-cover" />
             </div>
-            <div className="absolute inset-0 bg-gradient-to-t from-ink-950/90 via-ink-950/40 to-transparent" />
+            <div className="absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-ink-950/90 to-transparent" />
             <div className="absolute inset-x-0 bottom-0 p-7 lg:p-10">
               <div className="flex flex-wrap items-center gap-3">
                 <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/15 text-white ring-1 ring-white/30 backdrop-blur">
@@ -92,17 +92,27 @@ export function ServiceDetail() {
                 <Reveal key={sub.slug} delay={(i % 6) * 0.06}>
                   <Link
                     to={`/services/${service.slug}/${sub.slug}`}
-                    className="group flex h-full flex-col rounded-2xl bg-ink-50/60 p-6 ring-1 ring-ink-900/5 transition-all duration-300 hover:-translate-y-1 hover:bg-white hover:shadow-card hover:ring-brand-200"
+                    className="group flex h-full flex-col overflow-hidden rounded-2xl bg-ink-50/60 ring-1 ring-ink-900/5 transition-all duration-300 hover:-translate-y-1 hover:bg-white hover:shadow-card hover:ring-brand-200"
                   >
-                    <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-white text-brand-700 shadow-sm ring-1 ring-ink-900/5 transition-colors duration-300 group-hover:bg-brand-600 group-hover:text-white">
-                      <SubIcon className="h-5 w-5" />
-                    </span>
-                    <h3 className="mt-4 font-bold text-ink-900">{sub.title}</h3>
-                    <p className="mt-2 flex-1 text-sm leading-relaxed text-ink-600">{sub.summary}</p>
-                    <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-brand-700">
-                      Learn more
-                      <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                    </span>
+                    <div className="relative aspect-[16/10] overflow-hidden">
+                      <Media
+                        src={sub.image}
+                        alt={sub.title}
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-ink-950/75 to-transparent" />
+                      <span className="absolute bottom-3 left-3 flex h-10 w-10 items-center justify-center rounded-xl bg-white text-brand-700 shadow-sm ring-1 ring-ink-900/5 transition-colors duration-300 group-hover:bg-brand-600 group-hover:text-white">
+                        <SubIcon className="h-4 w-4" />
+                      </span>
+                    </div>
+                    <div className="flex flex-1 flex-col p-6">
+                      <h3 className="font-bold text-ink-900">{sub.title}</h3>
+                      <p className="mt-2 flex-1 text-sm leading-relaxed text-ink-600">{sub.summary}</p>
+                      <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-brand-700">
+                        Learn more
+                        <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                      </span>
+                    </div>
                   </Link>
                 </Reveal>
               );

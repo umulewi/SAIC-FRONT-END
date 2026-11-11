@@ -1,5 +1,6 @@
 export interface SubService {
   slug: string;
+  image: string;
   title: string;
   summary: string;
   intro: string;
@@ -29,11 +30,12 @@ export const publicServices: MainService[] = [
       "Deal-making and financial facilitation that connects agribusinesses to funding, partners, land, and markets.",
     content:
       "Our transaction advisory and brokerage team sits between entrepreneurs and the opportunities they need to grow — lenders, investors, buyers, partners, and land — structuring every deal so it holds up under scrutiny.",
-    image: "/images/service-advisory.jpg",
+    image: "/images/service-branding.jpg",
     href: "/services/transaction-advisory",
     subServices: [
       {
         slug: "feasibility-studies-business-plan-development",
+        image: "/images/services/feasibility-studies-business-plan-development.jpg",
         title: "Feasibility Studies & Business Plan Development",
         summary:
           "Rigorous feasibility analysis and bankable business plans that turn an idea into a fundable venture.",
@@ -53,6 +55,7 @@ export const publicServices: MainService[] = [
       },
       {
         slug: "loan-application-financial-documentation-support",
+        image: "/images/services/loan-application-financial-documentation-support.jpg",
         title: "Loan Application & Financial Documentation Support",
         summary:
           "End-to-end support preparing loan applications and the financial documentation lenders require.",
@@ -72,6 +75,7 @@ export const publicServices: MainService[] = [
       },
       {
         slug: "grant-writing-application",
+        image: "/images/services/grant-writing-application.jpg",
         title: "Grant Writing & Application",
         summary: "Professionally written grant proposals and applications aligned to funder priorities.",
         intro:
@@ -90,6 +94,7 @@ export const publicServices: MainService[] = [
       },
       {
         slug: "investment-facilitation-pitch-preparation",
+        image: "/images/services/investment-facilitation-pitch-preparation.jpg",
         title: "Investment Facilitation & Pitch Preparation",
         summary: "Pitch decks, investor materials, and warm introductions that connect businesses to the right capital.",
         intro:
@@ -108,6 +113,7 @@ export const publicServices: MainService[] = [
       },
       {
         slug: "b2b-b2c-market-linkage",
+        image: "/images/services/b2b-b2c-market-linkage.jpg",
         title: "B2B & B2C Market Linkage",
         summary: "Direct connections to buyers, processors, distributors, and end consumers.",
         intro:
@@ -126,6 +132,7 @@ export const publicServices: MainService[] = [
       },
       {
         slug: "mergers-acquisitions-business-sales",
+        image: "/images/services/mergers-acquisitions-business-sales.jpg",
         title: "Mergers, Acquisitions & Business Sales",
         summary: "Brokerage and advisory support for buying, selling, or merging agribusiness enterprises.",
         intro:
@@ -144,6 +151,7 @@ export const publicServices: MainService[] = [
       },
       {
         slug: "agricultural-land-transactions-lease-facilitation",
+        image: "/images/services/agricultural-land-transactions-lease-facilitation.jpg",
         title: "Agricultural Land Transactions & Lease Facilitation",
         summary: "Facilitation of land purchase, sale, and lease arrangements for agricultural use.",
         intro:
@@ -162,6 +170,7 @@ export const publicServices: MainService[] = [
       },
       {
         slug: "financial-advisory-budgeting-cash-flow",
+        image: "/images/services/financial-advisory-budgeting-cash-flow.jpg",
         title: "Financial Advisory (Budgeting & Cash Flow)",
         summary: "Practical budgeting, cash flow planning, and financial management advisory.",
         intro:
@@ -180,6 +189,7 @@ export const publicServices: MainService[] = [
       },
       {
         slug: "strategic-partnership-mou-development",
+        image: "/images/services/strategic-partnership-mou-development.jpg",
         title: "Strategic Partnership & MoU Development",
         summary: "Brokering and formalizing strategic partnerships through well-structured MoUs and agreements.",
         intro:
@@ -198,6 +208,7 @@ export const publicServices: MainService[] = [
       },
       {
         slug: "due-diligence-coordination",
+        image: "/images/services/due-diligence-coordination.jpg",
         title: "Due Diligence Coordination",
         summary: "Coordinated due diligence for investments, acquisitions, partnerships, and land transactions.",
         intro:
@@ -216,6 +227,7 @@ export const publicServices: MainService[] = [
       },
       {
         slug: "funds-grant-management",
+        image: "/images/services/funds-grant-management.jpg",
         title: "Funds & Grant Management",
         summary: "Post-award management of grants and funds to ensure compliant, effective use.",
         intro:
@@ -234,6 +246,7 @@ export const publicServices: MainService[] = [
       },
       {
         slug: "internal-organizational-assessment-sops-development",
+        image: "/images/services/internal-organizational-assessment-sops-development.jpg",
         title: "Internal Organizational Assessment & SOPs Development",
         summary: "Organizational diagnostics and Standard Operating Procedures that professionalize business operations.",
         intro:
@@ -266,6 +279,7 @@ export const publicServices: MainService[] = [
     subServices: [
       {
         slug: "farm-operations-management",
+        image: "/images/services/farm-operations-management.jpg",
         title: "Farm Operations Management",
         summary: "Day-to-day operational management support that improves efficiency across farm activities.",
         intro:
@@ -284,6 +298,7 @@ export const publicServices: MainService[] = [
       },
       {
         slug: "climate-smart-agriculture-advisory",
+        image: "/images/services/climate-smart-agriculture-advisory.jpg",
         title: "Climate-Smart Agriculture Advisory",
         summary: "Technical advisory on climate-smart practices tailored to specific farms and crops.",
         intro:
@@ -302,6 +317,7 @@ export const publicServices: MainService[] = [
       },
       {
         slug: "carbon-footprint-assessment-auditing",
+        image: "/images/services/carbon-footprint-assessment-auditing.jpg",
         title: "Carbon Footprint Assessment & Auditing",
         summary: "Independent assessment and auditing of a farm or enterprise's carbon footprint.",
         intro:
@@ -320,6 +336,7 @@ export const publicServices: MainService[] = [
       },
       {
         slug: "carbon-credit-project-development",
+        image: "/images/services/carbon-credit-project-development.jpg",
         title: "Carbon Credit Project Development (VCS/Gold Standard)",
         summary: "End-to-end development of carbon credit projects under recognized standards like VCS and Gold Standard.",
         intro:
@@ -338,6 +355,7 @@ export const publicServices: MainService[] = [
       },
       {
         slug: "mrv-measurement-reporting-verification",
+        image: "/images/services/mrv-measurement-reporting-verification.jpg",
         title: "MRV (Measurement, Reporting & Verification) Services",
         summary: "Ongoing measurement, reporting, and verification support that keeps carbon projects compliant.",
         intro:
@@ -356,6 +374,7 @@ export const publicServices: MainService[] = [
       },
       {
         slug: "agroforestry-reforestation-programmes",
+        image: "/images/services/agroforestry-reforestation-programmes.jpg",
         title: "Agroforestry & Reforestation Programmes",
         summary: "Design and implementation of agroforestry and reforestation initiatives.",
         intro:
@@ -374,6 +393,7 @@ export const publicServices: MainService[] = [
       },
       {
         slug: "soil-carbon-sequestration-advisory",
+        image: "/images/services/soil-carbon-sequestration-advisory.jpg",
         title: "Soil Carbon Sequestration Advisory",
         summary: "Advisory on practices that build soil organic carbon and long-term soil health.",
         intro:
@@ -392,6 +412,7 @@ export const publicServices: MainService[] = [
       },
       {
         slug: "irrigation-water-management-design",
+        image: "/images/services/irrigation-water-management-design.jpg",
         title: "Irrigation & Water Management Design",
         summary: "Design of efficient irrigation and water management systems suited to farm conditions.",
         intro:
@@ -410,6 +431,7 @@ export const publicServices: MainService[] = [
       },
       {
         slug: "crop-livestock-technical-support",
+        image: "/images/services/crop-livestock-technical-support.jpg",
         title: "Crop & Livestock Technical Support",
         summary: "Direct technical support addressing crop and livestock production challenges.",
         intro:
@@ -428,6 +450,7 @@ export const publicServices: MainService[] = [
       },
       {
         slug: "greenhouse-construction",
+        image: "/images/services/greenhouse-construction.jpg",
         title: "Greenhouse Construction",
         summary: "Design and construction of greenhouses for controlled, higher-yield production.",
         intro:
@@ -446,6 +469,7 @@ export const publicServices: MainService[] = [
       },
       {
         slug: "climate-finance-green-fund-advisory",
+        image: "/images/services/climate-finance-green-fund-advisory.jpg",
         title: "Climate Finance & Green Fund Advisory",
         summary: "Advisory that connects climate-smart agribusinesses to climate finance and green funding instruments.",
         intro:
@@ -473,11 +497,12 @@ export const publicServices: MainService[] = [
       "Practical learning, coaching, and incubation support that turns agricultural ideas into capable and sustainable enterprises.",
     content:
       "From early-stage ideation to business growth, we build the knowledge, confidence, and systems entrepreneurs, cooperatives, and partner organizations need to succeed.",
-    image: "/images/service-training.jpg",
+    image: "/images/service-advisory.jpg",
     href: "/services/training-incubation",
     subServices: [
       {
         slug: "certified-agribusiness-incubation",
+        image: "/images/services/certified-agribusiness-incubation.jpg",
         title: "Certified Agribusiness Incubation (3-6 Months)",
         summary: "A structured, certified incubation programme that takes agribusiness ideas from concept to launch.",
         intro:
@@ -496,6 +521,7 @@ export const publicServices: MainService[] = [
       },
       {
         slug: "cooperative-enterprise-capacity-building",
+        image: "/images/services/cooperative-enterprise-capacity-building.jpg",
         title: "Cooperative & Enterprise Capacity Building",
         summary: "Capacity building that strengthens governance, operations, and performance of cooperatives and enterprises.",
         intro:
@@ -514,6 +540,7 @@ export const publicServices: MainService[] = [
       },
       {
         slug: "entrepreneurship-business-plan-training",
+        image: "/images/services/entrepreneurship-business-plan-training.jpg",
         title: "Entrepreneurship & Business Plan Training",
         summary: "Practical training in entrepreneurship fundamentals and business plan development.",
         intro:
@@ -532,6 +559,7 @@ export const publicServices: MainService[] = [
       },
       {
         slug: "climate-smart-agriculture-training",
+        image: "/images/services/climate-smart-agriculture-training.jpg",
         title: "Climate-Smart Agriculture Training",
         summary: "Training in climate-resilient farming practices that protect yields under changing conditions.",
         intro:
@@ -550,6 +578,7 @@ export const publicServices: MainService[] = [
       },
       {
         slug: "extension-on-farm-demonstrations",
+        image: "/images/services/extension-on-farm-demonstrations.jpg",
         title: "Extension & On-Farm Demonstrations",
         summary: "Hands-on, on-farm demonstration of improved agricultural techniques and technologies.",
         intro:
@@ -568,6 +597,7 @@ export const publicServices: MainService[] = [
       },
       {
         slug: "online-hybrid-learning-programmes",
+        image: "/images/services/online-hybrid-learning-programmes.jpg",
         title: "Online & Hybrid Learning Programmes",
         summary: "Flexible online and blended learning programmes that extend training beyond the classroom.",
         intro:
@@ -586,6 +616,7 @@ export const publicServices: MainService[] = [
       },
       {
         slug: "access-to-finance-investment-readiness-training",
+        image: "/images/services/access-to-finance-investment-readiness-training.jpg",
         title: "Access to Finance & Investment Readiness Training",
         summary: "Training that prepares entrepreneurs to confidently approach lenders and investors.",
         intro:
@@ -604,6 +635,7 @@ export const publicServices: MainService[] = [
       },
       {
         slug: "curriculum-development-consultancy",
+        image: "/images/services/curriculum-development-consultancy.jpg",
         title: "Curriculum Development Consultancy",
         summary: "Consultancy support designing training curricula for partner organizations and institutions.",
         intro:
@@ -622,6 +654,7 @@ export const publicServices: MainService[] = [
       },
       {
         slug: "sub-contracting-training-capacity-building",
+        image: "/images/services/sub-contracting-training-capacity-building.jpg",
         title: "Sub-Contracting in Training & Capacity Building Project Implementation",
         summary: "Delivery partnership for organizations and projects that need training implemented on the ground.",
         intro:

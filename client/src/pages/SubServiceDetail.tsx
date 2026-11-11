@@ -48,9 +48,9 @@ export function SubServiceDetail() {
         <div className="container-page">
           <div className="relative overflow-hidden rounded-[2rem] shadow-card ring-1 ring-ink-900/5">
             <div className="aspect-[4/3] w-full sm:aspect-[16/8] lg:aspect-[21/9]">
-              <Media src={service.image} alt={subService.title} className="h-full w-full object-cover" />
+              <Media src={subService.image} alt={subService.title} className="h-full w-full object-cover" />
             </div>
-            <div className="absolute inset-0 bg-gradient-to-t from-ink-950/90 via-ink-950/45 to-transparent" />
+            <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-ink-950/90 to-transparent" />
             <div className="absolute inset-x-0 bottom-0 p-7 lg:p-10">
               <div className="flex flex-wrap items-center gap-3">
                 <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/15 text-white ring-1 ring-white/30 backdrop-blur">
