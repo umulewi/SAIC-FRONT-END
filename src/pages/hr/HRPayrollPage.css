@@ -1,0 +1,493 @@
+/* HRPayrollPage */
+
+/* ── Salary Config Modal ─────────────────────────────────────────────────── */
+.hrp-cfg-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem 1.25rem;
+  margin-bottom: 1.25rem;
+}
+@media (max-width: 480px) { .hrp-cfg-grid { grid-template-columns: 1fr; } }
+
+.hrp-cfg-field { display: flex; flex-direction: column; gap: 0.35rem; }
+
+.hrp-cfg-label {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #374151;
+  letter-spacing: 0.01em;
+}
+.hrp-cfg-req { color: #dc2626; }
+
+.hrp-input-group {
+  display: flex;
+  align-items: center;
+  border: 1.5px solid #d1d5db;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.hrp-input-group:focus-within {
+  border-color: #2D5016;
+  box-shadow: 0 0 0 3px rgba(45,80,22,0.1);
+}
+
+.hrp-input-prefix {
+  padding: 0 0.65rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #fff;
+  background: #2D5016;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.hrp-cfg-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.9rem;
+  color: #111;
+  background: #fff;
+  width: 100%;
+  min-width: 0;
+}
+.hrp-cfg-input::placeholder { color: #d1d5db; }
+/* suppress browser number spinners */
+.hrp-cfg-input::-webkit-inner-spin-button,
+.hrp-cfg-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.hrp-cfg-input[type=number] { -moz-appearance: textfield; appearance: textfield; }
+
+/* ── Preview strip ───────────────────────────────────────────────────────── */
+.hrp-cfg-preview-strip {
+  display: flex;
+  align-items: center;
+  background: #f8fdf8;
+  border: 1px solid #c8dfc8;
+  border-radius: 10px;
+  padding: 0.85rem 1.1rem;
+  gap: 0;
+}
+.hrp-cfg-prev-item {
+  flex: 1;
+  text-align: center;
+}
+.hrp-cfg-prev-divider {
+  width: 1px;
+  height: 2.5rem;
+  background: #c8dfc8;
+  flex-shrink: 0;
+}
+.hrp-cfg-prev-lbl {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #6a8c6a;
+  margin-bottom: 0.2rem;
+}
+.hrp-cfg-prev-val {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1e3a1e;
+  line-height: 1.1;
+}
+.hrp-cfg-prev-val.hrp-cfg-prev-highlight { color: #2D5016; }
+.hrp-cfg-prev-unit {
+  font-size: 0.6rem;
+  color: #9ca3af;
+  margin-top: 1px;
+  font-weight: 500;
+}
+
+/* ── Payment modal employee card ─────────────────────────────────────────── */
+.hrp-pay-card {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  background: #f8fdf8;
+  border: 1px solid #c8dfc8;
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  margin-bottom: 1.1rem;
+}
+.hrp-pay-card-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: #2D5016;
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  letter-spacing: 0.03em;
+}
+.hrp-pay-card-info { flex: 1; min-width: 0; }
+.hrp-pay-card-name {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #1e3a1e;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hrp-pay-card-role {
+  font-size: 0.71rem;
+  color: #6a8c6a;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hrp-pay-card-amount { text-align: right; flex-shrink: 0; }
+.hrp-pay-card-lbl {
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #6a8c6a;
+}
+.hrp-pay-card-val {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #2D5016;
+  line-height: 1.1;
+}
+.hrp-pay-card-unit {
+  font-size: 0.62rem;
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+/* ── Document header (inside table card, above the table) ─────────────────── */
+.hrp-doc-header {
+  border-bottom: 1px solid #d4e4d4;
+  padding: 0.85rem 1.25rem 0.7rem;
+  background: #f8fdf8;
+}
+.hrp-doc-title {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #1e3a1e;
+  text-align: center;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  margin-bottom: 0.25rem;
+}
+.hrp-doc-sub {
+  font-size: 0.7rem;
+  color: #6a8c6a;
+  text-align: center;
+  margin-bottom: 0.2rem;
+}
+.hrp-doc-formula {
+  font-size: 0.67rem;
+  color: #2D5016;
+  font-style: italic;
+  text-align: center;
+  font-weight: 500;
+}
+
+/* ── Unconfigured positions bar ──────────────────────────────────────────── */
+.hrp-uncfg-bar {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  padding: 0.6rem 0.9rem;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.hrp-uncfg-label {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #92400e;
+  white-space: nowrap;
+}
+
+/* ── (kept for setup panel chip/badge reuse) ─────────────────────────────── */
+.hrp-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+@media (max-width: 900px) { .hrp-stats { grid-template-columns: repeat(2,1fr); } }
+@media (max-width: 520px)  { .hrp-stats { grid-template-columns: 1fr; } }
+
+.hrp-stat-card {
+  background: #fff;
+  border: 1px solid #dde8d8;
+  border-radius: 10px;
+  padding: 0.9rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.hrp-stat-icon,
+.hrp-stat-icon.s2,
+.hrp-stat-icon.s3,
+.hrp-stat-icon.s4 { color: #9fb89a; flex-shrink: 0; }
+
+.hrp-stat-val { font-size: 1.1rem; font-weight: 700; color: #2D5016; line-height: 1.2; }
+.hrp-stat-lbl { font-size: 0.69rem; color: #8fae87; font-weight: 500; margin-top: 1px; }
+
+/* Setup panel */
+.hrp-setup-panel {
+  background: #fff;
+  border: 1px solid #dde8d8;
+  border-radius: 10px;
+  padding: 1rem 1.15rem;
+  margin-bottom: 1rem;
+}
+.hrp-setup-header { display: flex; align-items: center; gap: 0.45rem; margin-bottom: 0.7rem; }
+.hrp-setup-icon      { color: #9fb89a; display: flex; align-items: center; }
+.hrp-setup-header h3 { margin: 0; font-size: 0.84rem; font-weight: 600; color: #3f5c3a; }
+.hrp-setup-badge {
+  margin-left: auto;
+  background: #dde8d8; color: #5f7d5c;
+  font-size: 0.65rem; font-weight: 700;
+  padding: 0.08rem 0.45rem; border-radius: 100px;
+}
+
+.hrp-unconfigured-label { font-size: 0.73rem; color: #7a9a76; margin: 0 0 0.4rem; }
+.hrp-chips { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-bottom: 0.7rem; }
+.hrp-chip {
+  display: inline-flex; align-items: center; gap: 0.2rem;
+  background: #fff; border: 1px solid #dde8d8;
+  border-radius: 6px; padding: 0.2rem 0.6rem;
+  font-size: 0.73rem; font-weight: 500; color: #5f7d5c;
+  cursor: pointer; transition: border-color 0.13s;
+}
+.hrp-chip:hover { border-color: #9fb89a; color: #3f5c3a; }
+.hrp-chip-plus  { color: #9fb89a; font-size: 0.85rem; line-height: 1; }
+
+.hrp-cfg-table { margin-top: 0.2rem; }
+.hrp-cfg-table table { font-size: 0.79rem; }
+
+/* Controls */
+.hrp-controls {
+  display: flex; align-items: center;
+  justify-content: space-between; flex-wrap: wrap;
+  gap: 0.5rem; margin-bottom: 0.75rem;
+}
+.hrp-period-pill {
+  display: flex; background: #fff;
+  border: 1px solid #dde8d8; border-radius: 8px; overflow: hidden;
+}
+.hrp-period-pill select {
+  border: none; background: transparent;
+  padding: 0.4rem 0.7rem; font-size: 0.8rem;
+  color: #3f5c3a; cursor: pointer; outline: none; font-weight: 600;
+}
+.hrp-period-pill select:not(:last-child) { border-right: 1px solid #dde8d8; }
+
+.hrp-dept-select {
+  background: #fff; border: 1px solid #dde8d8;
+  border-radius: 8px; padding: 0.4rem 0.7rem;
+  font-size: 0.8rem; color: #3f5c3a; cursor: pointer; outline: none;
+}
+
+.hrp-legend { display: flex; align-items: center; gap: 0.7rem; flex-wrap: wrap; }
+.hrp-legend-item { display: flex; align-items: center; gap: 0.25rem; font-size: 0.69rem; color: #9fb89a; }
+.hrp-legend-dot  { width: 6px; height: 6px; border-radius: 50%; background: #b7cbb2; }
+
+/* Table */
+.hrp-table-card {
+  background: #fff;
+  border: 1px solid #dde8d8;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.hrp-table-scroll { overflow-x: auto; }
+.hrp-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+
+/* Column group row */
+.hrp-table thead tr.hrp-col-groups th {
+  background: #fff;
+  font-size: 0.6rem; font-weight: 700;
+  letter-spacing: 0.07em; text-transform: uppercase;
+  text-align: center; padding: 0.55rem 0.6rem 0.3rem;
+  color: #2D5016; border-bottom: none;
+}
+.hrp-cg-pos    { text-align: left !important; padding-left: 1rem !important; color: #2D5016 !important; }
+.hrp-cg-allow,
+.hrp-cg-net,
+.hrp-cg-deduct,
+.hrp-cg-cost,
+.hrp-cg-status { border-left: 1px solid #eef3ea; }
+
+/* Sub-header row */
+.hrp-table thead tr.hrp-col-heads th {
+  background: #fff;
+  color: #2D5016;
+  font-size: 0.63rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.04em;
+  padding: 0.3rem 0.75rem 0.55rem;
+  white-space: nowrap;
+  border-bottom: 1px solid #dde8d8;
+  text-align: right;
+}
+.hrp-th-left   { text-align: left !important; }
+.hrp-th-center { text-align: center !important; }
+
+/* Body */
+.hrp-table tbody td {
+  padding: 0.58rem 0.75rem;
+  border-bottom: 1px solid #f2f6ef;
+  vertical-align: middle;
+  text-align: right;
+  color: #3f5c3a;
+  background: #fff;
+}
+.hrp-td-left   { text-align: left !important; }
+.hrp-td-center { text-align: center !important; }
+.hrp-table tbody tr:last-child td { border-bottom: none; }
+.hrp-table tbody tr:hover td { background: #eef3ea; }
+
+/* Dept separator */
+.hrp-dept-row td {
+  background: #fff !important;
+  color: #2D5016 !important;
+  font-size: 0.62rem; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 0.3rem 1rem !important;
+  text-align: left !important;
+  border-top: 1px solid #f0f0f0 !important;
+  border-bottom: 1px solid #f0f0f0 !important;
+}
+
+/* Vacant rows */
+.hrp-row-vacant td { color: #b7cbb2 !important; background: #fff !important; }
+
+/* Position cell */
+.hrp-position-cell { min-width: 185px; }
+.hrp-pos-row { display: flex; align-items: center; gap: 0.5rem; }
+
+.hrp-avatar {
+  width: 28px; height: 28px; border-radius: 7px;
+  background: #dde8d8; color: #7a9a76;
+  font-size: 0.59rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.hrp-avatar.vacant { background: #eef3ea; color: #b7cbb2; }
+
+.hrp-pos-title  { font-weight: 600; font-size: 0.78rem; color: #2D5016; line-height: 1.2; }
+.hrp-pos-name   { font-size: 0.66rem; color: #7a9a76; margin-top: 1px; }
+.hrp-pos-vacant { font-size: 0.66rem; color: #b7cbb2; margin-top: 1px; }
+
+/* Active badge */
+.hrp-active-badge {
+  display: inline-flex; align-items: center; gap: 0.25rem;
+  font-size: 0.65rem; font-weight: 500; color: #7a9a76;
+}
+.hrp-active-badge.vacant { color: #b7cbb2; }
+.hrp-active-dot { width: 5px; height: 5px; border-radius: 50%; background: #9fb89a; flex-shrink: 0; }
+.hrp-active-badge.vacant .hrp-active-dot { background: #dde8d8; }
+
+/* Payment badge */
+.hrp-pay-badge {
+  display: inline-flex; align-items: center; gap: 0.2rem;
+  font-size: 0.67rem; font-weight: 600; white-space: nowrap; color: #5f7d5c;
+}
+.hrp-pay-badge.unpaid { color: #9fb89a; }
+.hrp-pay-date { font-size: 0.6rem; opacity: 0.6; font-weight: 400; }
+
+/* Cells */
+.hrp-net-cell  { font-weight: 700; color: #2D5016 !important; }
+.hrp-ded-cell  { color: #5f7d5c !important; }
+.hrp-cost-cell { color: #2D5016 !important; font-weight: 700; }
+.hrp-paye-cell { color: #7a9a76 !important; }
+.hrp-num       { text-align: right !important; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.hrp-dept-col  { color: #9fb89a; font-size: 0.73rem; text-align: left !important; }
+
+/* Action buttons */
+.hrp-actions { display: flex; align-items: center; gap: 0.2rem; justify-content: center; }
+.hrp-act-btn {
+  width: 24px; height: 24px; border-radius: 5px;
+  border: 1px solid #dde8d8; background: #fff;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.13s; color: #b7cbb2;
+}
+.hrp-act-btn:hover { border-color: #9fb89a; color: #5f7d5c; }
+
+/* Totals row */
+.hrp-total-row td {
+  background: #fff !important;
+  color: #2D5016 !important;
+  font-weight: 700 !important;
+  font-size: 0.7rem;
+  border-top: 1px solid #dde8d8 !important;
+  border-bottom: none !important;
+  padding: 0.65rem 0.75rem !important;
+}
+
+/* Empty state */
+.hrp-empty { text-align: center; padding: 2.5rem 1.5rem; color: #b7cbb2; }
+.hrp-empty-icon {
+  width: 42px; height: 42px; border-radius: 10px;
+  border: 1px solid #dde8d8;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 0.65rem; color: #dbe6d6;
+}
+.hrp-empty h4 { margin: 0 0 0.2rem; color: #9fb89a; font-size: 0.86rem; font-weight: 600; }
+.hrp-empty p  { margin: 0; font-size: 0.77rem; color: #b7cbb2; }
+
+/* Footnote */
+.hrp-footnote {
+  font-size: 0.67rem; color: #b7cbb2;
+  margin-top: 0.55rem;
+  display: flex; flex-wrap: wrap; gap: 0.15rem 0.55rem; align-items: center;
+}
+.hrp-footnote-dot { width: 2px; height: 2px; border-radius: 50%; background: #dde8d8; }
+
+/* Config modal fields */
+.hrp-cfg-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+@media (max-width: 480px) { .hrp-cfg-fields { grid-template-columns: 1fr; } }
+
+.hrp-preview-card {
+  grid-column: 1 / -1;
+  background: #fff;
+  border: 1px solid #dde8d8;
+  border-radius: 6px;
+  padding: 0.65rem 0.9rem;
+  display: flex; gap: 1.5rem; flex-wrap: wrap;
+}
+.hrp-prev-lbl { font-size: 0.62rem; color: #9fb89a; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+.hrp-prev-val { font-size: 0.96rem; font-weight: 700; color: #2D5016; line-height: 1.2; }
+
+/* Payment employee card */
+.hrp-pay-employee-card {
+  background: #fff;
+  border: 1px solid #dde8d8;
+  border-radius: 6px;
+  padding: 0.7rem 0.9rem;
+  display: flex; align-items: center; gap: 0.7rem;
+  margin-bottom: 0.2rem;
+}
+.hrp-pay-avatar {
+  width: 34px; height: 34px; border-radius: 8px;
+  background: #dde8d8; color: #7a9a76;
+  font-size: 0.75rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.hrp-pay-emp-name   { font-weight: 600; color: #2D5016; font-size: 0.86rem; }
+.hrp-pay-emp-role   { font-size: 0.7rem; color: #8fae87; margin-top: 1px; }
+.hrp-pay-emp-net    { margin-left: auto; text-align: right; }
+.hrp-pay-emp-netlbl { font-size: 0.6rem; color: #9fb89a; text-transform: uppercase; letter-spacing: 0.04em; }
+.hrp-pay-emp-netval { font-size: 0.96rem; font-weight: 700; color: #2D5016; }

@@ -1,0 +1,15 @@
+/* ══════════════════════════════════════════════
+   SAIC MIS — Admin Overview Page
+══════════════════════════════════════════════ */
+
+.ao-root { display: flex; flex-direction: column; gap: 1.25rem; }
+
+/* ─── Section divider ────────────────────── */
+.ao-section-divider {
+  display: flex; align-items: center; gap: 0.5rem;
+  font-size: 0.82rem; font-weight: 800; color: #2D5016;
+  text-transform: uppercase; letter-spacing: 0.07em;
+  padding: 0.5rem 0 0.25rem;
+  border-top: 2px solid #e4ede4;
+  margin-top: 0.25rem;
+}

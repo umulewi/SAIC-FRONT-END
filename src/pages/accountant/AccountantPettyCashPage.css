@@ -1,0 +1,281 @@
+/* ══════════════════════════════════════════════
+   SAIC MIS — Accountant Petty Cash Page
+══════════════════════════════════════════════ */
+
+.pcp-root { display: flex; flex-direction: column; gap: 1.25rem; }
+
+/* ─── Summary ────────────────────────────── */
+.pcp-summary-row { display: flex; gap: 0.85rem; flex-wrap: wrap; }
+.pcp-summary-card {
+  display: flex; align-items: center; gap: 0.85rem;
+  background: #f0f7f0; border: 1px solid #c8dfc8; border-radius: 12px;
+  padding: 1rem 1.25rem; flex: 1 1 220px;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+}
+.pcp-summary-filtered { background: #e3f2fd; border-color: #bbdefb; }
+.pcp-sum-val { font-size: 1.45rem; font-weight: 800; color: #1e3a1e; margin: 0 0 0.15rem; }
+.pcp-sum-lbl { font-size: 0.72rem; font-weight: 600; color: #6a8c6a; margin: 0; text-transform: uppercase; letter-spacing: 0.04em; }
+
+/* ─── Drawer (add/edit form) ─────────────── */
+.pcp-drawer {
+  background: #fff; border: 1px solid #d4e4d4; border-left: 4px solid #2D5016;
+  border-radius: 12px; padding: 1.25rem 1.5rem 1.5rem;
+  box-shadow: 0 4px 16px rgba(45,80,22,0.08);
+}
+.pcp-drawer-head {
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;
+}
+.pcp-drawer-title {
+  font-size: 1rem; font-weight: 700; color: #1e3a1e; margin: 0;
+}
+
+/* ─── Table cells ────────────────────────── */
+.pcp-item-cell { color: #1e3a1e; font-size: 0.85rem; font-weight: 500; }
+.pcp-cash-cell { font-size: 0.85rem; font-weight: 700; color: #2D5016; white-space: nowrap; }
+
+/* ─── Grouped receipt rows ───────────────── */
+.pcp-group-header-row td {
+  background: #edf6ed;
+  border-top: 2px solid #b5d5b5;
+  border-bottom: 1px solid #b5d5b5 !important;
+  padding: 0.6rem 0.85rem !important;
+}
+.pcp-group-header {
+  display: flex; align-items: center; gap: 0.85rem; flex-wrap: wrap;
+}
+.pcp-group-meta {
+  font-size: 0.78rem; font-weight: 700; color: #2D5016;
+  white-space: nowrap; margin-left: auto;
+  background: #fff; border: 1px solid #c8dfc8;
+  border-radius: 20px; padding: 0.2rem 0.65rem;
+}
+.pcp-group-item-row > td { background: #fafff8 !important; }
+.pcp-group-item-row > td:first-child { border-left: 3px solid #9fca7f; }
+.pcp-group-receipt-cell {
+  vertical-align: middle !important;
+  text-align: center;
+  border-left: 1px solid #ddeedd !important;
+  background: #f4faf4 !important;
+}
+
+/* ─── Centered receipt row ───────────────── */
+.pcp-receipt-center-row td {
+  background: #f4faf4 !important;
+  border-bottom: 1px solid #ddeedd !important;
+  padding: 0.7rem 1rem !important;
+  text-align: center;
+}
+.pcp-receipt-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.pcp-receipt-card {
+  display: inline-flex; align-items: center; gap: 0.55rem;
+  padding: 0.5rem 1.25rem;
+  background: #fff; border: 1.5px solid #b5d5b5;
+  border-radius: 10px; text-decoration: none;
+  color: #2D5016; font-size: 0.85rem; font-weight: 600;
+  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+  box-shadow: 0 1px 4px rgba(45,80,22,0.07);
+  max-width: 360px;
+}
+.pcp-receipt-card:hover {
+  background: #e6f4e6; border-color: #7dba5a;
+  box-shadow: 0 3px 10px rgba(45,80,22,0.13);
+}
+.pcp-receipt-card-icon { flex-shrink: 0; color: #3a8022; }
+.pcp-receipt-card-name {
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  max-width: 240px;
+}
+.pcp-receipt-card-ext { flex-shrink: 0; opacity: 0.6; }
+
+/* ─── Total row ──────────────────────────── */
+.pcp-total-row td { background: #f0f7f0 !important; border-top: 2px solid #c8dfc8; }
+.pcp-total-val   { font-size: 0.95rem !important; color: #1e3a1e !important; }
+
+/* ─── Action buttons ─────────────────────── */
+.pcp-btn-edit,
+.pcp-btn-delete {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border: none; border-radius: 6px;
+  cursor: pointer; transition: background 0.15s;
+}
+.pcp-btn-edit   { background: #e3f2fd; color: #1565c0; }
+.pcp-btn-edit:hover   { background: #bbdefb; }
+.pcp-btn-delete { background: #fff5f5; color: #c53030; }
+.pcp-btn-delete:hover { background: #fed7d7; }
+
+/* ─── Filter wrap (shared with admin page) ── */
+.apc-filters-wrap {
+  display: flex; flex-direction: column; gap: 0.55rem;
+  background: #fff; border: 1px solid #e4ede4; border-radius: 12px;
+  padding: 0.85rem 1rem;
+}
+.apc-preset-row { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.apc-preset-btn {
+  padding: 0.3rem 0.8rem; font-size: 0.78rem; font-weight: 600;
+  border-radius: 20px; border: 1px solid #c8dfc8; background: #f8fdf8;
+  color: #3a6320; cursor: pointer; transition: background 0.15s, border-color 0.15s;
+}
+.apc-preset-btn:hover  { background: #eaf4ea; border-color: #9fca7f; }
+.apc-preset-btn.active { background: #2D5016; border-color: #2D5016; color: #fff; }
+.apc-filters      { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+.apc-date-group   { display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap; }
+.apc-date-label   { font-size: 0.78rem; font-weight: 600; color: #5a7a5a; white-space: nowrap; }
+.apc-period-label { font-size: 0.78rem; color: #5a7a5a; margin: 0; }
+.apc-period-label strong { color: #2D5016; }
+
+/* ─── Export button ──────────────────────── */
+.apc-export-btn {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  padding: 0.42rem 0.9rem; font-size: 0.8rem; font-weight: 600;
+  border-radius: 8px; border: 1px solid #2D5016;
+  background: #2D5016; color: #fff; cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+}
+.apc-export-btn:hover    { background: #3a6320; }
+.apc-export-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+/* ─── Spin ───────────────────────────────── */
+@keyframes spin { to { transform: rotate(360deg); } }
+.spin { animation: spin 0.75s linear infinite; }
+
+/* ─── Receipt file input & link ─────────── */
+.pcp-file-input {
+  display: block; width: 100%; box-sizing: border-box;
+  padding: 0.55rem 0.85rem;
+  border: 1.5px dashed #b5d5b5; border-radius: 10px;
+  font-size: 0.85rem; color: #4a6a4a; background: #fafff8;
+  cursor: pointer;
+}
+.pcp-file-input:focus { outline: none; border-color: #2D5016; }
+.pcp-file-name {
+  font-size: 0.75rem; color: #2D5016; margin: 0.3rem 0 0;
+  display: flex; align-items: center; gap: 0.3rem;
+}
+.pcp-receipt-link {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  font-size: 0.78rem; color: #2D5016; text-decoration: none;
+  padding: 0.25rem 0.6rem; border-radius: 6px;
+  border: 1px solid #c8dfc8; background: #f0f7f0;
+  transition: background 0.15s, border-color 0.15s;
+  max-width: 160px;
+}
+.pcp-receipt-link:hover { background: #e0f0e0; border-color: #9fca7f; }
+.pcp-receipt-name {
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  max-width: 100px; display: inline-block;
+}
+
+/* ─── Batch create form ──────────────────── */
+.pcp-drawer--batch { padding-bottom: 1rem; }
+
+.pcp-batch-table-wrap {
+  overflow-x: auto; border: 1px solid #d4e4d4; border-radius: 10px;
+  margin-bottom: 0.85rem;
+}
+.pcp-batch-table {
+  width: 100%; border-collapse: collapse; font-size: 0.82rem;
+  background: #fff;
+}
+.pcp-batch-table thead th {
+  background: #f0f7f0; color: #3a5c1a; font-weight: 700;
+  padding: 0.55rem 0.6rem; text-align: left; border-bottom: 1px solid #d4e4d4;
+  white-space: nowrap;
+}
+.pcp-batch-table th:first-child { width: 32px; }
+.pcp-batch-table th:last-child  { width: 36px; }
+.pcp-batch-table tfoot td {
+  background: #f0f7f0; border-top: 2px solid #c8dfc8;
+}
+
+.pcp-batch-row td {
+  padding: 0.4rem 0.5rem; border-bottom: 1px solid #eff5ef; vertical-align: middle;
+}
+.pcp-batch-row:last-child td { border-bottom: none; }
+
+.pcp-batch-num {
+  text-align: center; color: #9aab9a; font-size: 0.75rem; font-weight: 700;
+}
+.pcp-batch-input {
+  width: 100%; box-sizing: border-box;
+  border: 1px solid #c8dfc8; border-radius: 7px;
+  padding: 0.4rem 0.6rem; font-size: 0.82rem; color: #1e3a1e;
+  background: #fafff8; outline: none; min-width: 100px;
+}
+.pcp-batch-input:focus { border-color: #2D5016; background: #fff; }
+.pcp-batch-cash { min-width: 90px; max-width: 130px; }
+
+.pcp-batch-file-cell { display: flex; align-items: center; }
+.pcp-batch-file-btn {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  padding: 0.38rem 0.65rem; font-size: 0.78rem; font-weight: 600;
+  border: 1.5px dashed #b5d5b5; border-radius: 7px;
+  background: #fafff8; color: #3a6320; cursor: pointer;
+  white-space: nowrap; transition: background 0.15s, border-color 0.15s;
+  max-width: 180px; overflow: hidden;
+}
+.pcp-batch-file-btn:hover { background: #eaf4ea; border-color: #9fca7f; }
+.pcp-batch-file-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.pcp-batch-remove {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 26px; height: 26px; border: none; border-radius: 6px;
+  background: #fff0f0; color: #c53030; cursor: pointer;
+  transition: background 0.15s;
+}
+.pcp-batch-remove:hover { background: #fed7d7; }
+.pcp-batch-remove:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Shared receipt row */
+.pcp-batch-receipt-row {
+  display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;
+  background: #f6fbf6; border: 1.5px dashed #b5d5b5; border-radius: 10px;
+  padding: 0.65rem 0.9rem;
+}
+.pcp-batch-receipt-label {
+  display: flex; align-items: center; gap: 0.35rem;
+  font-size: 0.8rem; font-weight: 600; color: #3a5c1a; white-space: nowrap;
+}
+.pcp-batch-file-btn--set {
+  background: #e6f4e6 !important; border-color: #7dba5a !important; color: #2a5010 !important;
+}
+
+.pcp-batch-footer {
+  display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;
+  padding-top: 0.5rem;
+}
+
+/* ─── Responsive ─────────────────────────── */
+@media (max-width: 640px) {
+  .pcp-summary-row  { flex-direction: column; }
+  .pcp-summary-card { flex: 1 1 100%; }
+  .apc-filters      { flex-direction: column; align-items: stretch; }
+  .apc-date-group   { flex-wrap: wrap; }
+  .pcp-batch-receipt-row { flex-direction: column; align-items: flex-start; }
+}
+@media (max-width: 480px) {
+  .pcp-drawer       { padding: 0.85rem 0.9rem 1rem; }
+  .pcp-batch-table  { font-size: 0.78rem; }
+  .pcp-batch-input  { padding: 0.35rem 0.45rem; font-size: 0.78rem; min-width: 80px; }
+  .pcp-batch-cash   { min-width: 72px; max-width: 100px; }
+  .pcp-batch-footer { flex-direction: column; align-items: stretch; }
+  .pcp-batch-footer .btn-primary,
+  .pcp-batch-footer .btn-secondary,
+  .pcp-batch-footer .apc-export-btn { width: 100%; justify-content: center; }
+  .apc-preset-row   { gap: 0.3rem; }
+  .apc-preset-btn   { padding: 0.25rem 0.55rem; font-size: 0.73rem; }
+  .apc-date-group   { flex-direction: column; align-items: stretch; }
+  .apc-date-label   { display: none; }
+}
+
+/* ─── Shared helpers used here ───────────── */
+.col-num { width: 42px; color: #a0b8a0; font-size: 0.78rem; }
+.atm-close-btn {
+  background: none; border: none; cursor: pointer; color: #9aab9a;
+  display: flex; align-items: center; padding: 0.25rem;
+  border-radius: 6px; transition: background 0.15s, color 0.15s;
+}
+.atm-close-btn:hover { background: #f0f7f0; color: #2D5016; }
