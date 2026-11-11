@@ -5,11 +5,11 @@ import {
   ArrowLeft, CheckCircle, XCircle, MessageSquare, Paperclip, Users,
   Clock, Calendar, AlertCircle, Download, Loader2, Send, UserPlus,
   FileText, Image, FileSpreadsheet, Archive, Trash2, Pencil, X,
-  CalendarClock, History, ShieldCheck,
+  CalendarClock, History, ShieldCheck, Building2,
 } from 'lucide-react';
 import {
   getTask, updateTask, reviewTask, addComment, assignTask,
-  removeAssignee, uploadTaskFiles, extendDeadline,
+  removeAssignee, uploadTaskFiles, extendDeadline, getClientOptions, type ClientOption,
 } from '../../api/tasks';
 import { adminGetStaff } from '../../api/role';
 import type { EnhancedTask, TaskPriority, TaskAssignment, StaffMember, DeadlineExtension } from '../../types';
@@ -87,6 +87,8 @@ export default function AdminTaskDetailPage() {
   const [editDeadlineTime, setEditDeadlineTime] = useState('');
   const [editAssignees,    setEditAssignees]    = useState<number[]>([]);
   const [editStaff,        setEditStaff]        = useState<StaffMember[]>([]);
+  const [editClientId,     setEditClientId]     = useState('');
+  const [clients,          setClients]          = useState<ClientOption[]>([]);
   const [saving,           setSaving]           = useState(false);
   const [editError,        setEditError]        = useState('');
 
@@ -176,10 +178,14 @@ export default function AdminTaskDetailPage() {
     setEditDeadline(task.deadline ? task.deadline.slice(0, 10) : '');
     setEditDeadlineTime(task.deadline_time ?? '');
     setEditAssignees((task.assignees ?? []).filter(a => a.assigned_by_role === 'admin').map(a => a.users_id));
+    setEditClientId(task.client_id ? String(task.client_id) : '');
     setEditError('');
     setEditOpen(true);
     if (editStaff.length === 0) {
       try { setEditStaff(await adminGetStaff()); } catch { /* ignore */ }
+    }
+    if (clients.length === 0) {
+      try { setClients(await getClientOptions()); } catch { /* ignore */ }
     }
   };
 
@@ -197,6 +203,7 @@ export default function AdminTaskDetailPage() {
         instructions: editInstructions.trim() || undefined,
         deadline: editDeadline || undefined,
         deadline_time: editDeadlineTime || undefined,
+        client_id: editClientId ? Number(editClientId) : null,
       });
 
       const currentIds = new Set(
@@ -322,6 +329,15 @@ export default function AdminTaskDetailPage() {
               </div>
             </div>
             <div className="form-group">
+              <label><Building2 size={13} /> Client</label>
+              <select value={editClientId} onChange={e => setEditClientId(e.target.value)} disabled={saving}>
+                <option value="">No client</option>
+                {clients.map(c => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="form-group">
               <label><Users size={13} /> Assigned Managers</label>
               <div className="atm-staff-grid">
                 {editStaff.filter(s => (s.role_name ?? '').endsWith('Manager')).map(s => {
@@ -404,6 +420,7 @@ export default function AdminTaskDetailPage() {
               </span>
               <span className="atd-meta-item"><Clock size={13} /> Created: {fmtDate(task.created_at)}</span>
               {task.creator_email && <span className="atd-meta-item">By: {task.creator_email}</span>}
+              {task.client_name && <span className="atd-meta-item"><Building2 size={13} /> Client: {task.client_name}</span>}
             </div>
           </div>
 

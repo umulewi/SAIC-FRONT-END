@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import {
   Plus, Search, Filter, ChevronLeft, ChevronRight, Eye,
   Trash2, X, CheckCircle, Loader2, Users, Calendar, AlertCircle,
-  ClipboardList, UserPlus, FileText, AlignLeft, BookOpen, Clock,
+  ClipboardList, UserPlus, FileText, AlignLeft, BookOpen, Clock, Building2,
 } from 'lucide-react';
-import { getTasks, createTask, deleteTask } from '../../api/tasks';
+import { getTasks, createTask, deleteTask, getClientOptions, type ClientOption } from '../../api/tasks';
 import { adminGetStaff } from '../../api/role';
 import type { EnhancedTask, TaskPriority, StaffMember, WorkflowStage } from '../../types';
 import { WORKFLOW_LABELS, WORKFLOW_BADGE } from '../../types';
@@ -50,6 +50,8 @@ export default function AdminTasksPage() {
   const [deadlineTime, setDeadlineTime] = useState('');
   const [selectedUsers,setSelectedUsers]= useState<number[]>([]);
   const [staff,        setStaff]        = useState<StaffMember[]>([]);
+  const [clients,      setClients]      = useState<ClientOption[]>([]);
+  const [clientId,     setClientId]     = useState('');
   const [submitting,   setSubmitting]   = useState(false);
   const [createError,  setCreateError]  = useState('');
 
@@ -77,11 +79,15 @@ export default function AdminTasksPage() {
     if (staff.length === 0) {
       try { setStaff(await adminGetStaff()); } catch { /* ignore */ }
     }
+    if (clients.length === 0) {
+      try { setClients(await getClientOptions()); } catch { /* ignore */ }
+    }
   };
 
   const resetCreate = () => {
     setShowCreate(false); setTitle(''); setDescription(''); setPriority('medium');
-    setInstructions(''); setDeadline(''); setDeadlineTime(''); setSelectedUsers([]); setCreateError('');
+    setInstructions(''); setDeadline(''); setDeadlineTime(''); setSelectedUsers([]);
+    setClientId(''); setCreateError('');
   };
 
   const toggleUser = (uid: number) =>
@@ -100,6 +106,7 @@ export default function AdminTasksPage() {
         deadline: deadline || undefined,
         deadline_time: deadlineTime || undefined,
         assign_to: selectedUsers,
+        client_id: clientId ? Number(clientId) : undefined,
       });
       resetCreate(); load(1); setPage(1);
     } catch (err: unknown) {
@@ -217,6 +224,17 @@ export default function AdminTasksPage() {
                 </div>
 
                 <div className="atm-field atm-field-full">
+                  <label className="atm-flabel"><Building2 size={12} /> Client <span className="atm-flabel-opt">(optional)</span></label>
+                  <select className="atm-finput" value={clientId}
+                    onChange={e => setClientId(e.target.value)} disabled={submitting}>
+                    <option value="">No client</option>
+                    {clients.map(c => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="atm-field atm-field-full">
                   <label className="atm-flabel"><AlignLeft size={12} /> Description</label>
                   <textarea className="atm-finput atm-ftextarea" rows={2} value={description}
                     onChange={e => setDescription(e.target.value)}
@@ -279,13 +297,13 @@ export default function AdminTasksPage() {
             <table className="saic-table">
               <thead>
                 <tr>
-                  <th>#</th><th>Title</th><th>Priority</th><th>Stage</th>
+                  <th>#</th><th>Title</th><th>Client</th><th>Priority</th><th>Stage</th>
                   <th>Assignees</th><th>Due Date</th><th>Created</th><th>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {tasks.length === 0 && (
-                  <tr><td colSpan={8}>
+                  <tr><td colSpan={9}>
                     <div className="empty-state"><ClipboardList size={38} /><p>No tasks found. Create one to get started.</p></div>
                   </td></tr>
                 )}
@@ -303,6 +321,7 @@ export default function AdminTasksPage() {
                           {t.description && <span className="task-desc-preview">{t.description}</span>}
                         </div>
                       </td>
+                      <td>{t.client_name || <span className="atm-no-assignee">—</span>}</td>
                       <td><span className={`badge ${PRIORITY_COLORS[t.priority]}`}>{t.priority}</span></td>
                       <td>
                         <span className={`badge ${stageBadge}`}>{stageLabel}</span>

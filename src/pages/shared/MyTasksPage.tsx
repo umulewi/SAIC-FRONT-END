@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   ClipboardList, Calendar, AlertCircle, Eye, ArrowRight, Search, Filter,
   UserPlus, CheckCircle, XCircle, Users, Loader2, X, Inbox, Send as SendIcon,
-  Plus, Clock, User, Paperclip, BookOpen, AlignLeft, FileText,
+  Plus, Clock, User, Paperclip, BookOpen, AlignLeft, FileText, Building2,
 } from 'lucide-react';
 import { getTasks, assignToTeam, managerReviewTask, createTask, getTask, removeAssignee, uploadTaskFiles } from '../../api/tasks';
 import { getMyTeam } from '../../api/role';
@@ -75,6 +75,11 @@ function TaskCard({
           <span className="mt-meta-item" style={{ color: '#a0b8a0', fontSize: '0.74rem' }}>
             {task.comment_count ?? 0} comment{task.comment_count !== 1 ? 's' : ''}
           </span>
+          {task.client_name && (
+            <span className="mt-meta-item">
+              <Building2 size={12} /> {task.client_name}
+            </span>
+          )}
         </div>
         {task.assignee_names && (
           <div className="mt-task-meta" style={{ marginTop: '0.3rem', flexWrap: 'wrap', gap: '0.35rem' }}>

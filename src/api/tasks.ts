@@ -9,6 +9,7 @@ export interface TaskFilters {
   page?: number;
   limit?: number;
   view?: 'received' | 'given';
+  client_id?: number;
 }
 
 export interface CreateTaskPayload {
@@ -19,6 +20,7 @@ export interface CreateTaskPayload {
   deadline?: string;
   deadline_time?: string;
   assign_to?: number[];
+  client_id?: number | null;
 }
 
 // ─── Task CRUD ────────────────────────────────────────────────────────────────
@@ -48,6 +50,18 @@ export async function updateTask(id: number, payload: Partial<CreateTaskPayload>
 
 export async function deleteTask(id: number): Promise<void> {
   await client.delete(`/tasks/${id}`);
+}
+
+// ─── Clients (for task assignment) ───────────────────────────────────────────
+
+export interface ClientOption {
+  id: number;
+  name: string;
+}
+
+export async function getClientOptions(): Promise<ClientOption[]> {
+  const { data } = await client.get<{ success: boolean; organizations: ClientOption[] }>('/admin/clients');
+  return data.organizations;
 }
 
 // ─── Assignments ──────────────────────────────────────────────────────────────

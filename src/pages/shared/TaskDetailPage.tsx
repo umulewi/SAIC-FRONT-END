@@ -5,7 +5,7 @@ import {
   ArrowLeft, Calendar, Clock, MessageSquare, Paperclip, Send,
   Loader2, CheckCircle, AlertCircle, Upload, Download, FileText,
   Image, FileSpreadsheet, Archive, PlayCircle, ThumbsUp, ThumbsDown,
-  Pencil, CalendarClock, X, Users,
+  Pencil, CalendarClock, X, Users, Building2,
 } from 'lucide-react';
 import { getTask, updateTaskStatus, submitTask, addComment, managerReviewTask, updateTask, extendDeadline, assignTask, removeAssignee } from '../../api/tasks';
 import { getMyTeam } from '../../api/role';
@@ -380,6 +380,7 @@ export default function TaskDetailPage({ apiBase }: TaskDetailPageProps) {
             <div className="atd-meta-row" style={{ marginTop: '0.5rem' }}>
               <span className="atd-meta-item"><Calendar size={12} /> Due: {fmtDate(task.deadline)}</span>
               <span className="atd-meta-item"><Clock size={12} /> Created: {fmtDate(task.created_at)}</span>
+              {task.client_name && <span className="atd-meta-item"><Building2 size={12} /> Client: {task.client_name}</span>}
               {isTeamOnly && (
                 <span className="atd-meta-item" style={{ color: '#7b5ea7', fontWeight: 600, background: '#f3eeff', padding: '1px 8px', borderRadius: 10, border: '1px solid #d4bbff' }}>
                   Team Task

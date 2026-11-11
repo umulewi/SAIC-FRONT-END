@@ -100,6 +100,8 @@ export interface EnhancedTask {
   created_by?: number;
   created_at?: string;
   updated_at?: string;
+  client_id?: number | null;
+  client_name?: string | null;
   creator_email?: string;
   assignee_count?: number;
   assignee_names?: string;
